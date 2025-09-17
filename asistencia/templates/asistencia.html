@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}GestiÃ³n de Asistencia{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+    <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="-mb-px flex space-x-6 px-6" aria-label="Tabs">
+            <a href="#register-attendance" data-tab="register-attendance" class="attendance-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Asistencia</a>
+            <a href="#register-face" data-tab="register-face" class="attendance-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Rostro</a>
+            <a href="#view-attendances" data-tab="view-attendances" class="attendance-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Ver Asistencias</a>
+        </nav>
+    </div>
+    <div class="p-6">
+        <div id="register-attendance-tab" class="attendance-tab-content">
+            {% include 'marcar_asistencia_tab.html' %}
+        </div>
+        <div id="register-face-tab" class="attendance-tab-content hidden">
+            {% include 'registrar_rostro_tab.html' %}
+        </div>
+        <div id="view-attendances-tab" class="attendance-tab-content hidden">
+            {% include 'ver_asistencias_tab.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function setupTabs(prefix) {
+        document.querySelectorAll(`.${prefix}-tab`).forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabId = button.dataset.tab;
+                window.location.hash = tabId;
+                switchTab(prefix, tabId);
+            });
+        });
+    }
+
+    function switchTab(prefix, tabId) {
+        document.querySelectorAll(`.${prefix}-tab-content`).forEach(content => {
+            content.classList.add('hidden');
+        });
+        document.querySelectorAll(`.${prefix}-tab`).forEach(button => {
+            button.classList.remove('tab-active');
+            button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+        });
+
+        const tabContent = document.getElementById(`${tabId}-tab`);
+        if(tabContent) {
+            tabContent.classList.remove('hidden');
+        }
+
+        const activeButton = document.querySelector(`.${prefix}-tab[data-tab="${tabId}"]`);
+        if(activeButton) {
+            activeButton.classList.add('tab-active');
+            activeButton.classList.remove('border-transparent', 'text-gray-500');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setupTabs('attendance');
+        // Activate tab based on URL hash
+        const hash = window.location.hash.substring(1);
+        const validTabs = ['register-attendance', 'register-face', 'view-attendances'];
+        if (hash && validTabs.includes(hash)) {
+            switchTab('attendance', hash);
+        } else {
+            switchTab('attendance', 'register-attendance');
+        }
+    });
+
+    // Script for marcar_asistencia_tab.html
+    const videoMark = document.getElementById('video-mark');
+    const canvasMark = document.getElementById('canvas-mark');
+    const statusDivMark = document.getElementById('status-mark');
+    let processingMark = false;
+
+    if (videoMark) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                videoMark.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error al acceder a la cÃ¡mara: ", err);
+                statusDivMark.innerHTML = `<span class="badge bg-danger">Error de cÃ¡mara</span>`;
+            });
+
+        const recognizeFace = () => {
+            if (processingMark) return;
+            processingMark = true;
+
+            const context = canvasMark.getContext('2d');
+            canvasMark.width = videoMark.videoWidth;
+            canvasMark.height = videoMark.videoHeight;
+            context.drawImage(videoMark, 0, 0, canvasMark.width, canvasMark.height);
+            const imageData = canvasMark.toDataURL('image/jpeg');
+
+            const formData = new FormData();
+            formData.append('image', imageData);
+
+            fetch("{% url 'api_reconocer_rostro' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    statusDivMark.innerHTML = `<span class="badge bg-success">Â¡Asistencia registrada para ${data.nombre}!</span>`;
+                } else if (data.status === 'already_marked') {
+                    statusDivMark.innerHTML = `<span class="badge bg-warning"> ${data.nombre}, ya has marcado asistencia hoy.</span>`;
+                }
+                processingMark = false;
+            })
+            .catch(() => {
+                processingMark = false;
+            });
+        };
+
+        setInterval(recognizeFace, 2000);
+    }
+
+    // Script for registrar_rostro_tab.html
+    const videoRegister = document.getElementById('video-register');
+    const canvasRegister = document.getElementById('canvas-register');
+    const captureBtn = document.getElementById('captureBtn');
+    const empleadoSelect = document.getElementById('empleadoSelect');
+    const resultRegister = document.getElementById('result-register');
+
+    if (videoRegister) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                videoRegister.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error al acceder a la cÃ¡mara: ", err);
+                // Handle error in UI
+            });
+
+        captureBtn.addEventListener('click', () => {
+            const empleadoId = empleadoSelect.value;
+            if (!empleadoId) {
+                // Handle error in UI
+                return;
+            }
+
+            const context = canvasRegister.getContext('2d');
+            canvasRegister.width = videoRegister.videoWidth;
+            canvasRegister.height = videoRegister.videoHeight;
+            context.drawImage(videoRegister, 0, 0, canvasRegister.width, canvasRegister.height);
+            
+            const imageData = canvasRegister.toDataURL('image/jpeg');
+
+            const formData = new FormData();
+            formData.append('empleado_id', empleadoId);
+            formData.append('image', imageData);
+
+            fetch("{% url 'api_guardar_rostro' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Handle success in UI
+                } else {
+                    // Handle error in UI
+                }
+            })
+            .catch(err => {
+                console.error('Error en la peticiÃ³n:', err);
+                // Handle error in UI
+            });
+        });
+    }
+
+    // Script for ver_asistencias_tab.html
+    const searchBtn = document.getElementById('asistencia-search-btn');
+    const dniInput = document.getElementById('asistencia-dni-input');
+    const resultsContainer = document.getElementById('asistencia-results-container');
+    const employeeNameSpan = document.getElementById('asistencia-employee-name');
+    const listContainer = document.getElementById('asistencia-list');
+    const noSearchMessage = document.getElementById('asistencia-no-search-message');
+
+    if (searchBtn) {
+        searchBtn.addEventListener('click', () => {
+            const dni = dniInput.value;
+            if (!dni) {
+                return;
+            }
+
+            fetch(`/asistencia/api/ver-asistencias/${dni}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        employeeNameSpan.textContent = `${data.empleado.nombre} ${data.empleado.apellido}`;
+                        let a_list = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha</th><th class="p-4">Hora</th></tr></thead><tbody>';
+                        data.asistencias.forEach(asistencia => {
+                            const fecha = new Date(asistencia.fecha_hora);
+                            a_list += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString()}</td><td class="p-4">${fecha.toLocaleTimeString()}</td></tr>`;
+                        });
+                        a_list += '</tbody></table>';
+                        listContainer.innerHTML = a_list;
+                        resultsContainer.classList.remove('hidden');
+                        noSearchMessage.classList.add('hidden');
+                    } else {
+                        // Handle error
+                    }
+                });
+        });
+    }
+</script>
+{% endblock %}

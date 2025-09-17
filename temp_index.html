@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="es" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrador - Nuevas Energías</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Script para evitar el "flash" del tema incorrecto (FOUC)
+        // Se coloca en el <head> para ejecutarse antes de que se renderice el body.
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Estilos para el scrollbar en modo oscuro */
+        .dark ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #1F2937;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4B5563;
+            border-radius: 20px;
+            border: 3px solid #1F2937;
+        }
+
+        /* Transiciones suaves */
+        * {
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+
+        /* Clases para la barra lateral móvil */
+        .sidebar-mobile-closed {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile-open {
+            transform: translateX(0);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Estilos para el stepper del formulario */
+        .step-active span {
+            background-color: #D9232D;
+            color: white;
+        }
+
+        .step-active:after {
+            background-color: #D9232D;
+        }
+
+        .step-completed span {
+            background-color: #16A34A;
+            /* green-600 */
+            color: white;
+        }
+
+        .step-completed:after {
+            background-color: #16A34A;
+        }
+
+        /* Estilos para pestañas activas */
+        .tab-active {
+            border-color: #D9232D;
+            color: #D9232D;
+            background-color: #FEF2F2;
+            /* red-50 */
+        }
+
+        .dark .tab-active {
+            background-color: rgba(217, 35, 45, 0.1);
+        }
+
+        .action-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+
+        /* Estilos para notificaciones */
+        .notification {
+            transition: all 0.3s ease-in-out;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.fade-out {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div class="relative flex h-screen overflow-hidden">
+        <!-- Overlay para el menú móvil -->
+        <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <!-- Barra lateral (visible en desktop) -->
+        <aside id="desktop-sidebar"
+            class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden lg:flex flex-col">
+            <div class="h-16 flex items-center justify-center px-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                    <svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="48" fill="#6B7280" />
+                        <path d="M50,2 A48,48 0 0,1 98,50" fill="none" stroke="#FFC107" stroke-width="4" />
+                        <path d="M98,50 A48,48 0 0,1 50,98" fill="none" stroke="#D9232D" stroke-width="4" />
+                    </svg>
+                    <!-- <img src="./logo-nuevas-energias-v2.png" alt="Nuevas Energias" srcset="" style="width: 100px; height: 50px;"> -->
+                    <span class="font-bold text-xl text-gray-800 dark:text-white">Nuevas Energías</span>
+                </div>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <!-- Nav links se renderizan dinámicamente -->
+            </nav>
+        </aside>
+
+        <!-- Barra lateral móvil (oculta por defecto) -->
+        <aside id="mobile-sidebar"
+            class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 z-30 flex flex-col sidebar-mobile-closed lg:hidden">
+            <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                    
+                    <img src="./logo-nuevas-energias-v2.png" alt="Nuevas Energias" srcset=""> 
+                </div>
+                <button id="close-mobile-menu" class="p-1"><i data-lucide="x"></i></button>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <!-- Nav links se renderizan dinámicamente -->
+            </nav>
+        </aside>
+
+        <!-- Contenido principal -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Cabecera -->
+            <header
+                class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+                <div class="flex items-center gap-4">
+                    <button id="open-mobile-menu" class="lg:hidden text-gray-600 dark:text-gray-300">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h1 id="view-title" class="text-xl font-semibold">Dashboard</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <!-- Interruptor de modo claro/oscuro -->
+                    <button id="theme-toggle"
+                        class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+                        <span id="theme-toggle-dark-icon" class="hidden">
+                            <i data-lucide="moon"></i>
+                        </span>
+                        <span id="theme-toggle-light-icon" class="hidden">
+                            <i data-lucide="sun"></i>
+                        </span>
+                    </button>
+
+                    <!-- Notificaciones -->
+                    <div class="relative">
+                        <button id="notification-toggle"
+                            class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+                            <i data-lucide="bell"></i>
+                            <span id="notification-badge"
+                                class="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800 hidden"></span>
+                        </button>
+                        <!-- Panel de Notificaciones -->
+                        <div id="notification-panel"
+                            class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border dark:border-gray-700 z-20">
+                            <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+                                <h3 class="font-semibold">Notificaciones</h3>
+                                <button id="mark-all-read-btn" class="text-sm text-red-600 hover:underline">Marcar como leídas</button>
+                            </div>
+                            <div id="notification-list" class="max-h-96 overflow-y-auto divide-y dark:divide-gray-700">
+                                <!-- Las notificaciones se renderizan aquí -->
+                            </div>
+                            <div class="p-2 border-t dark:border-gray-700 text-center">
+                                <button id="view-all-notifications-btn" class="text-sm font-semibold text-red-600 hover:underline w-full p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">Ver todas</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botón de cambio de rol -->
+                    <button id="role-switcher"
+                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2 text-sm whitespace-nowrap">
+                        <!-- Contenido dinámico -->
+                    </button>
+
+                    <div class="relative">
+                        <img id="user-avatar" class="h-10 w-10 rounded-full object-cover" src=""
+                            alt="Avatar de usuario">
+                        <span
+                            class="absolute right-0 bottom-0 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-800"></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenedor de Vistas -->
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+                <div class="max-w-7xl mx-auto">
+                    <section id="dashboard-view" class="view-section"></section>
+                    <section id="my-profile-view" class="view-section hidden"></section>
+                    <section id="employees-view" class="view-section hidden"></section>
+                    <section id="view-employee-view" class="view-section hidden"></section>
+                    <section id="employee-form-view" class="view-section hidden"></section>
+                    <section id="payslips-view" class="view-section hidden"></section>
+                    <section id="schedules-view" class="view-section hidden"></section>
+                    <section id="sanctions-view" class="view-section hidden"></section>
+                    <section id="sanction-detail-view" class="view-section hidden"></section>
+                    <section id="create-sanction-view" class="view-section hidden"></section>
+                    <section id="incidents-view" class="view-section hidden"></section>
+                    <section id="incident-detail-view" class="view-section hidden"></section>
+                    <section id="create-incident-view" class="view-section hidden"></section>
+                    <section id="create-multi-sanction-view" class="view-section hidden"></section>
+                    <section id="attendance-view" class="view-section hidden"></section>
+                    <section id="all-notifications-view" class="view-section hidden"></section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="notification-container" class="fixed bottom-4 right-4 z-50 w-full max-w-sm space-y-3">
+        <!-- Las notificaciones se añadirán aquí dinámicamente -->
+    </div>
+
+    <!-- MODALS -->
+    <!-- Modal: Cargar Recibo -->
+    <div id="upload-payslip-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 m-4"
+            onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold">Cargar Nuevo Recibo</h2>
+                <button onclick="closeModal('upload-payslip-modal')"
+                    class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x"></i></button>
+            </div>
+            <form class="mt-6 space-y-4">
+                <div>
+                    <label for="emission-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha
+                        de Emisión</label>
+                    <input type="date" id="emission-date"
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                </div>
+                <div>
+                    <label for="period" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Período
+                        (YYYY-MM)</label>
+                    <input type="month" id="period"
+                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                </div>
+                <div>
+                    <label for="pdf-file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Archivo
+                        PDF</label>
+                    <input type="file" id="pdf-file" accept=".pdf"
+                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 dark:file:bg-red-900/50 dark:file:text-red-300 dark:hover:file:bg-red-900">
+                </div>
+                <div>
+                    <label for="img-file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagen
+                        (Opcional)</label>
+                    <input type="file" id="img-file" accept="image/*"
+                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 dark:file:bg-gray-700 dark:file:text-gray-300 dark:hover:file:bg-gray-600">
+                </div>
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('upload-payslip-modal')"
+                        class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar
+                        Recibo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Registrar Resolución de Incidente -->
+    <div id="resolve-incident-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 m-4"
+            onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold">Registrar Resolución de Incidente</h2>
+                <button onclick="closeModal('resolve-incident-modal')"
+                    class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x"></i></button>
+            </div>
+            <form class="mt-6 space-y-4">
+                <div>
+                    <label for="resolution-details" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Detalles de la Resolución Final</label>
+                    <textarea id="resolution-details" rows="4" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" placeholder="Describa la conclusión de la investigación, las medidas tomadas y el resultado final..."></textarea>
+                </div>
+                <div class="pt-4 flex flex-col sm:flex-row justify-end gap-3">
+                    <button type="button" id="close-incident-only-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Solo Cerrar Incidente</button>
+                    <button type="button" id="resolve-and-sanction-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"><i data-lucide="shield-plus"></i>Guardar y Aplicar Sanción</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Eliminar Empleado -->
+    <div id="delete-employee-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 m-4 text-center">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
+                <i data-lucide="trash-2" class="h-6 w-6 text-red-600 dark:text-red-400"></i>
+            </div>
+            <h2 class="text-xl font-semibold mt-4">Eliminar Empleado</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">¿Estás seguro de que deseas eliminar a este
+                empleado? Esta acción no se puede deshacer.</p>
+            <div class="mt-6 flex justify-center gap-3">
+                <button type="button" onclick="closeModal('delete-employee-modal')"
+                    class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 w-full">Cancelar</button>
+                <button id="confirm-delete-btn"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- INICIALIZACIÓN Y DATOS DE EJEMPLO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+        });
+
+        let currentUserRole = 'admin';
+        let currentFormStep = 1;
+        const today = new Date().toISOString().split('T')[0];
+
+        const appState = {
+            loggedInEmployeeId: 1, // Ana Torres es el empleado por defecto para el modo empleado
+            editingEmployeeId: null,
+            deletingEmployeeId: null,
+            viewingSanctionId: null,
+            viewingIncidentId: null,
+            viewingEmployeeId: null,
+            creatingSanctionFromIncidentId: null, // Nuevo estado para vincular incidente a sanción
+        };
+
+        const mockData = {
+            currentUser: { name: 'Ricardo Rojas', initials: 'RR' },
+            employees: [
+                { id: 1, name: 'Ana', surname: 'Torres', dni: '40.123.456', gender: 'Femenino', civilStatus: 'Soltera', birthDate: '1998-05-15', phone: '11-1234-5678', email: 'ana.torres@example.com', position: 'Analista de Energía', status: 'Activo', photo: 'https://placehold.co/100x100/FFC107/1F2937?text=AT', facialRecognitionRegistered: true },
+                { id: 2, name: 'Carlos', surname: 'Vega', dni: '38.765.432', gender: 'Masculino', civilStatus: 'Casado', birthDate: '1995-11-20', phone: '11-8765-4321', email: 'carlos.vega@example.com', position: 'Ingeniero Eléctrico', status: 'Activo', photo: 'https://placehold.co/100x100/D9232D/FFFFFF?text=CV', facialRecognitionRegistered: false },
+                { id: 3, name: 'Laura', surname: 'Méndez', dni: '42.987.654', gender: 'Femenino', civilStatus: 'Soltera', birthDate: '2000-01-30', phone: '11-4321-8765', email: 'laura.mendez@example.com', position: 'Consultora Jr.', status: 'Activo', photo: 'https://placehold.co/100x100/6B7280/FFFFFF?text=LM', facialRecognitionRegistered: true },
+                { id: 4, name: 'Marcos', surname: 'Rojas', dni: '35.111.222', gender: 'Masculino', civilStatus: 'Soltero', birthDate: '1992-03-10', phone: '11-5555-4444', email: 'marcos.rojas@example.com', position: 'Gerente de Proyectos', status: 'Licencia', photo: 'https://placehold.co/100x100/10B981/FFFFFF?text=MR', facialRecognitionRegistered: true },
+            ],
+            schedules: [
+                { id: 1, name: 'Turno Mañana', time: '09:00 - 13:00', days: 'Lunes a Viernes', requiredStaff: 2 },
+                { id: 2, name: 'Turno Tarde', time: '14:00 - 18:00', days: 'Lunes a Viernes', requiredStaff: 3 },
+            ],
+            scheduleAssignments: [
+                { employeeId: 1, scheduleId: 1 }, { employeeId: 2, scheduleId: 2 }, { employeeId: 3, scheduleId: 2 },
+            ],
+            sanctions: [
+                { id: 1, employeeId: 2, type: 'Apercibimiento Escrito', reason: 'Llegada tarde reiterada durante la última semana.', startDate: '2025-08-20', endDate: null, incidentId: 2 },
+                { id: 2, employeeId: 4, type: 'Suspensión sin goce de haberes', reason: 'Incumplimiento de las normas de seguridad en el proyecto X.', startDate: '2025-09-01', endDate: '2025-09-03' },
+                { id: 3, employeeId: 1, type: 'Apercibimiento Verbal', reason: 'No completar el reporte diario de actividades.', startDate: '2025-08-25', endDate: null },
+            ],
+            incidents: [
+                { id: 1, name: 'Fallo de equipamiento', date: '2025-08-15', description: 'El monitor del puesto 5 dejó de funcionar repentinamente.', involvedEmployeeIds: [1, 3], observations: 'Se solicitó reemplazo al departamento de TI.' },
+                { id: 2, name: 'Conflicto interpersonal', date: '2025-08-18', description: 'Discusión entre dos miembros del equipo de análisis por la distribución de tareas.', involvedEmployeeIds: [1, 2], observations: 'Se medió en el conflicto y se reasignaron las tareas.', descargos: [
+                    { employeeId: 1, date: '2025-08-20', statement: 'Yo estaba siguiendo el plan original. Carlos decidió cambiar el enfoque sin consultarme, lo que generó la confusión.', hasFile: true },
+                    { employeeId: 2, date: '2025-08-21', statement: 'El plan de Ana no era eficiente. Tomé una decisión ejecutiva para optimizar el proceso, pero no tuve tiempo de comunicarlo formalmente.' }
+                ] },
+            ],
+            attendance: [
+                { employeeId: 1, date: today, time: '09:01:12' },
+                { employeeId: 3, date: today, time: '09:03:45' },
+                { employeeId: 4, date: '2025-09-01', time: '08:59:50' },
+                { employeeId: 1, date: '2025-08-30', time: '09:05:00' },
+                { employeeId: 1, date: '2025-08-29', time: '08:58:10' },
+            ],
+            payslips: [
+                { id: 1, employeeId: 1, emissionDate: '2025-09-01', period: '2025-08', hasPdf: true, hasImage: true },
+                { id: 2, employeeId: 1, emissionDate: '2025-08-01', period: '2025-07', hasPdf: true, hasImage: false },
+                { id: 3, employeeId: 2, emissionDate: '2025-09-01', period: '2025-08', hasPdf: true, hasImage: true },
+            ],
+            notifications: [
+                { id: 1, icon: 'log-in', iconColor: 'text-green-500', bgColor: 'bg-green-100 dark:bg-green-900/50', text: '<span class="font-semibold">Ana Torres</span> marcó su asistencia.', time: 'Hace 5 min', read: false },
+                { id: 2, icon: 'shield-alert', iconColor: 'text-yellow-500', bgColor: 'bg-yellow-100 dark:bg-yellow-900/50', text: 'Se registró una sanción para <span class="font-semibold">Carlos Vega</span>.', time: 'Hace 1 hora', read: false },
+                { id: 3, icon: 'user-plus', iconColor: 'text-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900/50', text: 'Nuevo empleado <span class="font-semibold">Laura Méndez</span> ha sido añadido.', time: 'Hace 3 horas', read: false },
+                { id: 4, icon: 'receipt', iconColor: 'text-purple-500', bgColor: 'bg-purple-100 dark:bg-purple-900/50', text: 'Nuevo recibo de sueldo disponible para Agosto 2025.', time: 'Ayer', read: true },
+            ],
+            requiredDocs: [
+                { name: 'DNI frente', mandatory: true }, { name: 'DNI dorso', mandatory: true }, { name: 'Constancia de CUIL', mandatory: true }, { name: 'Alta en AFIP', mandatory: true }, { name: 'Contrato de trabajo (firmado)', mandatory: true }, { name: 'Examen Preocupacional / Certificado de Aptitud Laboral', mandatory: true }, { name: 'Certificado de Antecedentes Penales', mandatory: false }, { name: 'Constancia de inscripción en la ART', mandatory: false }, { name: 'Afiliación a Obra Social', mandatory: false }, { name: 'Declaración Jurada de Cargas de Familia (F.572 AFIP)', mandatory: false }, { name: 'Copia de la libreta de asignaciones familiares', mandatory: false }, { name: 'Títulos académicos o certificados de estudios', mandatory: false },
+            ]
+        };
+
+        const viewTitles = {
+            // Admin
+            dashboard: 'Resumen (Admin)',
+            employees: 'Gestión de Empleados',
+            'view-employee': 'Perfil del Empleado',
+            'employee-form': 'Formulario de Empleado',
+            'create-sanction': 'Registrar Nueva Sanción',
+            'create-incident': 'Registrar Nuevo Incidente',
+            'create-multi-sanction': 'Aplicar Sanciones (desde Incidente)',
+
+            // Employee
+            'my-profile': 'Mi Perfil',
+            payslips: 'Mis Recibos',
+            schedules: 'Mis Horarios',
+            sanctions: 'Mis Sanciones',
+            incidents: 'Mis Incidentes',
+            attendance: 'Mis Asistencias',
+
+            // Shared
+            'sanction-detail': 'Detalle de Sanción',
+            'incident-detail': 'Detalle de Incidente',
+            'all-notifications': 'Notificaciones',
+        };
+
+        // --- LÓGICA DE LA APLICACIÓN ---
+
+        function initializeApp() {
+            lucide.createIcons();
+            setupThemeToggle();
+            setupMobileMenu();
+            setupNotificationPanel();
+            setupRoleSwitcher();
+            updateUserUI();
+            updateNavForRole(currentUserRole);
+            renderAllViews();
+            switchView('dashboard');
+            setupGlobalEventListeners();
+        }
+
+        function renderAllViews() {
+            renderNotificationPanel();
+            renderDashboard();
+            renderMyProfile();
+            renderEmployees();
+            renderEmployeeForm();
+            renderPayslips();
+            renderSchedules();
+            renderSanctions(mockData.sanctions, true); // Renderiza el esqueleto
+            // La siguiente línea se mantiene para el flujo de sanción directa
+            renderCreateSanctionForm();
+            renderIncidents(mockData.incidents, true); // Renderiza el esqueleto
+            renderCreateIncidentForm();
+            renderAllNotificationsView();
+            renderAttendance();
+        }
+
+        // --- RENDERIZADO DE VISTAS ---
+        function renderDashboard() {
+            const dashboardSection = document.getElementById('dashboard-view');
+            const isEmployee = currentUserRole === 'employee';
+
+            if (isEmployee) {
+                dashboardSection.innerHTML = `
+                <div>
+                    <h2 class="text-2xl font-bold mb-4">Bienvenido, ${mockData.currentUser.name}</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-8">Aquí tienes un resumen rápido de tu información.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm"><div class="flex items-center justify-between"><h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Próximo Recibo</h3><i data-lucide="receipt" class="text-blue-500"></i></div><p class="mt-2 text-3xl font-bold">Octubre 2025</p></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm"><div class="flex items-center justify-between"><h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Horario Asignado</h3><i data-lucide="clock" class="text-green-500"></i></div><p class="mt-2 text-3xl font-bold">9:00 - 18:00</p></div>
+                    </div>
+                </div>`;
+            } else {
+                dashboardSection.innerHTML = `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm"><div class="flex items-center justify-between"><h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Empleados</h3><i data-lucide="users" class="text-red-600"></i></div><p class="mt-2 text-3xl font-bold">${mockData.employees.length}</p></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm"><div class="flex items-center justify-between"><h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Asistencia Hoy</h3><i data-lucide="user-check" class="text-green-500"></i></div><p class="mt-2 text-3xl font-bold">${mockData.attendance.filter(a => a.date === today).length} / ${mockData.employees.length}</p></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm"><div class="flex items-center justify-between"><h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Sanciones Mes</h3><i data-lucide="shield-alert" class="text-yellow-500"></i></div><p class="mt-2 text-3xl font-bold">${mockData.sanctions.length}</p></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm"><div class="flex items-center justify-between"><h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Nuevas Contrataciones</h3><i data-lucide="user-plus" class="text-blue-500"></i></div><p class="mt-2 text-3xl font-bold">5</p></div>
+                    </div>
+                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mt-8"><h2 class="text-lg font-semibold mb-4 ml-2">Actividad Reciente</h2><ul class="space-y-4"><li class="flex items-center gap-4"><div class="bg-green-100 dark:bg-green-900 p-2 rounded-full"><i data-lucide="log-in" class="text-green-500"></i></div><p class="text-sm flex-1"><span class="font-semibold">Ana Torres</span> marcó su asistencia a las 09:02 AM.</p><span class="text-xs text-gray-500 dark:text-gray-400">Hace 5 min</span></li><li class="flex items-center gap-4"><div class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-full"><i data-lucide="alert-triangle" class="text-yellow-500"></i></div><p class="text-sm flex-1">Se reportó un incidente para <span class="font-semibold">Carlos Vega</span>.</p><span class="text-xs text-gray-500 dark:text-gray-400">Hace 1 hora</span></li><li class="flex items-center gap-4"><div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full"><i data-lucide="user-plus" class="text-blue-500"></i></div><p class="text-sm flex-1">Nuevo empleado <span class="font-semibold">Laura Méndez</span> ha sido añadido al sistema.</p><span class="text-xs text-gray-500 dark:text-gray-400">Hace 3 horas</span></li></ul></div>`;
+            }
+        }
+
+        function renderMyProfile() {
+            const container = document.getElementById('my-profile-view');
+            renderEmployeeProfile(appState.loggedInEmployeeId, container, true);
+        }
+
+        function renderEmployees() {
+            const container = document.getElementById('employees-view');
+            const employeesList = mockData.employees.map(emp => {
+                const fullName = `${emp.name} ${emp.surname}`;
+                return `
+                <tr class="hidden lg:table-row bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td class="p-4"><img src="${emp.photo}" class="h-10 w-10 rounded-full object-cover"></td>
+                    <td class="p-4 font-medium">${fullName}</td>
+                    <td class="p-4 text-gray-600 dark:text-gray-300">${emp.dni}</td>
+                    <td class="p-4 text-gray-600 dark:text-gray-300">${emp.position}</td>
+                    <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${emp.status === 'Activo' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${emp.status}</span></td>
+                    <td class="p-4">
+                        <div class="relative">
+                            <button data-action="toggle-menu" data-employee-id="${emp.id}" class="p-1"><i data-lucide="more-horizontal"></i></button>
+                            <div id="action-menu-${emp.id}" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-10 border dark:border-gray-700 py-1">
+                                <a href="#" data-action="view-employee" data-employee-id="${emp.id}" class="action-menu-item text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="eye" class="w-4 h-4"></i>Ver Perfil</a>
+                                <a href="#" data-action="edit-employee" data-employee-id="${emp.id}" class="action-menu-item text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="edit-2" class="w-4 h-4"></i>Editar</a>
+                                <a href="#" data-action="delete-employee" data-employee-id="${emp.id}" class="action-menu-item text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"><i data-lucide="trash-2" class="w-4 h-4"></i>Eliminar</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <div class="block lg:hidden bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 space-y-3">
+                    <div class="flex items-center gap-4"><img src="${emp.photo}" class="h-12 w-12 rounded-full object-cover"><div class="flex-1"><p class="font-semibold">${fullName}</p><p class="text-sm text-gray-500 dark:text-gray-400">${emp.position}</p></div>
+                    <div class="relative">
+                        <button data-action="toggle-menu" data-employee-id="${emp.id}" class="p-1"><i data-lucide="more-horizontal"></i></button>
+                        <div id="action-menu-mobile-${emp.id}" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-10 border dark:border-gray-700 py-1">
+                                <a href="#" data-action="view-employee" data-employee-id="${emp.id}" class="action-menu-item text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="eye" class="w-4 h-4"></i>Ver Perfil</a>
+                                <a href="#" data-action="edit-employee" data-employee-id="${emp.id}" class="action-menu-item text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="edit-2" class="w-4 h-4"></i>Editar</a>
+                                <a href="#" data-action="delete-employee" data-employee-id="${emp.id}" class="action-menu-item text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"><i data-lucide="trash-2" class="w-4 h-4"></i>Eliminar</a>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-300"><p><strong>DNI:</strong> ${emp.dni}</p><p><strong>Estado:</strong> <span class="font-semibold ${emp.status === 'Activo' ? 'text-green-600' : 'text-yellow-600'}">${emp.status}</span></p></div>
+                </div>`}).join('');
+
+            container.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="relative w-full sm:max-w-xs"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i><input type="text" placeholder="Buscar por nombre o DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600"></div>
+                    <button id="add-employee-btn" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700"><i data-lucide="plus"></i><span>Registrar Empleado</span></button>
+                </div>
+                <div class="hidden lg:block bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"><table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Foto</th><th class="p-4">Nombre</th><th class="p-4">DNI</th><th class="p-4">Cargo</th><th class="p-4">Estado</th><th class="p-4">Acciones</th></tr></thead>
+                    <tbody id="employees-table-body">${employeesList}</tbody>
+                </table></div>
+                <div id="employees-card-list" class="lg:hidden space-y-4">${employeesList}</div>`;
+            document.getElementById('add-employee-btn').addEventListener('click', () => {
+                appState.editingEmployeeId = null;
+                switchView('employee-form');
+            });
+        }
+
+        function renderEmployeeProfile(employeeId, container, isMyProfile = false) {
+            const employee = mockData.employees.find(e => e.id === employeeId);
+            if (!employee) {
+                container.innerHTML = `<p>Empleado no encontrado.</p>`;
+                return;
+            }
+            const fullName = `${employee.name} ${employee.surname}`;
+            const docStatusHtml = mockData.requiredDocs.map(doc => `
+                <li class="flex items-center justify-between py-2">
+                    <p class="text-sm">${doc.name}</p>
+                    <span class="text-xs font-semibold text-green-600 bg-green-100 dark:text-green-200 dark:bg-green-900 px-2 py-1 rounded-full">Entregado</span>
+                </li>
+            `).join('');
+
+            const backButton = isMyProfile ? '' : `<button onclick="switchView('employees')" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6"><i data-lucide="arrow-left"></i> Volver a Empleados</button>`;
+
+            container.innerHTML = `
+                <div>
+                    ${backButton}
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm text-center">
+                                <img src="${employee.photo}" class="h-32 w-32 rounded-full mx-auto mb-4 object-cover">
+                                <h2 class="text-2xl font-bold">${fullName}</h2>
+                                <p class="text-gray-500 dark:text-gray-400">${employee.position}</p>
+                                <span class="mt-4 inline-block px-3 py-1 text-sm font-semibold rounded-full ${employee.status === 'Activo' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${employee.status}</span>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                            <h3 class="text-lg font-semibold border-b pb-3 dark:border-gray-700">Datos Personales</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-sm">
+                                <div><strong class="block text-gray-500">DNI:</strong> ${employee.dni}</div>
+                                <div><strong class="block text-gray-500">Email:</strong> ${employee.email}</div>
+                                <div><strong class="block text-gray-500">Teléfono:</strong> ${employee.phone}</div>
+                                <div><strong class="block text-gray-500">Fecha de Nac.:</strong> ${employee.birthDate}</div>
+                                <div><strong class="block text-gray-500">Género:</strong> ${employee.gender}</div>
+                                <div><strong class="block text-gray-500">Estado Civil:</strong> ${employee.civilStatus}</div>
+                            </div>
+                             <h3 class="text-lg font-semibold border-b pb-3 dark:border-gray-700 mt-8">Documentación</h3>
+                             <ul class="divide-y dark:divide-gray-700 mt-4">${docStatusHtml}</ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function renderEmployeeForm(employeeId = null) {
+            const container = document.getElementById('employee-form-view');
+            const isEditing = employeeId !== null;
+            const employee = isEditing ? mockData.employees.find(e => e.id === employeeId) : {};
+
+            const docListHtml = mockData.requiredDocs.map(doc => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <p class="text-sm font-medium">${doc.name} ${doc.mandatory ? '<span class="text-red-500">*</span>' : ''}</p>
+                     <label class="cursor-pointer text-sm text-red-600 hover:text-red-700 font-semibold flex items-center gap-2">
+                         <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                         <span>Subir Archivo</span>
+                         <input type="file" class="hidden">
+                     </label>
+                 </div>
+             `).join('');
+ 
+             container.innerHTML = `
+                 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm max-w-4xl mx-auto">
+                     <!-- Stepper -->
+                     <ol class="flex items-center w-full mb-8">
+                         <li id="step-indicator-1" class="flex w-full items-center text-sm font-medium text-gray-500 dark:text-gray-400 after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:inline-block dark:after:border-gray-700"><span class="flex items-center justify-center w-8 h-8 rounded-full shrink-0">1</span></li>
+                         <li id="step-indicator-2" class="flex w-full items-center text-sm font-medium text-gray-500 dark:text-gray-400 after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:inline-block dark:after:border-gray-700"><span class="flex items-center justify-center w-8 h-8 rounded-full shrink-0">2</span></li>
+                         <li id="step-indicator-3" class="flex w-full items-center text-sm font-medium text-gray-500 dark:text-gray-400 after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:inline-block dark:after:border-gray-700"><span class="flex items-center justify-center w-8 h-8 rounded-full shrink-0">3</span></li>
+                         <li id="step-indicator-4" class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400"><span class="flex items-center justify-center w-8 h-8 rounded-full shrink-0">4</span></li>
+                     </ol>
+ 
+                     <!-- Step 1: Datos Personales -->
+                     <div id="form-step-1" class="form-step"><h3 class="text-lg font-semibold mb-4">1. Datos Personales</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-sm font-medium">Nombre</label><input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" value="${employee.name || ''}"></div><div><label class="block text-sm font-medium">Apellido</label><input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" value="${employee.surname || ''}"></div><div><label class="block text-sm font-medium">DNI</label><input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" value="${employee.dni || ''}"></div><div><label class="block text-sm font-medium">Fecha de Nacimiento</label><input type="date" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" value="${employee.birthDate || ''}"></div><div><label class="block text-sm font-medium">Género</label><select class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"><option>Seleccionar...</option><option>Masculino</option><option>Femenino</option><option>Otro</option></select></div><div><label class="block text-sm font-medium">Estado Civil</label><select class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"><option>Seleccionar...</option><option>Soltero/a</option><option>Casado/a</option><option>Viudo/a</option></select></div></div></div>
+                     <!-- Step 2: Datos de Contacto -->
+                     <div id="form-step-2" class="form-step hidden"><h3 class="text-lg font-semibold mb-4">2. Datos de Contacto</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-sm font-medium">Teléfono</label><input type="tel" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" value="${employee.phone || ''}"></div><div><label class="block text-sm font-medium">Email</label><input type="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" value="${employee.email || ''}"></div></div></div>
+                     <!-- Step 3: Foto del Empleado -->
+                     <div id="form-step-3" class="form-step hidden"><h3 class="text-lg font-semibold mb-4">3. Foto del Empleado</h3><div class="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg dark:border-gray-600"><i data-lucide="image-up" class="w-12 h-12 text-gray-400 mb-2"></i><p class="text-sm text-gray-500 mb-2">Arrastra una imagen o haz clic para seleccionar</p><input type="file" class="hidden"></div></div>
+                     <!-- Step 4: Documentación -->
+                     <div id="form-step-4" class="form-step hidden"><h3 class="text-lg font-semibold mb-4">4. Documentación Requerida</h3><div class="space-y-3">${docListHtml}</div></div>
+ 
+                     <!-- Navigation Buttons -->
+                     <div class="mt-8 pt-4 border-t dark:border-gray-700 flex justify-between items-center"><button id="form-prev-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50" disabled>Anterior</button><div><button onclick="switchView('employees')" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">Cancelar</button><button id="form-next-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Siguiente</button></div></div>
+                 </div>`;
+             updateFormStepUI();
+             setupFormNavigation();
+        }
+
+        function renderPayslips() {
+            const container = document.getElementById('payslips-view');
+
+            if (currentUserRole === 'employee') {
+                const employee = mockData.employees.find(e => e.id === appState.loggedInEmployeeId);
+                const employeePayslips = mockData.payslips.filter(p => p.employeeId === employee.id);
+                const listHtml = employeePayslips.map(p => `
+                    <tr class="border-t dark:border-gray-700">
+                        <td class="p-4 font-medium">${p.emissionDate}</td>
+                        <td class="p-4 hidden sm:table-cell text-gray-600 dark:text-gray-400">${p.period}</td>
+                        <td class="p-4"><div class="flex items-center gap-2">
+                            ${p.hasPdf ? '<button class="flex items-center gap-1 text-sm text-red-600 hover:underline"><i data-lucide="file-text" class="w-4 h-4"></i>PDF</button>' : ''}
+                            ${p.hasImage ? '<button class="flex items-center gap-1 text-sm text-blue-600 hover:underline"><i data-lucide="image" class="w-4 h-4"></i>Imagen</button>' : ''}
+                        </div></td>
+                    </tr>`).join('');
+
+                container.innerHTML = `<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"><table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha de Emisión</th><th class="p-4 hidden sm:table-cell">Período</th><th class="p-4">Archivos</th></tr></thead><tbody>${listHtml}</tbody></table></div>`;
+            } else {
+                container.innerHTML = `
+                <div class="space-y-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                        <div class="relative w-full sm:max-w-xs">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                            <input id="payslip-dni-input" type="text" placeholder="Buscar por DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                             <button id="payslip-search-btn" class="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><i data-lucide="search" class="w-5 h-5"></i></button>
+                        </div>
+                        <button id="upload-payslip-btn" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700"><i data-lucide="upload"></i><span>Cargar Recibo</span></button>
+                    </div>
+                    <div id="payslip-results-container" class="hidden">
+                        <h2 class="text-xl font-bold mb-4">Resultados para <span id="payslip-employee-name"></span></h2>
+                        <div id="payslip-list" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"></div>
+                    </div>
+                    <div id="payslip-no-search-message" class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                        <i data-lucide="receipt" class="mx-auto h-12 w-12 text-gray-400"></i>
+                        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Buscar recibos de sueldo</h3>
+                        <p class="mt-1 text-sm text-gray-500">Ingresa un DNI para ver los recibos de un empleado.</p>
+                    </div>
+                </div>`;
+                document.getElementById('payslip-search-btn').addEventListener('click', handlePayslipSearch);
+                document.getElementById('upload-payslip-btn').addEventListener('click', () => openModal('upload-payslip-modal'));
+            }
+        }
+
+        function handlePayslipSearch() {
+            const dni = document.getElementById('payslip-dni-input').value;
+            const employee = mockData.employees.find(e => e.dni.replace(/\./g, '') === dni.replace(/\./g, ''));
+            if (!employee) {
+                showNotification('error', 'Empleado no encontrado', `No se encontró un empleado con el DNI ${dni}.`);
+                return;
+            }
+
+            document.getElementById('payslip-no-search-message').classList.add('hidden');
+            const employeePayslips = mockData.payslips.filter(p => p.employeeId === employee.id);
+            const resultsContainer = document.getElementById('payslip-results-container');
+            const listContainer = document.getElementById('payslip-list');
+
+            document.getElementById('payslip-employee-name').textContent = `${employee.name} ${employee.surname} (DNI: ${employee.dni})`;
+
+            if (employeePayslips.length > 0) {
+                listContainer.innerHTML = `
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr>
+                            <th class="p-4">Fecha de Emisión</th><th class="p-4 hidden sm:table-cell">Período</th><th class="p-4">Archivos</th>
+                        </tr></thead>
+                        <tbody>${employeePayslips.map(p => `
+                            <tr class="border-t dark:border-gray-700">
+                                <td class="p-4 font-medium">${p.emissionDate}</td>
+                                <td class="p-4 hidden sm:table-cell text-gray-600 dark:text-gray-400">${p.period}</td>
+                                <td class="p-4"><div class="flex items-center gap-2">
+                                    ${p.hasPdf ? '<button class="flex items-center gap-1 text-sm text-red-600 hover:underline"><i data-lucide="file-text" class="w-4 h-4"></i>PDF</button>' : ''}
+                                    ${p.hasImage ? '<button class="flex items-center gap-1 text-sm text-blue-600 hover:underline"><i data-lucide="image" class="w-4 h-4"></i>Imagen</button>' : ''}
+                                </div></td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>`;
+            } else {
+                listContainer.innerHTML = `<p class="p-6 text-center text-gray-500">Este empleado no tiene recibos cargados.</p>`;
+            }
+
+            resultsContainer.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function renderSchedules() {
+            const container = document.getElementById('schedules-view');
+            if (currentUserRole === 'employee') {
+                const assignment = mockData.scheduleAssignments.find(a => a.employeeId === appState.loggedInEmployeeId);
+                let content = '<p class="text-center text-gray-500">Aún no tienes un horario asignado.</p>';
+                if (assignment) {
+                    const schedule = mockData.schedules.find(s => s.id === assignment.scheduleId);
+                    content = `
+                        <h3 class="text-lg font-semibold mb-4">Tu Horario Asignado</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                            <h4 class="font-bold text-xl">${schedule.name}</h4>
+                            <p class="text-gray-600 dark:text-gray-400">${schedule.time}</p>
+                            <p class="text-sm text-gray-500">${schedule.days}</p>
+                        </div>`;
+                }
+                container.innerHTML = `<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">${content}</div>`;
+            } else {
+                container.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                    <div class="border-b border-gray-200 dark:border-gray-700">
+                        <nav class="-mb-px flex space-x-6 px-6" aria-label="Tabs">
+                            <button data-tab="view-assignments" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Ver Asignaciones</button>
+                            <button data-tab="assign-schedules" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Asignar Horarios</button>
+                            <button data-tab="create-schedule" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Crear Horario</button>
+                        </nav>
+                    </div>
+                    <div class="p-6">
+                        <div id="view-assignments-tab" class="schedule-tab-content"></div>
+                        <div id="assign-schedules-tab" class="schedule-tab-content hidden"></div>
+                        <div id="create-schedule-tab" class="schedule-tab-content hidden"></div>
+                    </div>
+                </div>
+                `;
+                setupTabs('schedule');
+                switchTab('schedule', 'view-assignments');
+            }
+        }
+
+        function renderSchedulesContent(activeTab) {
+            const viewTab = document.getElementById('view-assignments-tab');
+            const assignTab = document.getElementById('assign-schedules-tab');
+            const createTab = document.getElementById('create-schedule-tab');
+
+            if (activeTab === 'view-assignments') {
+                const schedulesHtml = mockData.schedules.map(schedule => {
+                    const assignedEmployees = mockData.scheduleAssignments
+                        .filter(a => a.scheduleId === schedule.id)
+                        .map(a => mockData.employees.find(e => e.id === a.employeeId));
+                    return `
+                        <details class="group bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
+                                <div>
+                                    <h4 class="font-bold">${schedule.name}</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">${schedule.time} (${schedule.days})</p>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="text-sm font-semibold">${assignedEmployees.length} / ${schedule.requiredStaff} Asignados</span>
+                                    <span class="transition group-open:rotate-180">
+                                        <i data-lucide="chevron-down"></i>
+                                    </span>
+                                </div>
+                            </summary>
+                            <div class="mt-4 border-t pt-4 dark:border-gray-600">
+                                ${assignedEmployees.length > 0 ? assignedEmployees.map(e => `
+                                    <div class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        <img src="${e.photo}" class="h-8 w-8 rounded-full object-cover">
+                                        <div>
+                                            <p class="font-semibold text-sm">${e.name} ${e.surname}</p>
+                                            <p class="text-xs text-gray-500">${e.position}</p>
+                                        </div>
+                                    </div>
+                                `).join('') : '<p class="text-sm text-gray-500">No hay empleados asignados a este horario.</p>'}
+                            </div>
+                        </details>`;
+                }).join('<div class="my-4"></div>');
+                viewTab.innerHTML = `<h3 class="text-lg font-semibold mb-4">Horarios y Personal Asignado</h3><div class="space-y-4">${schedulesHtml}</div>`;
+            }
+
+            else if (activeTab === 'assign-schedules') {
+                const schedulesList = mockData.schedules.map(s => `<option value="${s.id}">${s.name} (${s.time})</option>`).join('');
+                assignTab.innerHTML = `
+                    <h3 class="text-lg font-semibold mb-4">Asignar Empleados a un Horario</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">1. Seleccionar Horario</label>
+                            <select id="schedule-select-for-assignment" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                                <option value="">Seleccionar...</option>
+                                ${schedulesList}
+                            </select>
+                        </div>
+                        <div id="employee-list-for-assignment" class="hidden">
+                            <label class="block text-sm font-medium mb-1">2. Asignar Empleados</label>
+                            <div class="p-4 border rounded-lg max-h-60 overflow-y-auto dark:border-gray-600">
+                            </div>
+                            <button class="mt-4 w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Guardar Asignación</button>
+                        </div>
+                    </div>`;
+                document.getElementById('schedule-select-for-assignment').addEventListener('change', (e) => {
+                    const scheduleId = parseInt(e.target.value);
+                    const listContainer = document.getElementById('employee-list-for-assignment');
+                    if (!scheduleId) {
+                        listContainer.classList.add('hidden');
+                        return;
+                    }
+                    const assignedEmployeeIds = mockData.scheduleAssignments.filter(a => a.scheduleId === scheduleId).map(a => a.employeeId);
+                    const availableEmployees = mockData.employees.filter(e => !assignedEmployeeIds.includes(e.id));
+
+                    const employeeCheckboxes = availableEmployees.map(e => `
+                        <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500">
+                             <img src="${e.photo}" class="h-8 w-8 rounded-full object-cover">
+                            <span class="font-medium text-sm">${e.name} ${e.surname}</span>
+                        </label>
+                    `).join('');
+                    listContainer.querySelector('div').innerHTML = employeeCheckboxes || '<p class="text-sm text-gray-500">No hay más empleados disponibles para asignar.</p>';
+                    listContainer.classList.remove('hidden');
+                });
+            }
+
+            else if (activeTab === 'create-schedule') {
+                createTab.innerHTML = `
+                    <h3 class="text-lg font-semibold mb-4">Crear Nuevo Horario</h3>
+                    <div class="max-w-md space-y-4">
+                         <div>
+                            <label class="block text-sm font-medium">Turno</label>
+                            <select class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                                <option>Turno Mañana (09:00 - 13:00, L-V)</option>
+                                <option>Turno Tarde (14:00 - 18:00, L-V)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Cantidad de Personal Requerido</label>
+                            <input type="number" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" min="1">
+                        </div>
+                        <div class="pt-2">
+                             <button class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Crear Horario</button>
+                        </div>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function renderSanctions(filteredSanctions, isAdminView) {
+            const container = document.getElementById('sanctions-view');
+            const sanctionsListHtml = filteredSanctions.map(sanction => {
+                const employee = mockData.employees.find(e => e.id === sanction.employeeId);
+                return `
+                    <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        ${isAdminView ? `<td class="p-4"><div class="flex items-center gap-3"><img src="${employee.photo}" class="h-10 w-10 rounded-full object-cover hidden sm:block"><div><p class="font-medium">${employee.name} ${employee.surname}</p><p class="text-sm text-gray-500 dark:text-gray-400">${employee.dni}</p></div></div></td>` : ''}
+                        <td class="p-4 text-gray-600 dark:text-gray-300">${sanction.type}</td>
+                        <td class="p-4 text-gray-600 dark:text-gray-300 hidden md:table-cell">${sanction.startDate} ${sanction.endDate ? ' - ' + sanction.endDate : ''}</td>
+                        <td class="p-4"><button data-action="view-sanction" data-sanction-id="${sanction.id}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</button></td>
+                    </tr>`;
+            }).join('');
+
+            const adminControls = `
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="relative w-full sm:max-w-xs"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i><input id="sanction-filter-dni" type="text" placeholder="Filtrar por DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600"></div>
+                    <button id="add-sanction-btn" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700"><i data-lucide="plus"></i><span>Aplicar Sanción Directa</span></button>
+                </div>`;
+
+            container.innerHTML = `
+                ${isAdminView ? adminControls : ''}
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"><table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                        <tr>
+                        ${isAdminView ? '<th class="p-4">Empleado</th>' : ''}
+                        <th class="p-4">Tipo</th><th class="p-4 hidden md:table-cell">Período</th><th class="p-4">Acciones</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">${sanctionsListHtml}</tbody>
+                </table></div>
+            `;
+            if (isAdminView) {
+                document.getElementById('add-sanction-btn').addEventListener('click', () => switchView('create-sanction'));
+                document.getElementById('sanction-filter-dni').addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.replace(/\./g, '');
+                    const filtered = mockData.sanctions.filter(sanction => {
+                        const employee = mockData.employees.find(emp => emp.id === sanction.employeeId);
+                        return employee.dni.replace(/\./g, '').includes(searchTerm);
+                    });
+                    renderSanctions(filtered, true);
+                    document.getElementById('sanction-filter-dni').value = e.target.value;
+                    document.getElementById('sanction-filter-dni').focus();
+                });
+            }
+        }
+
+        function renderCreateSanctionForm() {
+            const container = document.getElementById('create-sanction-view');
+            const sanctionTypes = ['Apercibimiento Verbal', 'Apercibimiento Escrito', 'Suspensión sin goce de haberes', 'Cambio de tareas o responsabilidades', 'Suspensión Prolongada sin goce de haberes', 'Despido con causa'];
+
+            container.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm max-w-2xl mx-auto">
+                    <!-- Step 1: Search -->
+                    <div id="sanction-step-1">
+                        <h3 class="text-lg font-semibold mb-4">1. Buscar Empleado</h3>
+                        <div class="flex gap-2">
+                            <input id="sanction-dni-search" type="text" placeholder="DNI del empleado..." class="flex-grow w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                            <button id="sanction-search-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"><i data-lucide="search"></i></button>
+                        </div>
+                        <div id="sanction-employee-found" class="hidden mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600"></div>
+                    </div>
+
+                    <!-- Step 2: Form -->
+                    <div id="sanction-step-2" class="hidden mt-6">
+                        <h3 class="text-lg font-semibold mb-4">2. Detalles de la Sanción</h3>
+                        <form class="space-y-4">
+                            <div><label class="block text-sm font-medium">Tipo de Sanción</label>
+                                <select class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                                    <option>Seleccionar...</option>
+                                    ${sanctionTypes.map(t => `<option>${t}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div><label class="block text-sm font-medium">Motivo / Descripción</label>
+                                <textarea rows="4" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium">Fecha Inicio</label><input type="date" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"></div>
+                                <div><label class="block text-sm font-medium">Fecha Fin (Opcional)</label><input type="date" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"></div>
+                            </div>
+                        </form>
+                    </div>
+
+                     <!-- Navigation Buttons -->
+                    <div class="mt-8 pt-4 border-t dark:border-gray-700 flex justify-end gap-3">
+                        <button onclick="switchView('sanctions')" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">Cancelar</button>
+                        <button id="save-sanction-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50" disabled>Guardar Sanción</button>
+                    </div>
+                </div>`;
+
+            document.getElementById('sanction-search-btn').addEventListener('click', () => {
+                const dni = document.getElementById('sanction-dni-search').value;
+                const employee = mockData.employees.find(e => e.dni === dni);
+                const employeeCard = document.getElementById('sanction-employee-found');
+                if (employee) {
+                    employeeCard.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <img src="${employee.photo}" class="h-12 w-12 rounded-full object-cover">
+                            <div>
+                                <p class="font-bold">${employee.name} ${employee.surname}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">${employee.position}</p>
+                            </div>
+                        </div>`;
+                    employeeCard.classList.remove('hidden');
+                    document.getElementById('sanction-step-2').classList.remove('hidden');
+                    document.getElementById('save-sanction-btn').disabled = false;
+                } else {
+                    employeeCard.innerHTML = `<p class="text-red-600">Empleado no encontrado.</p>`;
+                    employeeCard.classList.remove('hidden');
+                    document.getElementById('sanction-step-2').classList.add('hidden');
+                    document.getElementById('save-sanction-btn').disabled = true;
+                }
+            });
+
+            document.getElementById('save-sanction-btn').addEventListener('click', () => {
+                showNotification('success', 'Sanción Registrada', 'La sanción ha sido registrada exitosamente.');
+                switchView('sanctions');
+            });
+        }
+
+        function renderCreateMultiSanctionForm() {
+            const container = document.getElementById('create-multi-sanction-view');
+            const incidentId = appState.creatingSanctionFromIncidentId;
+            const incident = mockData.incidents.find(i => i.id === incidentId);
+
+            if (!incident) {
+                container.innerHTML = `<p>Error: No se pudo encontrar el incidente de origen.</p>`;
+                return;
+            }
+
+            const involvedEmployees = incident.involvedEmployeeIds.map(id => mockData.employees.find(e => e.id === id));
+            const sanctionTypes = ['Apercibimiento Verbal', 'Apercibimiento Escrito', 'Suspensión sin goce de haberes', 'Cambio de tareas o responsabilidades', 'Suspensión Prolongada sin goce de haberes', 'Despido con causa'];
+
+            const employeeFormsHtml = involvedEmployees.map((employee, index) => `
+                <details class="bg-gray-50 dark:bg-gray-800/50 rounded-lg border dark:border-gray-700 group" ${index === 0 ? 'open' : ''}>
+                    <summary class="flex items-center justify-between p-4 cursor-pointer font-medium list-none">
+                        <div class="flex items-center gap-4">
+                            <img src="${employee.photo}" class="h-10 w-10 rounded-full object-cover">
+                            <div>
+                                <p class="font-bold">${employee.name} ${employee.surname}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">${employee.position}</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="transition-transform duration-200 group-open:rotate-180"></i>
+                    </summary>
+                    <div class="p-4 border-t dark:border-gray-700">
+                        <form class="space-y-4" data-employee-id="${employee.id}">
+                            <div>
+                                <label class="block text-sm font-medium">Tipo de Sanción</label>
+                                <select class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                                    <option value="">No aplicar sanción</option>
+                                    ${sanctionTypes.map(t => `<option>${t}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium">Motivo / Descripción</label>
+                                <textarea rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" placeholder="Detallar la falta y la justificación de la medida."></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium">Fecha Inicio</label><input type="date" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"></div>
+                                <div><label class="block text-sm font-medium">Fecha Fin (Opcional)</label><input type="date" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"></div>
+                            </div>
+                        </form>
+                    </div>
+                </details>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                        <div class="mb-6 border-b pb-4 dark:border-gray-700">
+                            <h2 class="text-2xl font-bold">Aplicar Sanciones</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Incidente de origen: <strong class="text-gray-700 dark:text-gray-300">${incident.name}</strong></p>
+                        </div>
+                        <div class="space-y-4">${employeeFormsHtml}</div>
+                        <div class="mt-8 pt-6 border-t dark:border-gray-700 flex justify-end gap-3">
+                            <button id="cancel-multi-sanction-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">Cancelar</button>
+                            <button id="save-multi-sanction-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar Sanciones</button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderSanctionDetail(sanctionId) {
+            const container = document.getElementById('sanction-detail-view');
+            const sanction = mockData.sanctions.find(s => s.id === sanctionId);
+            if (!sanction) {
+                container.innerHTML = `<p>Sanción no encontrada.</p>`;
+                return;
+            }
+            const employee = mockData.employees.find(e => e.id === sanction.employeeId);
+            const backButtonTarget = currentUserRole === 'admin' ? 'sanctions' : 'sanctions';
+
+            const backToIncidentLink = sanction.incidentId ? `
+                <div class="mb-4">
+                    <a href="#" data-action="view-incident" data-incident-id="${sanction.incidentId}" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline">
+                        <i data-lucide="link"></i> Ver Incidente Vinculado
+                    </a>
+                </div>
+            ` : '';
+
+            container.innerHTML = `
+                <div>
+                    <button onclick="switchView('${backButtonTarget}')" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+                        <i data-lucide="arrow-left"></i> Volver
+                    </button>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm max-w-2xl mx-auto">
+                        <div class="flex justify-between items-start">
+                            <h2 class="text-2xl font-bold mb-2">Detalle de la Sanción</h2>
+                        </div>
+                        
+                        ${backToIncidentLink}
+
+                        <div class="space-y-4 ${sanction.incidentId ? 'mt-4' : ''}">
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-500">Empleado</h4>
+                                <div class="flex items-center gap-3 mt-2">
+                                    <img src="${employee.photo}" class="h-10 w-10 rounded-full object-cover">
+                                    <div>
+                                        <p class="font-bold">${employee.name} ${employee.surname}</p>
+                                        <p class="text-xs text-gray-500">${employee.dni}</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <div><h4 class="text-sm font-semibold text-gray-500">Tipo de Sanción</h4><p>${sanction.type}</p></div>
+                             <div><h4 class="text-sm font-semibold text-gray-500">Período</h4><p>${sanction.startDate} ${sanction.endDate ? `al ${sanction.endDate}` : ''}</p></div>
+                             <div><h4 class="text-sm font-semibold text-gray-500">Motivo</h4><p class="text-gray-600 dark:text-gray-300">${sanction.reason}</p></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function renderIncidents(filteredIncidents, isAdminView) {
+            const container = document.getElementById('incidents-view');
+            const incidentsListHtml = filteredIncidents.map(incident => {
+                const involved = incident.involvedEmployeeIds.map(id => mockData.employees.find(e => e.id === id));
+                 return `
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-lg mb-1">${incident.name}</h3>
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">${incident.date}</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">${incident.description}</p>
+                        </div>
+                        <div class="border-t dark:border-gray-700 pt-4 flex justify-between items-center">
+                            ${isAdminView ? `
+                            <div class="flex items-center">
+                                <span class="text-sm mr-2 text-gray-500">Involucrados:</span>
+                                <div class="flex -space-x-2">
+                                    ${involved.map(e => `<img class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800" src="${e.photo}" alt="${e.name}" title="${e.name} ${e.surname}">`).join('')}
+                                </div>
+                            </div>
+                            ` : '<div></div>'}
+                            <button data-action="view-incident" data-incident-id="${incident.id}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const adminControls = `
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="relative w-full sm:max-w-xs"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i><input id="incident-filter-dni" type="text" placeholder="Filtrar por DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600"></div>
+                    <button id="add-incident-btn" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700"><i data-lucide="plus"></i><span>Registrar Incidente</span></button>
+                </div>`;
+
+            container.innerHTML = `
+                ${isAdminView ? adminControls : ''}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${incidentsListHtml}</div>
+            `;
+            if (isAdminView) {
+                document.getElementById('add-incident-btn').addEventListener('click', () => switchView('create-incident'));
+                document.getElementById('incident-filter-dni').addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.replace(/\./g, '');
+                    const filtered = mockData.incidents.filter(incident => {
+                        return incident.involvedEmployeeIds.some(id => {
+                            const employee = mockData.employees.find(emp => emp.id === id);
+                            return employee.dni.replace(/\./g, '').includes(searchTerm);
+                        });
+                    });
+                    renderIncidents(filtered, true);
+                    document.getElementById('incident-filter-dni').value = e.target.value;
+                    document.getElementById('incident-filter-dni').focus();
+                });
+            }
+        }
+
+        function renderCreateIncidentForm() {
+            const container = document.getElementById('create-incident-view');
+            const incidentTypes = ['Conducta y Disciplina', 'Seguridad y Salud', 'Asistencia y Desempeño', 'Operativos y de Propiedad', 'Seguridad de la Información'];
+            const employeeCheckboxes = mockData.employees.map(e => `
+                <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <input type="checkbox" value="${e.id}" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500">
+                     <img src="${e.photo}" class="h-8 w-8 rounded-full object-cover">
+                    <span class="font-medium text-sm">${e.name} ${e.surname}</span>
+                </label>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm max-w-2xl mx-auto">
+                     <h3 class="text-xl font-semibold mb-6">Registrar Nuevo Incidente</h3>
+                     <form class="space-y-4">
+                        <div><label class="block text-sm font-medium">Tipo de Incidente</label>
+                            <select class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                                <option>Seleccionar...</option>
+                                ${incidentTypes.map(t => `<option>${t}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div><label class="block text-sm font-medium">Fecha del Incidente</label><input type="date" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"></div>
+                        <div><label class="block text-sm font-medium">Descripción</label><textarea rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"></textarea></div>
+                        <div>
+                            <label class="block text-sm font-medium">Empleados Involucrados</label>
+                            <div class="mt-2 p-2 border rounded-lg max-h-48 overflow-y-auto space-y-1 dark:border-gray-600">${employeeCheckboxes}</div>
+                        </div>
+                        <div><label class="block text-sm font-medium">Observaciones Generales</label><textarea rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm"></textarea></div>
+                    </form>
+                    <div class="mt-8 pt-4 border-t dark:border-gray-700 flex justify-end gap-3">
+                        <button onclick="switchView('incidents')" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">Cancelar</button>
+                        <button id="save-incident-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar Incidente</button>
+                    </div>
+                </div>`;
+
+            document.getElementById('save-incident-btn').addEventListener('click', () => {
+                showNotification('success', 'Incidente Registrado', 'El incidente ha sido registrado exitosamente.');
+                switchView('incidents');
+            });
+        }
+
+        function renderIncidentDetail(incidentId) {
+            const container = document.getElementById('incident-detail-view');
+            const incident = mockData.incidents.find(i => i.id === incidentId);
+            if (!incident) {
+                container.innerHTML = `<p>Incidente no encontrado.</p>`;
+                return;
+            }
+            const involvedEmployees = incident.involvedEmployeeIds.map(id => mockData.employees.find(e => e.id === id));
+            const backButtonTarget = currentUserRole === 'admin' ? 'incidents' : 'incidents';
+
+            let descargosHtml = '';
+            if (incident.descargos && incident.descargos.length > 0) {
+                const descargoItems = incident.descargos.map(descargo => {
+                    const employee = mockData.employees.find(e => e.id === descargo.employeeId);
+                    return `
+                        <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div class="flex items-center gap-2 mb-2">
+                                <img src="${employee.photo}" class="h-6 w-6 rounded-full object-cover">
+                                <p class="text-sm font-semibold">${employee.name} ${employee.surname}</p>
+                                <time class="text-xs text-gray-400 dark:text-gray-500 ml-auto">${descargo.date}</time>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 italic">"${descargo.statement}"</p>
+                            ${descargo.hasFile ? `
+                            <div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                <a href="#" class="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                                    <i data-lucide="paperclip" class="w-3 h-3"></i><span>Archivo Adjunto</span>
+                                </a>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                descargosHtml = `
+                    <li class="mb-6 ml-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 bg-cyan-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-cyan-900">
+                            <i data-lucide="message-square" class="w-3 h-3 text-cyan-800 dark:text-cyan-300"></i>
+                        </span>
+                        <h3 class="text-md font-semibold text-gray-900 dark:text-white">Descargos Recibidos</h3>
+                        ${descargoItems}
+                    </li>
+                `;
+            } else {
+                descargosHtml = `
+                    <li class="mb-6 ml-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-gray-700">
+                            <i data-lucide="message-square" class="w-3 h-3 text-gray-500"></i>
+                        </span>
+                        <h3 class="text-md font-semibold text-gray-500 dark:text-gray-400">Sin Descargos</h3>
+                        <p class="text-sm font-normal text-gray-500 dark:text-gray-400">No se han registrado descargos de los involucrados.</p>
+                    </li>
+                `;
+            }
+            const timelineHtml = `
+                <h4 class="text-sm font-semibold text-gray-500 mt-6 mb-3">Historial del Caso</h4>
+                <ol class="relative border-l border-gray-200 dark:border-gray-700 ml-2">
+                    <li class="mb-6 ml-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-blue-900">
+                            <i data-lucide="file-plus" class="w-3 h-3 text-blue-800 dark:text-blue-300"></i>
+                        </span>
+                        <h3 class="flex items-center mb-1 text-md font-semibold text-gray-900 dark:text-white">Incidente Reportado</h3>
+                        <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">Reportado el ${incident.date}</time>
+                    </li>
+                    <li class="mb-6 ml-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 bg-yellow-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-yellow-900">
+                            <i data-lucide="file-search" class="w-3 h-3 text-yellow-800 dark:text-yellow-300"></i>
+                        </span>
+                        <h3 class="text-md font-semibold text-gray-900 dark:text-white">En Investigación</h3>
+                        <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">Iniciado el 2025-08-19</time>
+                        <p class="text-sm font-normal text-gray-500 dark:text-gray-400">Se solicitó descargo al empleado y se están revisando las cámaras de seguridad.</p>
+                    </li>
+                    ${descargosHtml}
+                    <li class="ml-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-gray-700">
+                            <i data-lucide="gavel" class="w-3 h-3 text-gray-800 dark:text-gray-300"></i>
+                        </span>
+                        <h3 class="text-md font-semibold text-gray-500 dark:text-gray-400">Resolución Pendiente</h3>
+                    </li>
+                </ol>`;
+
+            container.innerHTML = `
+                 <div>
+                    <button onclick="switchView('${backButtonTarget}')" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+                        <i data-lucide="arrow-left"></i> Volver
+                    </button>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm max-w-2xl mx-auto">
+                        <h2 class="text-2xl font-bold mb-4">Detalle del Incidente</h2>
+                        <div class="space-y-4">
+                             <div><h4 class="text-sm font-semibold text-gray-500">Nombre del Incidente</h4><p>${incident.name}</p></div>
+                             <div><h4 class="text-sm font-semibold text-gray-500">Fecha</h4><p>${incident.date}</p></div>
+                             <div><h4 class="text-sm font-semibold text-gray-500">Descripción</h4><p class="text-gray-600 dark:text-gray-300">${incident.description}</p></div>
+                             <div><h4 class="text-sm font-semibold text-gray-500">Observaciones</h4><p class="text-gray-600 dark:text-gray-300">${incident.observations}</p></div>
+                             <div>
+                                <h4 class="text-sm font-semibold text-gray-500 mb-2">Empleados Involucrados</h4>
+                                <div class="space-y-2">
+                                ${involvedEmployees.map(e => `
+                                    <div class="flex items-center gap-3 p-2 rounded-md bg-gray-50 dark:bg-gray-700/50">
+                                        <img src="${e.photo}" class="h-8 w-8 rounded-full object-cover">
+                                        <div>
+                                            <p class="font-semibold text-sm">${e.name} ${e.surname}</p>
+                                            <p class="text-xs text-gray-500">${e.dni}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                </div>
+                             </div>
+                        </div>
+                        ${timelineHtml}
+                        <div id="incident-actions-container" class="mt-8 pt-6 border-t dark:border-gray-700">
+                            <!-- Contenido dinámico de acciones -->
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const actionsContainer = container.querySelector('#incident-actions-container');
+
+            if (currentUserRole === 'admin') {
+                actionsContainer.innerHTML = `
+                    <div class="flex justify-end">
+                        <button onclick="openModal('resolve-incident-modal')" class="bg-red-600 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
+                            <i data-lucide="gavel"></i><span>Registrar Resolución</span>
+                        </button>
+                    </div>
+                `;
+            } else { // currentUserRole === 'employee'
+                const isEmployeeInvolved = incident.involvedEmployeeIds.includes(appState.loggedInEmployeeId);
+                if (!isEmployeeInvolved) {
+                    actionsContainer.innerHTML = ''; // No actions if not involved
+                } else {
+                    const employeeHasSubmitted = incident.descargos && incident.descargos.some(d => d.employeeId === appState.loggedInEmployeeId);
+
+                    if (employeeHasSubmitted) {
+                        actionsContainer.innerHTML = `
+                            <div class="p-4 bg-green-50 dark:bg-green-900/50 border-l-4 border-green-500 rounded-r-lg">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="check-circle" class="h-5 w-5 text-green-500"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-green-700 dark:text-green-300">Ya has presentado tu descargo para este incidente.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        actionsContainer.innerHTML = `
+                            <div>
+                                <h3 class="text-lg font-semibold mb-3">Realizar Descargo</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Explica tu versión de los hechos y adjunta un archivo si lo consideras necesario. Este descargo será revisado por RRHH.</p>
+                                <form id="descargo-form" class="space-y-4">
+                                    <div>
+                                        <label for="descargo-statement" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tu descargo</label>
+                                        <textarea id="descargo-statement" rows="4" class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" placeholder="Escribe tu versión de los hechos..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label for="descargo-file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Adjuntar archivo (Opcional)</label>
+                                        <input type="file" id="descargo-file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 dark:file:bg-gray-700 dark:file:text-gray-300 dark:hover:file:bg-gray-600">
+                                    </div>
+                                    <div class="flex justify-end pt-2">
+                                        <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
+                                            <i data-lucide="send"></i><span>Enviar Descargo</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        `;
+                        const descargoForm = actionsContainer.querySelector('#descargo-form');
+                        if (descargoForm) {
+                            descargoForm.addEventListener('submit', (e) => {
+                                e.preventDefault();
+                                const statement = document.getElementById('descargo-statement').value;
+                                const fileInput = document.getElementById('descargo-file');
+                                const hasFile = fileInput.files.length > 0;
+                                if (statement.trim() === '') {
+                                    showNotification('warning', 'Campo Vacío', 'Por favor, escribe tu descargo antes de enviarlo.');
+                                    return;
+                                }
+                                if (!incident.descargos) incident.descargos = [];
+                                incident.descargos.push({ employeeId: appState.loggedInEmployeeId, date: new Date().toISOString().split('T')[0], statement: statement, hasFile: hasFile });
+                                showNotification('success', 'Descargo Enviado', 'Tu descargo ha sido registrado y será revisado.');
+                                renderIncidentDetail(incidentId);
+                            });
+                        }
+                    }
+                }
+            }
+
+            lucide.createIcons();
+        }
+
+        function renderAttendance() {
+            const container = document.getElementById('attendance-view');
+            if (currentUserRole === 'employee') {
+                container.innerHTML = `
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                            <h3 class="text-lg font-semibold">Mis Registros de Asistencia</h3>
+                            <div class="flex items-center gap-2">
+                                <label for="my-attendance-month-filter" class="text-sm font-medium">Mes:</label>
+                                <input type="month" id="my-attendance-month-filter" value="${today.slice(0, 7)}" class="px-2 py-1 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                            </div>
+                        </div>
+                        <div id="my-attendance-list-container" class="overflow-hidden"></div>
+                    </div>`;
+                renderMyAttendanceTable(today.slice(0, 7));
+                document.getElementById('my-attendance-month-filter').addEventListener('change', (e) => renderMyAttendanceTable(e.target.value));
+            } else {
+                container.innerHTML = `
+                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                    <div class="border-b border-gray-200 dark:border-gray-700">
+                        <nav class="-mb-px flex space-x-6 px-6" aria-label="Tabs">
+                            <button data-tab="register-attendance" class="attendance-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Asistencia</button>
+                            <button data-tab="register-face" class="attendance-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Rostro</button>
+                            <button data-tab="view-attendances" class="attendance-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Ver Asistencias</button>
+                        </nav>
+                    </div>
+                    <div class="p-6">
+                        <div id="register-attendance-tab" class="attendance-tab-content"></div>
+                        <div id="register-face-tab" class="attendance-tab-content hidden"></div>
+                        <div id="view-attendances-tab" class="attendance-tab-content hidden"></div>
+                    </div>
+                </div>
+                `;
+                setupTabs('attendance');
+                switchTab('attendance', 'register-attendance');
+            }
+        }
+
+        function renderAttendanceContent(activeTab) {
+            const registerTab = document.getElementById('register-attendance-tab');
+            const faceRegTab = document.getElementById('register-face-tab');
+            const viewTab = document.getElementById('view-attendances-tab');
+
+            if (activeTab === 'register-attendance') {
+                const todaysAttendances = mockData.attendance.filter(a => a.date === today);
+                const attendanceLogHtml = todaysAttendances.map(att => {
+                    const employee = mockData.employees.find(e => e.id === att.employeeId);
+                    return `<li class="flex items-center gap-4 py-2"><img src="${employee.photo}" class="h-10 w-10 rounded-full object-cover"><div class="flex-1"><p class="font-medium">${employee.name} ${employee.surname}</p><p class="text-sm text-gray-500">${employee.position}</p></div><span class="text-sm font-semibold text-gray-700 dark:text-gray-300">${att.time}</span></li>`;
+                }).join('');
+
+                registerTab.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 bg-gray-900 rounded-lg flex items-center justify-center aspect-video text-white relative overflow-hidden">
+                            <i data-lucide="camera" class="h-24 w-24 text-gray-600"></i>
+                            <div class="absolute bottom-4 left-4 text-sm bg-black/50 px-2 py-1 rounded">Cámara Desactivada (Modo de Muestra)</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                            <h3 class="font-bold mb-4">Últimos Registros (Hoy)</h3>
+                            <ul class="divide-y dark:divide-gray-700 max-h-[28rem] overflow-y-auto">${attendanceLogHtml || '<p class="text-sm text-center py-4 text-gray-500">Aún no hay registros hoy.</p>'}</ul>
+                        </div>
+                    </div>
+                `;
+            } else if (activeTab === 'register-face') {
+                faceRegTab.innerHTML = `
+                    <h3 class="text-lg font-semibold mb-4">Registro Facial de Empleado</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Buscar Empleado por DNI</label>
+                            <div class="flex gap-2">
+                                <input id="face-reg-dni-search" type="text" placeholder="DNI del empleado..." class="flex-grow w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                                <button id="face-reg-search-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"><i data-lucide="search"></i></button>
+                            </div>
+                            <div id="face-reg-employee-found" class="hidden mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600"></div>
+                        </div>
+                        <div id="face-reg-camera-view" class="hidden">
+                            <div class="bg-gray-900 rounded-lg flex items-center justify-center aspect-square text-white relative overflow-hidden">
+                                <i data-lucide="camera" class="h-16 w-16 text-gray-600"></i>
+                            </div>
+                            <button id="face-reg-save-btn" class="mt-4 w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50" disabled>Registrar Rostro</button>
+                        </div>
+                    </div>`;
+
+                document.getElementById('face-reg-search-btn').addEventListener('click', () => {
+                    const dni = document.getElementById('face-reg-dni-search').value;
+                    const employee = mockData.employees.find(e => e.dni === dni);
+                    const employeeCard = document.getElementById('face-reg-employee-found');
+                    const cameraView = document.getElementById('face-reg-camera-view');
+                    const saveBtn = document.getElementById('face-reg-save-btn');
+
+                    if (employee) {
+                        const regStatus = employee.facialRecognitionRegistered
+                            ? '<span class="text-xs font-semibold text-green-600 bg-green-100 dark:text-green-200 dark:bg-green-900 px-2 py-1 rounded-full">Ya Registrado</span>'
+                            : '<span class="text-xs font-semibold text-yellow-600 bg-yellow-100 dark:text-yellow-200 dark:bg-yellow-900 px-2 py-1 rounded-full">Pendiente</span>';
+                        employeeCard.innerHTML = `
+                            <div class="flex items-center gap-4">
+                                <img src="${employee.photo}" class="h-16 w-16 rounded-full object-cover">
+                                <div class="flex-1">
+                                    <p class="font-bold">${employee.name} ${employee.surname}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">${employee.position}</p>
+                                </div>
+                                ${regStatus}
+                            </div>`;
+                        employeeCard.classList.remove('hidden');
+                        cameraView.classList.remove('hidden');
+                        saveBtn.disabled = employee.facialRecognitionRegistered;
+                    } else {
+                        employeeCard.innerHTML = `<p class="text-red-600 text-center">Empleado no encontrado.</p>`;
+                        employeeCard.classList.remove('hidden');
+                        cameraView.classList.add('hidden');
+                    }
+                });
+            } else if (activeTab === 'view-attendances') {
+                viewTab.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                        <h3 class="text-lg font-semibold">Registros de Asistencia</h3>
+                        <div class="flex items-center gap-2">
+                             <label for="attendance-date-filter" class="text-sm font-medium">Fecha:</label>
+                             <input type="date" id="attendance-date-filter" value="${today}" class="px-2 py-1 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                        </div>
+                    </div>
+                    <div id="attendance-list-container" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"></div>
+                `;
+                renderAttendanceTable(today);
+                document.getElementById('attendance-date-filter').addEventListener('change', (e) => renderAttendanceTable(e.target.value));
+            }
+            lucide.createIcons();
+        }
+
+        function renderMyAttendanceTable(month) { // YYYY-MM
+            const container = document.getElementById('my-attendance-list-container');
+            const filteredAttendances = mockData.attendance.filter(a => a.employeeId === appState.loggedInEmployeeId && a.date.startsWith(month));
+
+            if (filteredAttendances.length === 0) {
+                container.innerHTML = `<p class="text-center py-8 text-gray-500">No hay registros para el mes seleccionado.</p>`;
+                return;
+            }
+            const tableRows = filteredAttendances.map(att => `
+                <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                     <td class="p-4 text-gray-600 dark:text-gray-300">${att.date}</td>
+                     <td class="p-4 font-semibold">${att.time}</td>
+                </tr>`).join('');
+            container.innerHTML = `<table class="w-full"><thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha</th><th class="p-4">Hora</th></tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">${tableRows}</tbody></table>`;
+        }
+
+        function renderAttendanceTable(date) {
+            const container = document.getElementById('attendance-list-container');
+            const filteredAttendances = mockData.attendance.filter(a => a.date === date);
+
+            if (filteredAttendances.length === 0) {
+                container.innerHTML = `<p class="text-center py-8 text-gray-500">No hay registros para la fecha seleccionada.</p>`;
+                return;
+            }
+
+            const tableRows = filteredAttendances.map(att => {
+                const employee = mockData.employees.find(e => e.id === att.employeeId);
+                return `
+                    <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                         <td class="p-4"><div class="flex items-center gap-3"><img src="${employee.photo}" class="h-10 w-10 rounded-full object-cover"><div><p class="font-medium">${employee.name} ${employee.surname}</p><p class="text-sm text-gray-500 dark:text-gray-400 sm:hidden">${employee.dni}</p></div></div></td>
+                         <td class="p-4 text-gray-600 dark:text-gray-300 hidden sm:table-cell">${employee.dni}</td>
+                         <td class="p-4 text-gray-600 dark:text-gray-300 hidden md:table-cell">${att.date}</td>
+                         <td class="p-4 font-semibold">${att.time}</td>
+                    </tr>`;
+            }).join('');
+
+            container.innerHTML = `
+                 <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                        <tr><th class="p-4">Empleado</th><th class="p-4 hidden sm:table-cell">DNI</th><th class="p-4 hidden md:table-cell">Fecha</th><th class="p-4">Hora</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">${tableRows}</tbody>
+                </table>
+            `;
+            lucide.createIcons();
+        }
+
+        function renderAllNotificationsView() {
+            const container = document.getElementById('all-notifications-view');
+            if (!container) return;
+
+            const notificationsHtml = mockData.notifications.map(notif => `
+                <div class="flex items-start gap-4 p-4 ${!notif.read ? 'bg-red-50/50 dark:bg-red-900/20' : ''}">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notif.bgColor}">
+                        <i data-lucide="${notif.icon}" class="w-5 h-5 ${notif.iconColor}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-800 dark:text-gray-200">${notif.text}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${notif.time}</p>
+                    </div>
+                    ${!notif.read ? `<div class="flex-shrink-0 flex items-center h-full"><div class="w-2.5 h-2.5 bg-red-500 rounded-full"></div></div>` : ''}
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-4 sm:p-6 border-b dark:border-gray-700 flex justify-between items-center">
+                        <h2 class="text-lg font-semibold">Centro de Notificaciones</h2>
+                        <button id="mark-all-read-page-btn" class="text-sm font-semibold text-red-600 hover:underline">Marcar todas como leídas</button>
+                    </div>
+                    <div class="divide-y dark:divide-gray-700">${notificationsHtml || '<p class="p-8 text-center text-sm text-gray-500">No tienes notificaciones.</p>'}</div>
+                </div>`;
+
+            document.getElementById('mark-all-read-page-btn').addEventListener('click', () => {
+                mockData.notifications.forEach(n => n.read = true);
+                renderAllNotificationsView(); // Re-render this view
+                renderNotificationPanel(); // Update the panel and badge
+                showNotification('info', 'Notificaciones', 'Todas las notificaciones han sido marcadas como leídas.');
+            });
+            lucide.createIcons();
+        }
+
+        function setupNotificationPanel() {
+            const toggleBtn = document.getElementById('notification-toggle');
+            const panel = document.getElementById('notification-panel');
+            const markAllReadBtn = document.getElementById('mark-all-read-btn');
+
+            if (!toggleBtn || !panel) return;
+
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                panel.classList.toggle('hidden');
+            });
+
+            markAllReadBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mockData.notifications.forEach(n => n.read = true);
+                renderNotificationPanel();
+                showNotification('info', 'Notificaciones', 'Todas las notificaciones han sido marcadas como leídas.');
+            });
+
+            const viewAllBtn = document.getElementById('view-all-notifications-btn');
+            if (viewAllBtn) {
+                viewAllBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    switchView('all-notifications');
+                    panel.classList.add('hidden');
+                });
+            };
+
+            // Cerrar el panel al hacer clic fuera
+            document.addEventListener('click', (e) => {
+                if (!panel.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    panel.classList.add('hidden');
+                }
+            });
+        }
+
+        function renderNotificationPanel() {
+            const list = document.getElementById('notification-list');
+            if (!list) return;
+
+            const notificationsHtml = mockData.notifications.map(notif => `
+                <a href="#" class="flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 ${!notif.read ? 'bg-red-50/50 dark:bg-red-900/20' : ''}">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notif.bgColor}">
+                        <i data-lucide="${notif.icon}" class="w-5 h-5 ${notif.iconColor}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-700 dark:text-gray-300">${notif.text}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${notif.time}</p>
+                    </div>
+                    ${!notif.read ? '<div class="flex-shrink-0 w-2.5 h-2.5 bg-red-500 rounded-full mt-1.5"></div>' : ''}
+                </a>
+            `).join('');
+
+            list.innerHTML = notificationsHtml || `<p class="p-6 text-center text-sm text-gray-500">No tienes notificaciones.</p>`;
+            updateNotificationBadge();
+            lucide.createIcons();
+        }
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notification-badge');
+            if (!badge) return;
+            const hasUnread = mockData.notifications.some(n => !n.read);
+            badge.classList.toggle('hidden', !hasUnread);
+        }
+
+        // --- LÓGICA DE NAVEGACIÓN Y UI ---
+
+        function setupGlobalEventListeners() {
+            document.body.addEventListener('click', function (e) {
+                const actionTarget = e.target.closest('[data-action]');
+                if (actionTarget) {
+                    const { action, employeeId, sanctionId, incidentId } = actionTarget.dataset;
+
+                    if (action === 'toggle-menu') {
+                        const menu = document.getElementById(`action-menu-${employeeId}`) || document.getElementById(`action-menu-mobile-${employeeId}`);
+                        if (menu) menu.classList.toggle('hidden');
+                    }
+                    if (action === 'view-employee') {
+                        appState.viewingEmployeeId = parseInt(employeeId);
+                        switchView('view-employee');
+                    }
+                    if (action === 'edit-employee') {
+                        appState.editingEmployeeId = parseInt(employeeId);
+                        switchView('employee-form');
+                    }
+                    if (action === 'delete-employee') {
+                        appState.deletingEmployeeId = parseInt(employeeId);
+                        openModal('delete-employee-modal');
+                    }
+                    if (action === 'view-sanction') {
+                        appState.viewingSanctionId = parseInt(sanctionId);
+                        switchView('sanction-detail');
+                    }
+                    if (action === 'view-incident') {
+                        appState.viewingIncidentId = parseInt(incidentId);
+                        switchView('incident-detail');
+                    }
+                }
+
+                if (!actionTarget || actionTarget.dataset.action !== 'toggle-menu') {
+                    document.querySelectorAll('[id^="action-menu-"]').forEach(menu => menu.classList.add('hidden'));
+                }
+            });
+
+            document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+                if (appState.deletingEmployeeId) {
+                    const employeeToDelete = mockData.employees.find(emp => emp.id === appState.deletingEmployeeId);
+                    mockData.employees = mockData.employees.filter(emp => emp.id !== appState.deletingEmployeeId);
+                    closeModal('delete-employee-modal');
+                    renderEmployees();
+                    lucide.createIcons();
+                    showNotification('success', 'Empleado Eliminado', `El empleado ${employeeToDelete.name} ${employeeToDelete.surname} ha sido eliminado.`);
+                }
+            });
+
+            // Listeners para el modal de resolución de incidentes
+            const resolveAndSanctionBtn = document.getElementById('resolve-and-sanction-btn');
+            resolveAndSanctionBtn.addEventListener('click', () => {
+                // 1. Guardar la resolución (simulado) y vincular el incidente para el siguiente paso
+                appState.creatingSanctionFromIncidentId = appState.viewingIncidentId;
+                
+                // 2. Cerrar el modal
+                closeModal('resolve-incident-modal');
+                
+                // 3. Redirigir al formulario de sanción múltiple
+                switchView('create-multi-sanction');
+                
+                // 4. Notificar al usuario
+                showNotification('info', 'Paso Siguiente', 'Complete los detalles para aplicar las sanciones correspondientes.');
+            });
+
+            // Listeners para la nueva vista de sanción múltiple
+            document.body.addEventListener('click', e => {
+                if (e.target.id === 'save-multi-sanction-btn') {
+                    // Aquí iría la lógica para recolectar los datos de cada formulario y guardarlos
+                    showNotification('success', 'Sanciones Registradas', 'Las sanciones han sido procesadas.');
+                    // Volver al detalle del incidente
+                    switchView('incident-detail');
+                }
+                if (e.target.id === 'cancel-multi-sanction-btn') {
+                    // Volver al detalle del incidente sin guardar
+                    switchView('incident-detail');
+                }
+            });
+            
+            const closeIncidentOnlyBtn = document.getElementById('close-incident-only-btn');
+            closeIncidentOnlyBtn.addEventListener('click', () => {
+                // Aquí se llamaría a la API para cambiar el estado del incidente a "Cerrado"
+                closeModal('resolve-incident-modal');
+                showNotification('success', 'Incidente Cerrado', 'El incidente ha sido cerrado sin aplicar sanciones.');
+                renderIncidentDetail(appState.viewingIncidentId); // Re-render para mostrar estado actualizado (simulado)
+            });
+        }
+
+        function setupThemeToggle() {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                darkIcon.classList.toggle('hidden', theme !== 'dark');
+                lightIcon.classList.toggle('hidden', theme === 'dark');
+            };
+
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(currentTheme);
+
+            themeToggleBtn.addEventListener('click', () => {
+                const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const view = e.currentTarget.dataset.view;
+                    switchView(view);
+                    if (!document.getElementById('mobile-sidebar').classList.contains('sidebar-mobile-closed')) {
+                        toggleMobileMenu();
+                    }
+                });
+            });
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(section => section.classList.add('hidden'));
+            const viewElement = document.getElementById(`${viewId}-view`);
+            if (viewElement) {
+                viewElement.classList.remove('hidden');
+            }
+
+            // Limpiar el estado de creación de sanción si no estamos en esa vista
+            if (viewId !== 'create-sanction' && viewId !== 'incident-detail' && viewId !== 'create-multi-sanction') {
+                appState.creatingSanctionFromIncidentId = null;
+            }
+
+            if (viewId === 'create-sanction') {
+                renderCreateSanctionForm();
+            } else if (viewId === 'create-multi-sanction') {
+                renderCreateMultiSanctionForm();
+            } else if (viewId === 'employee-form') {
+                renderEmployeeForm(appState.editingEmployeeId);
+            } else if (viewId === 'view-employee') {
+                renderEmployeeProfile(appState.viewingEmployeeId, document.getElementById('view-employee-view'));
+            } else if (viewId === 'sanction-detail') {
+                renderSanctionDetail(appState.viewingSanctionId);
+            } else if (viewId === 'incident-detail') {
+                renderIncidentDetail(appState.viewingIncidentId);
+            } else if (viewId === 'all-notifications') {
+                renderAllNotificationsView();
+            }
+
+            document.getElementById('view-title').textContent = viewTitles[viewId] || 'Dashboard';
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                const isActive = link.dataset.view === viewId;
+                link.classList.toggle('text-white', isActive);
+                link.classList.toggle('bg-red-600', isActive);
+                link.classList.toggle('dark:bg-red-700', isActive);
+                link.classList.toggle('text-gray-600', !isActive);
+                link.classList.toggle('dark:text-gray-300', !isActive);
+            });
+
+            if (viewId === 'employee-form') {
+                currentFormStep = 1;
+                updateFormStepUI();
+            } else if (viewId === 'schedules') {
+                renderSchedules();
+            } else if (viewId === 'sanctions') {
+                const employeeSanctions = mockData.sanctions.filter(s => s.employeeId === appState.loggedInEmployeeId);
+                renderSanctions(currentUserRole === 'admin' ? mockData.sanctions : employeeSanctions, currentUserRole === 'admin');
+            } else if (viewId === 'incidents') {
+                const employeeIncidents = mockData.incidents.filter(i => i.involvedEmployeeIds.includes(appState.loggedInEmployeeId));
+                renderIncidents(currentUserRole === 'admin' ? mockData.incidents : employeeIncidents, currentUserRole === 'admin');
+            } else if (viewId === 'attendance') {
+                renderAttendance();
+            } else if (viewId === 'payslips') {
+                renderPayslips();
+            } else if (viewId !== 'payslips') {
+                const resultsContainer = document.getElementById('payslip-results-container');
+                const noSearchMessage = document.getElementById('payslip-no-search-message');
+                const dniInput = document.getElementById('payslip-dni-input');
+                if (resultsContainer) resultsContainer.classList.add('hidden');
+                if (noSearchMessage) noSearchMessage.classList.remove('hidden');
+                if (dniInput) dniInput.value = '';
+            }
+
+            lucide.createIcons();
+        }
+
+        function setupMobileMenu() {
+            const openBtn = document.getElementById('open-mobile-menu');
+            const closeBtn = document.getElementById('close-mobile-menu');
+            const overlay = document.getElementById('mobile-overlay');
+
+            [openBtn, closeBtn, overlay].forEach(el => el.addEventListener('click', toggleMobileMenu));
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.toggle('sidebar-mobile-open');
+            sidebar.classList.toggle('sidebar-mobile-closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function setupTabs(prefix) {
+            document.querySelectorAll(`.${prefix}-tab`).forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+                    switchTab(prefix, tabId);
+                });
+            });
+        }
+
+        function switchTab(prefix, tabId) {
+            document.querySelectorAll(`.${prefix}-tab-content`).forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.querySelectorAll(`.${prefix}-tab`).forEach(button => {
+                button.classList.remove('tab-active');
+                button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+            });
+
+            document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+            const activeButton = document.querySelector(`.${prefix}-tab[data-tab="${tabId}"]`);
+            activeButton.classList.add('tab-active');
+            activeButton.classList.remove('border-transparent', 'text-gray-500');
+
+            if (prefix === 'schedule') renderSchedulesContent(tabId);
+            if (prefix === 'attendance') renderAttendanceContent(tabId);
+        }
+
+        function setupFormNavigation() {
+            const nextBtn = document.getElementById('form-next-btn');
+            const prevBtn = document.getElementById('form-prev-btn');
+
+            nextBtn.addEventListener('click', () => {
+                if (currentFormStep < 4) {
+                    currentFormStep++;
+                    updateFormStepUI();
+                } else {
+                    const action = appState.editingEmployeeId ? 'actualizado' : 'guardado';
+                    showNotification('success', 'Operación Exitosa', `El empleado ha sido ${action} correctamente.`);
+                    switchView('employees');
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentFormStep > 1) {
+                    currentFormStep--;
+                    updateFormStepUI();
+                }
+            });
+        }
+
+        function updateFormStepUI() {
+            document.querySelectorAll('.form-step').forEach(step => step.classList.add('hidden'));
+            document.getElementById(`form-step-${currentFormStep}`).classList.remove('hidden');
+
+            const nextBtn = document.getElementById('form-next-btn');
+            const prevBtn = document.getElementById('form-prev-btn');
+
+            for (let i = 1; i <= 4; i++) {
+                const indicator = document.getElementById(`step-indicator-${i}`);
+                indicator.classList.remove('step-active', 'step-completed');
+                if (i < currentFormStep) indicator.classList.add('step-completed');
+                else if (i === currentFormStep) indicator.classList.add('step-active');
+            }
+
+            prevBtn.disabled = currentFormStep === 1;
+            nextBtn.textContent = currentFormStep === 4 ? 'Finalizar' : 'Siguiente';
+        }
+
+        function updateUserUI() {
+            const avatar = document.getElementById('user-avatar');
+            const initials = mockData.currentUser.initials || 'U';
+            avatar.src = `https://placehold.co/100x100/D9232D/FFFFFF?text=${initials}`;
+            avatar.alt = mockData.currentUser.name;
+
+            const switcher = document.getElementById('role-switcher');
+            switcher.innerHTML = currentUserRole === 'admin' ? `<i data-lucide="user-cog"></i><span>Modo Admin</span>` : `<i data-lucide="user"></i><span>Modo Empleado</span>`;
+            lucide.createIcons();
+        }
+
+        function setupRoleSwitcher() {
+            document.getElementById('role-switcher').addEventListener('click', () => {
+                currentUserRole = currentUserRole === 'admin' ? 'employee' : 'admin';
+                const employee = mockData.employees.find(e => e.id === appState.loggedInEmployeeId);
+                mockData.currentUser.name = currentUserRole === 'admin' ? 'Ricardo Rojas' : `${employee.name} ${employee.surname}`;
+                mockData.currentUser.initials = currentUserRole === 'admin' ? 'RR' : `${employee.name[0]}${employee.surname[0]}`;
+                updateUserUI();
+                updateNavForRole(currentUserRole);
+                const newMode = currentUserRole === 'admin' ? 'Administrador' : 'Empleado';
+                showNotification('info', 'Modo Cambiado', `Ahora estás en el modo ${newMode}.`);
+                switchView(currentUserRole === 'admin' ? 'dashboard' : 'my-profile');
+            });
+        }
+
+        // --- LÓGICA DE NOTIFICACIONES ---
+        function showNotification(type, title, message, duration = 5000) {
+            const container = document.getElementById('notification-container');
+            if (!container) return;
+
+            const notificationId = `notif-${Date.now()}`;
+            const notification = document.createElement('div');
+            notification.id = notificationId;
+            notification.className = 'notification bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex items-start gap-4 border-l-4';
+
+            const icons = {
+                success: { icon: 'check-circle-2', color: 'border-green-500', iconColor: 'text-green-500' },
+                error: { icon: 'x-circle', color: 'border-red-500', iconColor: 'text-red-500' },
+                warning: { icon: 'alert-triangle', color: 'border-yellow-500', iconColor: 'text-yellow-500' },
+                info: { icon: 'info', color: 'border-blue-500', iconColor: 'text-blue-500' }
+            };
+
+            const config = icons[type] || icons.info;
+            notification.classList.add(config.color);
+
+            notification.innerHTML = `
+                <div class="flex-shrink-0">
+                    <i data-lucide="${config.icon}" class="${config.iconColor}"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-sm text-gray-900 dark:text-white">${title}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">${message}</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <button onclick="closeNotification('${notificationId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 -mt-1 -mr-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+            `;
+
+            container.appendChild(notification);
+            lucide.createIcons();
+
+            setTimeout(() => closeNotification(notificationId), duration);
+        }
+
+        function closeNotification(notificationId) {
+            const notification = document.getElementById(notificationId);
+            if (notification) {
+                notification.classList.add('fade-out');
+                notification.addEventListener('transitionend', () => notification.remove());
+            }
+        }
+
+        function updateNavForRole(role) {
+            const adminLinks = [
+                { view: 'dashboard', icon: 'layout-dashboard', text: 'Inicio' },
+                { view: 'employees', icon: 'users', text: 'Empleados' },
+                { view: 'payslips', icon: 'receipt', text: 'Recibos' },
+                { view: 'schedules', icon: 'clock', text: 'Horarios' },
+                { view: 'sanctions', icon: 'shield-alert', text: 'Sanciones' },
+                { view: 'incidents', icon: 'file-warning', text: 'Incidentes' },
+                { view: 'attendance', icon: 'scan-face', text: 'Asistencias' }
+            ];
+            const employeeLinks = [
+                { view: 'my-profile', icon: 'user', text: 'Mi Perfil' },
+                { view: 'payslips', icon: 'receipt', text: 'Mis Recibos' },
+                { view: 'schedules', icon: 'clock', text: 'Mis Horarios' },
+                { view: 'sanctions', icon: 'shield-alert', text: 'Mis Sanciones' },
+                { view: 'incidents', icon: 'file-warning', text: 'Mis Incidentes' },
+                { view: 'attendance', icon: 'user-check', text: 'Mis Asistencias' }
+            ];
+            const linksToRender = role === 'admin' ? adminLinks : employeeLinks;
+
+            const navHtml = linksToRender.map(link => `<a href="#" data-view="${link.view}" class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg"><i data-lucide="${link.icon}"></i><span>${link.text}</span></a>`).join('');
+
+            document.querySelector('#desktop-sidebar nav').innerHTML = navHtml;
+            document.querySelector('#mobile-sidebar nav').innerHTML = navHtml;
+
+            setupNavigation();
+        }
+
+    </script>
+</body>
+
+</html>

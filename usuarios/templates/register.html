@@ -1,0 +1,192 @@
+<head>
+    <title>Registrarse</title>
+</head>
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<main class="py-5" id="container-auth">
+
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Logo" style="max-width: 100px;">
+                        <h3 class="mt-3 mb-0">Registrarse</h3>
+                    </div>
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        {{error}}
+                    </div>
+                    {% endif %}
+                    <form method="post" novalidate id="register-form">
+                        {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nombre de usuario: </label>
+                        <input type="text" class="form-control" id="username" name="username" required placeholder="Ingrese su nombre de usuario">
+                        <div class="invalid-feedback">
+                            El nombre de usuario debe tener al menos 3 caracteres.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password1" class="form-label">Contraseña: </label>
+                        <div class="d-flex align-items-center">
+                            <input type="password" class="form-control" id="password1" name="password1" required placeholder="Ingrese su contraseña">
+                            <button type="button"
+                                class="btn btn-outline-secondary btn-sm ms-2"
+                                id="togglePassword1"
+                                tabindex="-1"
+                                style="padding: 2px 6px; border-radius: 50%;">
+                                <span id="icon-eye1">
+                                    <!-- Ojo cerrado SVG por defecto -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                      <ellipse cx="12" cy="12" rx="9" ry="5"/>
+                                      <circle cx="12" cy="12" r="2"/>
+                                      <line x1="4" y1="20" x2="20" y2="4"/>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">
+                            La contraseña debe tener al menos 6 caracteres.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password2" class="form-label">Confirmar contraseña: </label>
+                        <div class="d-flex align-items-center">
+                            <input type="password" class="form-control" id="password2" name="password2" required placeholder="Confirme su contraseña">
+                            <button type="button"
+                                class="btn btn-outline-secondary btn-sm ms-2"
+                                id="togglePassword2"
+                                tabindex="-1"
+                                style="padding: 2px 6px; border-radius: 50%;">
+                                <span id="icon-eye2">
+                                    <!-- Ojo cerrado SVG por defecto -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                      <ellipse cx="12" cy="12" rx="9" ry="5"/>
+                                      <circle cx="12" cy="12" r="2"/>
+                                      <line x1="4" y1="20" x2="20" y2="4"/>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback" id="feedback-password2">
+                            <!-- El mensaje se llenará dinámicamente -->
+                        </div>
+                    </div>
+                        <button type="submit" class="btn btn-primary w-100" id="btn-registrar">Registrarse</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('register-form');
+    const btn = document.getElementById('btn-registrar');
+    const campos = form.querySelectorAll('input');
+    const feedbackPassword2 = document.getElementById('feedback-password2');
+
+    function validar() {
+        let valido = true;
+
+        const username = form.querySelector('input[name="username"]');
+        const password1 = form.querySelector('input[name="password1"]');
+        const password2 = form.querySelector('input[name="password2"]');
+
+        // Usuario: mínimo 3 caracteres
+        if (username.classList.contains('is-touched')) {
+            if (!username.value || username.value.length < 3) {
+                valido = false;
+                username.classList.add('is-invalid');
+            } else {
+                username.classList.remove('is-invalid');
+            }
+        }
+
+        // Contraseña: mínimo 6 caracteres
+        if (password1.classList.contains('is-touched')) {
+            if (!password1.value || password1.value.length < 6) {
+                valido = false;
+                password1.classList.add('is-invalid');
+            } else {
+                password1.classList.remove('is-invalid');
+            }
+        }
+
+        // Confirmar contraseña: igual a contraseña
+        // Confirmar contraseña: igual a contraseña
+        if (password2.classList.contains('is-touched')) {
+            if (!password2.value) {
+                valido = false;
+                password2.classList.add('is-invalid');
+                feedbackPassword2.textContent = "Confirme su contraseña.";
+            } else if (password2.value !== password1.value) {
+                valido = false;
+                password2.classList.add('is-invalid');
+                feedbackPassword2.textContent = "Las contraseñas no coinciden.";
+            } else if (password2.value.length < 6) {
+                valido = false;
+                password2.classList.add('is-invalid');
+                feedbackPassword2.textContent = "La contraseña debe tener al menos 6 caracteres.";
+            } else {
+                password2.classList.remove('is-invalid');
+                feedbackPassword2.textContent = "";
+            }
+        }
+
+        // Habilita el botón solo si todos los campos son válidos y tocados
+        btn.disabled = !(
+            username.value.length >= 3 &&
+            password1.value.length >= 6 &&
+            password2.value === password1.value &&
+            password2.value.length > 0
+        );
+    }
+
+    campos.forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.add('is-touched');
+            validar();
+        });
+    });
+
+    // No mostrar errores al cargar
+    btn.disabled = true;
+});
+
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const eyeOpen = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <ellipse cx="12" cy="12" rx="9" ry="5"/>
+            <circle cx="12" cy="12" r="2"/>
+        </svg>`;
+    const eyeClosed = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <ellipse cx="12" cy="12" rx="9" ry="5"/>
+            <circle cx="12" cy="12" r="2"/>
+            <line x1="4" y1="20" x2="20" y2="4"/>
+        </svg>`;
+    if (input && icon) {
+        icon.innerHTML = eyeClosed;
+        icon.parentElement.addEventListener('click', function () {
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = eyeOpen;
+            } else {
+                input.type = 'password';
+                icon.innerHTML = eyeClosed;
+            }
+        });
+    }
+}
+togglePassword('password1', 'icon-eye1');
+togglePassword('password2', 'icon-eye2');
+</script>
+
+{% endblock %}

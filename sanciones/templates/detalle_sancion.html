@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <a href="{% url 'sanciones_empleado' sancion_empleado.id_empl.id %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+        <i data-lucide="arrow-left"></i> Volver a Sanciones
+    </a>
+
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <h2 class="text-2xl font-bold mb-2">Detalle de la Sanción</h2>
+
+        {% if sancion_empleado.incidente_asociado %}
+            <div class="mb-4">
+                <a href="{% url 'detalle_incidente' sancion_empleado.incidente_asociado.id_incidente.id %}" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline">
+                    <i data-lucide="link"></i> Ver Incidente Vinculado
+                </a>
+            </div>
+        {% endif %}
+
+        <div class="space-y-4 mt-4">
+            <div>
+                <h4 class="text-sm font-semibold text-gray-500">Empleado</h4>
+                <div class="flex items-center gap-3 mt-2">
+                    <div>
+                        <p class="font-bold">{{ sancion_empleado.id_empl.nombre }} {{ sancion_empleado.id_empl.apellido }}</p>
+                        <p class="text-xs text-gray-500">{{ sancion_empleado.id_empl.dni }}</p>
+                    </div>
+                </div>
+            </div>
+            <div><h4 class="text-sm font-semibold text-gray-500">Tipo de Sanción</h4><p>{{ sancion.nombre }}</p></div>
+            <div><h4 class="text-sm font-semibold text-gray-500">Período</h4><p>{{ sancion_empleado.fecha_inicio|date:"d/m/Y" }} {% if sancion_empleado.fecha_fin %}al {{ sancion_empleado.fecha_fin|date:"d/m/Y" }}{% endif %}</p></div>
+            <div><h4 class="text-sm font-semibold text-gray-500">Motivo</h4><p class="text-gray-600 dark:text-gray-300">{{ sancion_empleado.motivo }}</p></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

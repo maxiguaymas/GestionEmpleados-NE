@@ -1,0 +1,69 @@
+{% load static %}
+{% load auth_extras %}
+
+<header
+    class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+    <div class="flex items-center gap-4">
+        <button id="open-mobile-menu" class="lg:hidden text-gray-600 dark:text-gray-300">
+            <i data-lucide="menu"></i>
+        </button>
+        <h1 id="view-title" class="text-xl font-semibold">{% block page_title %}Dashboard{% endblock %}</h1>
+    </div>
+    <div class="flex items-center gap-4">
+        <button id="theme-toggle"
+            class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+            <span id="theme-toggle-dark-icon" class="hidden"><i data-lucide="moon"></i></span>
+            <span id="theme-toggle-light-icon" class="hidden"><i data-lucide="sun"></i></span>
+        </button>
+
+        <div class="relative">
+            <button id="notification-toggle"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+                <i data-lucide="bell"></i>
+                <span id="notification-badge"
+                    class="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800 hidden"></span>
+            </button>
+            <div id="notification-panel"
+                class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border dark:border-gray-700 z-20">
+                <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+                    <h3 class="font-semibold">Notificaciones</h3>
+                    <button id="mark-all-read-btn" class="text-sm text-red-600 hover:underline">Marcar como
+                        leídas</button>
+                </div>
+                <div id="notification-list" class="max-h-96 overflow-y-auto divide-y dark:divide-gray-700">
+                    <p class="p-4 text-center text-sm text-gray-500">No hay notificaciones</p>
+                </div>
+            </div>
+        </div>
+
+        {% if user|has_group:'Administrador' %}
+            {% if view_as_employee %}
+            <a href="{% url 'switch_to_admin_view' %}" id="role-switcher"
+                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2 text-sm whitespace-nowrap">
+                <i data-lucide="user-cog"></i>
+                <span>Modo Admin</span>
+            </a>
+            {% else %}
+            <a href="{% url 'switch_to_employee_view' %}" id="role-switcher"
+                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2 text-sm whitespace-nowrap">
+                <i data-lucide="user"></i>
+                <span>Modo Empleado</span>
+            </a>
+            {% endif %}
+        {% endif %}
+
+        <div class="relative">
+            {% if user.empleado %}
+                {% with iniciales=user.empleado.get_iniciales %}
+                <img id="user-avatar" class="h-10 w-10 rounded-full object-cover"
+                    src="https://placehold.co/100x100/D9232D/FFFFFF?text={{iniciales}}" alt="Avatar">
+                {% endwith %}
+            {% else %}
+                <img id="user-avatar" class="h-10 w-10 rounded-full object-cover"
+                    src="https://placehold.co/100x100/D9232D/FFFFFF?text={{ user|get_user_initials }}" alt="Avatar">
+            {% endif %}
+            <span
+                class="absolute right-0 bottom-0 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-800"></span>
+        </div>
+    </div>
+</header>

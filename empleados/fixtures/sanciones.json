@@ -1,0 +1,68 @@
+﻿[
+{
+  "model": "empleados.sancion",
+  "pk": 1,
+  "fields": {
+    "nombre": "Apercibimiento Verbal",
+    "tipo": "Leve",
+    "fecha": "2025-07-10",
+    "descripcion": "Advertencia informal al empleado sobre una falta menor.",
+    "estado": true
+  }
+},
+{
+  "model": "empleados.sancion",
+  "pk": 2,
+  "fields": {
+    "nombre": "Apercibimiento Escrito",
+    "tipo": "Leve",
+    "fecha": "2025-07-10",
+    "descripcion": "Advertencia formal por escrito que se coloca en el expediente del empleado.",
+    "estado": true
+  }
+},
+{
+  "model": "empleados.sancion",
+  "pk": 3,
+  "fields": {
+    "nombre": "Suspensi≤n sin Goce de Haberes",
+    "tipo": "Moderada",
+    "fecha": "2025-07-10",
+    "descripcion": "Suspensi≤n de las funciones por un perφodo determinado sin salario.",
+    "estado": true
+  }
+},
+{
+  "model": "empleados.sancion",
+  "pk": 4,
+  "fields": {
+    "nombre": "Cambio de Tareas o Responsabilidades",
+    "tipo": "Moderada",
+    "fecha": "2025-07-10",
+    "descripcion": "Reasignaci≤n a otras tareas o eliminaci≤n de responsabilidades.",
+    "estado": true
+  }
+},
+{
+  "model": "empleados.sancion",
+  "pk": 5,
+  "fields": {
+    "nombre": "Suspensi≤n Prolongada sin Goce de Haberes",
+    "tipo": "Grave",
+    "fecha": "2025-07-10",
+    "descripcion": "Suspensi≤n por un perφodo extenso, seg·n gravedad y polφtica.",
+    "estado": true
+  }
+},
+{
+  "model": "empleados.sancion",
+  "pk": 6,
+  "fields": {
+    "nombre": "Despido con Causa",
+    "tipo": "Grave",
+    "fecha": "2025-07-10",
+    "descripcion": "Terminaci≤n del contrato por falta grave, seg·n reglamento y legislaci≤n.",
+    "estado": true
+  }
+}
+]

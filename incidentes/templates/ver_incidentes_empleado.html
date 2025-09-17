@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <a href="{% url 'ver_empleado' empleado.id %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+        <i data-lucide="arrow-left"></i> Volver al Perfil del Empleado
+    </a>
+
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <h2 class="text-2xl font-bold mb-4">Incidentes de {{ empleado.nombre }} {{ empleado.apellido }}</h2>
+
+        {% if incidentes_empleado %}
+            <div class="space-y-4">
+                {% for incidente_empleado in incidentes_empleado %}
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg mb-1">{{ incidente_empleado.id_incidente.tipo_incid }}</h3>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ incidente_empleado.fecha_ocurrencia|date:"d/m/Y" }}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">{{ incidente_empleado.id_incidente.descripcion_incid }}</p>
+                        <a href="#" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-gray-500 py-8">No hay incidentes registrados para este empleado.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

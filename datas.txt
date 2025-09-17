@@ -1,0 +1,25 @@
+py manage.py shell
+
+from empleados.models import Sancion
+
+Sancion.objects.create(nombre="Apercibimiento Verbal", tipo="Leve", fecha="2025-07-10", descripcion="Advertencia informal al empleado sobre una falta menor.", estado=True)
+Sancion.objects.create(nombre="Apercibimiento Escrito", tipo="Leve", fecha="2025-07-10", descripcion="Advertencia formal por escrito que se coloca en el expediente.", estado=True)
+Sancion.objects.create(nombre="Suspensión sin Goce de Haberes", tipo="Moderada", fecha="2025-07-10", descripcion="Suspensión de las funciones por un período determinado sin salario.", estado=True)
+Sancion.objects.create(nombre="Cambio de Tareas o Responsabilidades", tipo="Moderada", fecha="2025-07-10", descripcion="Reasignación a otras tareas o eliminación de responsabilidades.", estado=True)
+Sancion.objects.create(nombre="Suspensión Prolongada sin Goce de Haberes", tipo="Grave", fecha="2025-07-10", descripcion="Suspensión por un período extenso, según gravedad y política interna.", estado=True)
+Sancion.objects.create(nombre="Despido con Causa", tipo="Grave", fecha="2025-07-10", descripcion="Terminación del contrato por falta grave, según reglamento.", estado=True)
+
+from empleados.models import RequisitoDocumento
+
+RequisitoDocumento.objects.create(nombre_doc="DNI (frente)", estado_doc=True, obligatorio=True)
+RequisitoDocumento.objects.create(nombre_doc="DNI (dorso)", estado_doc=True, obligatorio=True)
+RequisitoDocumento.objects.create(nombre_doc="Constancia de CUIL", estado_doc=True, obligatorio=True)
+RequisitoDocumento.objects.create(nombre_doc="Alta en AFIP (Formulario 931)", estado_doc=True, obligatorio=True)
+RequisitoDocumento.objects.create(nombre_doc="Contrato de Trabajo (firmado)", estado_doc=True, obligatorio=True)
+RequisitoDocumento.objects.create(nombre_doc="Examen Preocupacional / Certificado de Aptitud Laboral", estado_doc=True, obligatorio=True)
+RequisitoDocumento.objects.create(nombre_doc="Certificado de Antecedentes Penales", estado_doc=True, obligatorio=False)
+RequisitoDocumento.objects.create(nombre_doc="Constancia de inscripción en la ART", estado_doc=True, obligatorio=False)
+RequisitoDocumento.objects.create(nombre_doc="Afiliación a Obra Social", estado_doc=True, obligatorio=False)
+RequisitoDocumento.objects.create(nombre_doc="Declaración Jurada de Cargas de Familia (F.572 AFIP)", estado_doc=True, obligatorio=False)
+RequisitoDocumento.objects.create(nombre_doc="Copia de la libreta de asignaciones familiares", estado_doc=True, obligatorio=False)
+RequisitoDocumento.objects.create(nombre_doc="Títulos académicos o certificados de estudios", estado_doc=True, obligatorio=False)

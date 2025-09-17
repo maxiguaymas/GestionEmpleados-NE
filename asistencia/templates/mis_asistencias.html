@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Asistencias{% endblock %}
+
+{% block page_title %}Mis Asistencias{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h3 class="text-lg font-semibold">Mis Registros de Asistencia</h3>
+        <!-- Month filter can be added later -->
+    </div>
+    <div class="overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                <tr>
+                    <th class="p-4">Fecha</th>
+                    <th class="p-4">Hora</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for asistencia in asistencias %}
+                <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td class="p-4 text-gray-600 dark:text-gray-300">{{ asistencia.fecha_hora|date:"d/m/Y" }}</td>
+                    <td class="p-4 font-semibold">{{ asistencia.fecha_hora|time:"H:i:s" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="p-8 text-center text-gray-500">No tienes registros de asistencia.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

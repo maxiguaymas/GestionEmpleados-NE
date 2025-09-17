@@ -1,0 +1,19 @@
+<div class="text-center">
+    <h2 class="text-2xl font-bold mb-4">Ver Asistencias</h2>
+    <div class="flex justify-center mb-6">
+        <div class="relative w-full sm:max-w-xs">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+            <input id="asistencia-dni-input" type="text" placeholder="Buscar por DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+            <button id="asistencia-search-btn" class="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><i data-lucide="search" class="w-5 h-5"></i></button>
+        </div>
+    </div>
+    <div id="asistencia-results-container" class="hidden">
+        <h3 class="text-xl font-bold mb-4">Resultados para <span id="asistencia-employee-name"></span></h3>
+        <div id="asistencia-list" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"></div>
+    </div>
+    <div id="asistencia-no-search-message" class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <i data-lucide="calendar-check" class="mx-auto h-12 w-12 text-gray-400"></i>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Buscar asistencias de empleado</h3>
+        <p class="mt-1 text-sm text-gray-500">Ingresa un DNI para ver las asistencias de un empleado.</p>
+    </div>
+</div>

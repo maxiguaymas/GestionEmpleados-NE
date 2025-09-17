@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+    <a href="{% url 'empleados' %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+        <i data-lucide="arrow-left"></i> Volver a Empleados
+    </a>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-1 space-y-8">
+            <!-- Profile Card -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm text-center">
+                {% if empleado.ruta_foto %}
+                    <img src="{{ empleado.ruta_foto.url }}" alt="Foto de {{ empleado.nombre }}" class="h-32 w-32 rounded-full mx-auto mb-4 object-cover">
+                {% else %}
+                    <img src="{% static 'images/default-user.jpg' %}" alt="Sin foto" class="h-32 w-32 rounded-full mx-auto mb-4 object-cover">
+                {% endif %}
+                <h2 class="text-2xl font-bold">{{ empleado.nombre }} {{ empleado.apellido }}</h2>
+                {# <p class="text-gray-500 dark:text-gray-400">{{ empleado.position }}</p> #}
+                <span class="mt-4 inline-block px-3 py-1 text-sm font-semibold rounded-full {% if empleado.estado == 'Activo' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">{{ empleado.estado }}</span>
+            </div>
+
+            <!-- Actions Panel -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                <h3 class="text-lg font-semibold border-b pb-3 dark:border-gray-700">Gestión del Empleado</h3>
+                <div class="mt-4 space-y-2">
+                    <a href="{% url 'editar_empleado' empleado.id %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span class="font-medium">Editar Datos Personales</span>
+                        <i data-lucide="user-cog" class="w-5 h-5 text-gray-500"></i>
+                    </a>
+                    <a href="{% url 'ver_asistencias_empleado' empleado.id %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span class="font-medium">Ver Asistencias</span>
+                        <i data-lucide="calendar-check" class="w-5 h-5 text-gray-500"></i>
+                    </a>
+                    <a href="{% url 'sanciones_empleado' empleado.id %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span class="font-medium">Administrar Sanciones</span>
+                        <i data-lucide="shield-alert" class="w-5 h-5 text-gray-500"></i>
+                    </a>
+                    <a href="{% url 'mis_horarios' empleado.id %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span class="font-medium">Administrar Horarios</span>
+                        <i data-lucide="clock" class="w-5 h-5 text-gray-500"></i>
+                    </a>
+                    <a href="{% url 'mis_recibos' %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span class="font-medium">Ver Recibos de Sueldo</span>
+                        <i data-lucide="receipt" class="w-5 h-5 text-gray-500"></i>
+                    </a>
+                    <a href="{% url 'mis_incidentes' empleado.id %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span class="font-medium">Ver Incidentes</span>
+                        <i data-lucide="file-alert" class="w-5 h-5 text-gray-500"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Personal Data -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                <h3 class="text-lg font-semibold border-b pb-3 dark:border-gray-700">Datos Personales</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-sm">
+                    <div><strong class="block text-gray-500">DNI:</strong> {{ empleado.dni }}</div>
+                    <div><strong class="block text-gray-500">Email:</strong> {{ empleado.email }}</div>
+                    <div><strong class="block text-gray-500">Teléfono:</strong> {{ empleado.telefono|default:'-' }}</div>
+                    <div><strong class="block text-gray-500">Fecha de Nac.:</strong> {{ empleado.fecha_nacimiento|date:'d/m/Y' }}</div>
+                    <div><strong class="block text-gray-500">Género:</strong> {{ empleado.get_genero_display }}</div>
+                    <div><strong class="block text-gray-500">Estado Civil:</strong> {{ empleado.get_estado_civil_display }}</div>
+                </div>
+            </div>
+
+            <!-- Documentation -->
+            {% if legajo %}
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                <h3 class="text-lg font-semibold border-b pb-3 dark:border-gray-700">Documentación del Legajo</h3>
+                <ul class="divide-y dark:divide-gray-700 mt-4">
+                    {% for doc in documentos %}
+                    <li class="flex items-center justify-between py-3">
+                        <div>
+                            <p class="text-sm font-medium">{{ doc.id_requisito.nombre_doc }}</p>
+                            <p class="text-xs text-gray-500">Subido: {{ doc.fecha_hora_subida|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div>
+                        {% if doc.ruta_archivo %}
+                            <a href="{{ doc.ruta_archivo.url }}" target="_blank" class="text-xs font-semibold text-blue-600 bg-blue-100 dark:text-blue-200 dark:bg-blue-900 px-3 py-1.5 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800">Ver Archivo</a>
+                        {% else %}
+                            <span class="text-xs font-semibold text-yellow-600 bg-yellow-100 dark:text-yellow-200 dark:bg-yellow-900 px-3 py-1.5 rounded-full">Pendiente</span>
+                        {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

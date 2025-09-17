@@ -1,0 +1,110 @@
+﻿[
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 1,
+  "fields": {
+    "nombre_doc": "DNI (frente)",
+    "estado_doc": true,
+    "obligatorio": true
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 2,
+  "fields": {
+    "nombre_doc": "DNI (dorso)",
+    "estado_doc": true,
+    "obligatorio": true
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 3,
+  "fields": {
+    "nombre_doc": "Constancia de CUIL",
+    "estado_doc": true,
+    "obligatorio": true
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 4,
+  "fields": {
+    "nombre_doc": "Alta en AFIP (Formulario 931)",
+    "estado_doc": true,
+    "obligatorio": true
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 5,
+  "fields": {
+    "nombre_doc": "Contrato de Trabajo (firmado)",
+    "estado_doc": true,
+    "obligatorio": true
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 6,
+  "fields": {
+    "nombre_doc": "Examen Preocupacional / Certificado de Aptitud Laboral",
+    "estado_doc": true,
+    "obligatorio": true
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 7,
+  "fields": {
+    "nombre_doc": "Certificado de Antecedentes Penales",
+    "estado_doc": true,
+    "obligatorio": false
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 8,
+  "fields": {
+    "nombre_doc": "Constancia de inscripci≤n en la ART",
+    "estado_doc": true,
+    "obligatorio": false
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 9,
+  "fields": {
+    "nombre_doc": "Afiliaci≤n a Obra Social",
+    "estado_doc": true,
+    "obligatorio": false
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 10,
+  "fields": {
+    "nombre_doc": "Declaraci≤n Jurada de Cargas de Familia (F.572 AFIP)",
+    "estado_doc": true,
+    "obligatorio": false
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 11,
+  "fields": {
+    "nombre_doc": "Copia de la libreta de asignaciones familiares",
+    "estado_doc": true,
+    "obligatorio": false
+  }
+},
+{
+  "model": "empleados.requisitodocumento",
+  "pk": 12,
+  "fields": {
+    "nombre_doc": "Tφtulos acadΘmicos o certificados de estudios",
+    "estado_doc": true,
+    "obligatorio": false
+  }
+}
+]

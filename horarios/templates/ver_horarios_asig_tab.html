@@ -1,0 +1,24 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+            <tr>
+                <th class="p-4">Empleado</th>
+                <th class="p-4">DNI</th>
+                <th class="p-4">DÃ­a</th>
+                <th class="p-4">Hora de Entrada</th>
+                <th class="p-4">Hora de Salida</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for horario in horarios %}
+            <tr>
+                <td class="p-4">{{ horario.id_empl.nombre }} {{ horario.id_empl.apellido }}</td>
+                <td class="p-4">{{ horario.id_empl.dni }}</td>
+                <td class="p-4">{{ horario.id_horario.dia }}</td>
+                <td class="p-4">{{ horario.id_horario.hora_entrada|time:"H:i" }}</td>
+                <td class="p-4">{{ horario.id_horario.hora_salida|time:"H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

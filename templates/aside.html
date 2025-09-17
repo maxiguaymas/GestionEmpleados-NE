@@ -1,0 +1,141 @@
+{% load static %}
+{% load auth_extras %}
+
+{% comment %}
+<!-- Barra lateral (visible en desktop) -->
+{% endcomment %}
+<aside id="desktop-sidebar"
+    class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden lg:flex flex-col">
+    <div class="h-16 flex items-center justify-center px-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-2">
+            <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Nuevas Energias" style="width: 100px; height: 50px;">
+        </div>
+    </div>
+    <nav class="flex-1 px-4 py-6 space-y-2">
+        {% if view_as_employee or not user|has_group:'Administrador' %}
+            <a href="{% url 'ver_perfil' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="my-profile">
+                <i data-lucide="user-circle"></i>
+                <span class="font-medium">Mi Perfil</span>
+            </a>
+            <a href="{% url 'mis_recibos' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="payslips">
+                <i data-lucide="receipt"></i>
+                <span class="font-medium">Mis Recibos</span>
+            </a>
+            <a href="{% url 'mis_horarios_empleado' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="schedules">
+                <i data-lucide="calendar-days"></i>
+                <span class="font-medium">Mis Horarios</span>
+            </a>
+            <a href="{% url 'mis_sanciones' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="sanctions">
+                <i data-lucide="shield-alert"></i>
+                <span class="font-medium">Mis Sanciones</span>
+            </a>
+            <a href="{% url 'mis_incidentes' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="incidents">
+                <i data-lucide="alert-triangle"></i>
+                <span class="font-medium">Mis Incidentes</span>
+            </a>
+            <a href="{% url 'mis_asistencias' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="attendance">
+                <i data-lucide="camera"></i>
+                <span class="font-medium">Mis Asistencias</span>
+            </a>
+        {% else %}
+            <a href="/" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="dashboard">
+                <i data-lucide="layout-dashboard"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="{% url 'empleados' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="employees">
+                <i data-lucide="users"></i>
+                <span class="font-medium">Empleados</span>
+            </a>
+            <a href="{% url 'recibos_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="payslips">
+                <i data-lucide="receipt"></i>
+                <span class="font-medium">Recibos</span>
+            </a>
+            <a href="{% url 'horarios_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="schedules">
+                <i data-lucide="calendar-days"></i>
+                <span class="font-medium">Horarios</span>
+            </a>
+            <a href="{% url 'ver_todas_sanciones' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="sanctions">
+                <i data-lucide="shield-alert"></i>
+                <span class="font-medium">Sanciones</span>
+            </a>
+            <a href="{% url 'ver_incidentes' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="incidents">
+                <i data-lucide="alert-triangle"></i>
+                <span class="font-medium">Incidentes</span>
+            </a>
+            <a href="{% url 'asistencia_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="attendance">
+                <i data-lucide="camera"></i>
+                <span class="font-medium">Asistencia</span>
+            </a>
+        {% endif %}
+    </nav>
+</aside>
+
+{% comment %}
+<!-- Barra lateral móvil (oculta por defecto) -->
+{% endcomment %}
+<aside id="mobile-sidebar"
+    class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 z-30 flex flex-col sidebar-mobile-closed lg:hidden">
+    <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-2">
+            <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Nuevas Energias" style="width: 100px; height: 50px;">
+        </div>
+        <button id="close-mobile-menu" class="p-1"><i data-lucide="x"></i></button>
+    </div>
+    <nav class="flex-1 px-4 py-6 space-y-2">
+        {% if view_as_employee or not user|has_group:'Administrador' %}
+            <a href="{% url 'ver_perfil' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="my-profile">
+                <i data-lucide="user-circle"></i>
+                <span class="font-medium">Mi Perfil</span>
+            </a>
+            <a href="{% url 'mis_recibos' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="payslips">
+                <i data-lucide="receipt"></i>
+                <span class="font-medium">Mis Recibos</span>
+            </a>
+            <a href="{% url 'mis_horarios_empleado' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="schedules">
+                <i data-lucide="calendar-days"></i>
+                <span class="font-medium">Mis Horarios</span>
+            </a>
+            <a href="{% url 'mis_sanciones' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="sanctions">
+                <i data-lucide="shield-alert"></i>
+                <span class="font-medium">Mis Sanciones</span>
+            </a>
+            <a href="{% url 'mis_incidentes' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="incidents">
+                <i data-lucide="alert-triangle"></i>
+                <span class="font-medium">Mis Incidentes</span>
+            </a>
+            <a href="{% url 'mis_asistencias' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="attendance">
+                <i data-lucide="camera"></i>
+                <span class="font-medium">Mis Asistencias</span>
+            </a>
+        {% else %}
+            <a href="/" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="dashboard">
+                <i data-lucide="layout-dashboard"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="{% url 'empleados' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="employees">
+                <i data-lucide="users"></i>
+                <span class="font-medium">Empleados</span>
+            </a>
+            <a href="{% url 'recibos_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="payslips">
+                <i data-lucide="receipt"></i>
+                <span class="font-medium">Recibos</span>
+            </a>
+            <a href="{% url 'horarios_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="schedules">
+                <i data-lucide="calendar-days"></i>
+                <span class="font-medium">Horarios</span>
+            </a>
+            <a href="{% url 'ver_todas_sanciones' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="sanctions">
+                <i data-lucide="shield-alert"></i>
+                <span class="font-medium">Sanciones</span>
+            </a>
+            <a href="{% url 'ver_incidentes' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="incidents">
+                <i data-lucide="alert-triangle"></i>
+                <span class="font-medium">Incidentes</span>
+            </a>
+            <a href="{% url 'asistencia_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="attendance">
+                <i data-lucide="camera"></i>
+                <span class="font-medium">Asistencia</span>
+            </a>
+        {% endif %}
+    </nav>
+</aside>

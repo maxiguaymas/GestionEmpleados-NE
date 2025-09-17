@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <a href="{% url 'ver_incidentes' %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+        <i data-lucide="arrow-left"></i> Volver a Incidentes
+    </a>
+
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <div class="flex justify-between items-start">
+            <h2 class="text-2xl font-bold mb-4">Detalle del Incidente</h2>
+            <div>
+                <a href="{% url 'editar_incidente' incidente.id %}" class="text-blue-600 hover:underline mr-4">Editar</a>
+                <a href="{% url 'eliminar_incidente' incidente.id %}" class="text-red-600 hover:underline">Eliminar</a>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div><h4 class="text-sm font-semibold text-gray-500">Nombre del Incidente</h4><p>{{ incidente.tipo_incid }}</p></div>
+            <div><h4 class="text-sm font-semibold text-gray-500">Fecha</h4><p>{{ fecha_incidente|date:"d/m/Y" }}</p></div>
+            <div><h4 class="text-sm font-semibold text-gray-500">Descripción</h4><p class="text-gray-600 dark:text-gray-300">{{ incidente.descripcion_incid }}</p></div>
+            
+            <div>
+                <h4 class="text-sm font-semibold text-gray-500 mb-2">Empleados Involucrados</h4>
+                <div class="space-y-2">
+                    {% for involucrado in involucrados %}
+                        <div class="flex items-center justify-between p-2 rounded-md bg-gray-50 dark:bg-gray-700/50">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <p class="font-semibold text-sm">{{ involucrado.id_empl.nombre }} {{ involucrado.id_empl.apellido }}</p>
+                                    <p class="text-xs text-gray-500">{{ involucrado.id_empl.dni }}</p>
+                                </div>
+                            </div>
+                            {% if involucrado.ya_sancionado %}
+                                <span class="text-xs font-semibold text-green-600 bg-green-100 dark:text-green-200 dark:bg-green-900 px-2 py-1 rounded-full">Sancionado</span>
+                            {% else %}
+                                <span class="text-xs font-semibold text-yellow-600 bg-yellow-100 dark:text-yellow-200 dark:bg-yellow-900 px-2 py-1 rounded-full">Pendiente</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t dark:border-gray-700">
+            <h3 class="text-lg font-semibold mb-4">Aplicar Sanción Masiva</h3>
+            <form method="post" action="{% url 'aplicar_sancion_masiva' %}">
+                {% csrf_token %}
+                <input type="hidden" name="incidente_id" value="{{ incidente.id }}">
+                {{ sancion_form.as_p }}
+                <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 mt-4">Aplicar Sanción a Involucrados no Sancionados</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

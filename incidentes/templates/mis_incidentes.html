@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Incidentes{% endblock %}
+
+{% block page_title %}Mis Incidentes{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for incidente_empleado in incidentes_empleado %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col">
+        <div class="flex-1">
+            <div class="flex justify-between items-start">
+                <h3 class="font-bold text-lg mb-1">{{ incidente_empleado.id_incidente.tipo_incid }}</h3>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ incidente_empleado.fecha_ocurrencia|date:"d/m/Y" }}</span>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{{ incidente_empleado.id_incidente.descripcion_incid }}</p>
+        </div>
+        <div class="border-t dark:border-gray-700 pt-4 flex justify-between items-center">
+            <div></div>
+            <a href="{% url 'detalle_incidente' incidente_empleado.id_incidente.id %}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes incidentes registrados</h3>
+        <p class="mt-1 text-sm text-gray-500">No has estado involucrado en ningún incidente.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}

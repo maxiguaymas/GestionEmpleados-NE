@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Portal{% endblock %}
+
+{% block page_title %}Mi Portal{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+    <h2 class="text-2xl font-bold mb-4">Bienvenido, {{ user.first_name|default:user.username }}</h2>
+    <p class="text-gray-600 dark:text-gray-400">Aquí tienes un resumen rápido de tu información.</p>
+    <!-- Employee specific widgets will go here -->
+</div>
+{% endblock %}

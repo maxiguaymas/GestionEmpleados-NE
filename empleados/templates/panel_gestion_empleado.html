@@ -1,0 +1,39 @@
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h4 class="mb-0">Gestión del Empleado</h4>
+    </div>
+    <div class="card-body">
+        <div class="list-group">
+            <a href="{% url 'editar_empleado' empleado.id %}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Editar Datos Personales
+                <i class="fas fa-user-edit"></i>
+            </a>
+            <a href="{% url 'ver_asistencias_empleado' empleado.id %}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Ver Historial de Asistencias
+                <i class="fas fa-calendar-check"></i>
+            </a>
+            <a href="{% url 'sanciones_empleado' empleado.id %}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Administrar Sanciones
+                <i class="fas fa-exclamation-triangle"></i>
+            </a>
+            {# Asegúrate de que estas URLs existan en tu urls.py y acepten el ID del empleado #}
+            <a href="{% url 'mis_horarios' empleado.id %}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Administrar Horarios
+                <i class="fas fa-clock"></i>
+            </a>
+            <a href="{% url 'mis_recibos' %}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Ver Recibos de Sueldo
+                <i class="fas fa-file-invoice-dollar"></i>
+            </a>
+            <a href="{% url 'mis_incidentes' empleado.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                Ver Incidentes
+                <i class="fas fa-file-alt"></i>
+            </a>
+        </div>
+    </div>
+</div>

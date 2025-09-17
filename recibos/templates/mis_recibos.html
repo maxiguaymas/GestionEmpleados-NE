@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Recibos{% endblock %}
+
+{% block page_title %}Mis Recibos{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+    <table class="w-full text-left">
+        <thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300">
+            <tr>
+                <th class="p-4">Fecha de Emisión</th>
+                <th class="p-4 hidden sm:table-cell">Período</th>
+                <th class="p-4">Archivos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recibo in recibos %}
+            <tr class="border-t dark:border-gray-700">
+                <td class="p-4 font-medium">{{ recibo.fecha_emision|date:"d/m/Y" }}</td>
+                <td class="p-4 hidden sm:table-cell text-gray-600 dark:text-gray-400">{{ recibo.periodo }}</td>
+                <td class="p-4">
+                    <div class="flex items-center gap-2">
+                        {% if recibo.ruta_pdf %}
+                        <a href="{{ recibo.ruta_pdf.url }}" target="_blank" class="flex items-center gap-1 text-sm text-red-600 hover:underline">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>PDF
+                        </a>
+                        {% endif %}
+                        {% if recibo.ruta_imagen %}
+                        <a href="{{ recibo.ruta_imagen.url }}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                            <i data-lucide="image" class="w-4 h-4"></i>Imagen
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="p-8 text-center text-gray-500">No tienes recibos de sueldo cargados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

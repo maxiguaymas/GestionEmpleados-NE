@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}GestiÃ³n de Horarios{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+    <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="-mb-px flex space-x-6 px-6" aria-label="Tabs">
+            <a href="#view-assignments" data-tab="view-assignments" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Ver Asignaciones</a>
+            <a href="#assign-schedules" data-tab="assign-schedules" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Asignar Horarios</a>
+            <a href="#create-schedule" data-tab="create-schedule" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Crear Horario</a>
+        </nav>
+    </div>
+    <div class="p-6">
+        <div id="view-assignments-tab" class="schedule-tab-content">
+            {% include 'ver_horarios_asig_tab.html' %}
+        </div>
+        <div id="assign-schedules-tab" class="schedule-tab-content hidden">
+            <form action="{% url 'asignar_horario' %}" method="post">
+                {% csrf_token %}
+                {% include 'asignar_horario_tab.html' %}
+            </form>
+        </div>
+        <div id="create-schedule-tab" class="schedule-tab-content hidden">
+            <form action="{% url 'cargar_horario' %}" method="post">
+                {% csrf_token %}
+                {% include 'cargar_horario_tab.html' %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    function setupTabs(prefix) {
+        document.querySelectorAll(`.${prefix}-tab`).forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabId = button.dataset.tab;
+                window.location.hash = tabId;
+                switchTab(prefix, tabId);
+            });
+        });
+    }
+
+    function switchTab(prefix, tabId) {
+        document.querySelectorAll(`.${prefix}-tab-content`).forEach(content => {
+            content.classList.add('hidden');
+        });
+        document.querySelectorAll(`.${prefix}-tab`).forEach(button => {
+            button.classList.remove('tab-active');
+            button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+        });
+
+        const tabContent = document.getElementById(`${tabId}-tab`);
+        if(tabContent) {
+            tabContent.classList.remove('hidden');
+        }
+
+        const activeButton = document.querySelector(`.${prefix}-tab[data-tab="${tabId}"]`);
+        if(activeButton) {
+            activeButton.classList.add('tab-active');
+            activeButton.classList.remove('border-transparent', 'text-gray-500');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setupTabs('schedule');
+        const hash = window.location.hash.substring(1);
+        const validTabs = ['view-assignments', 'assign-schedules', 'create-schedule'];
+        if (hash && validTabs.includes(hash)) {
+            switchTab('schedule', hash);
+        } else {
+            switchTab('schedule', 'view-assignments');
+        }
+    });
+</script>
+{% endblock %}

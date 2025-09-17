@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block page_title %}Horarios Asignados{% endblock %}
+
+{% block content %}
+<main class="py-5 container-horarios d-flex flex-column align-items-center" id="empleados">
+    <h2 class="mb-4">Horarios Asignados</h2>
+
+    <!--
+        NOTA: Se ha reemplazado el formulario de búsqueda por una tabla interactiva.
+        Ahora se muestran todos los horarios y puedes usar el campo "Buscar" de la tabla
+        para filtrar por empleado, DNI, día, etc.
+    -->
+    <div class="col-lg-10 fondo-semi">
+        <div class="table-responsive shadow rounded">
+            <table class="table table-striped table-bordered align-middle datatable-spanish">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Empleado</th>
+                        <th>DNI</th>
+                        <th>Día</th>
+                        <th>Hora de Entrada</th>
+                        <th>Hora de Salida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# La vista debe pasar la lista completa de horarios asignados #}
+                    {% for horario in horarios %}
+                    <tr>
+                        <td>{{ horario.id_empl.nombre }} {{ horario.id_empl.apellido }}</td>
+                        <td>{{ horario.id_empl.dni }}</td>
+                        <td>{{ horario.id_horario.dia }}</td>
+                        <td>{{ horario.id_horario.hora_entrada|time:"H:i" }}</td>
+                        <td>{{ horario.id_horario.hora_salida|time:"H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,298 @@
+:root {
+    --primary-gradient: linear-gradient(90deg, #0dcaf0 0%, #0d6efd 100%);
+    --navbar-gradient: linear-gradient(90deg, #232526 0%, #414345 100%);
+    --footer-gradient: linear-gradient(135deg, #212529 80%, #343a40 100%);
+    --light-text: #f8f9fa;
+    --dark-text: #222;
+    --modal-border-radius: 1.2rem;
+}
+
+html,
+body {
+    width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+.logo-index {
+    max-width: 300px;
+    height: auto; /* Mantiene la proporción de la imagen */
+}
+
+.video-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.overlay-blanco {
+    background: rgba(255, 255, 255, 0.7);
+    min-height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+.page-item.active .page-link {
+    z-index: 0;
+}
+
+#main {
+    z-index: 1;
+    position: relative;
+}
+
+.list-group,
+.list-group-item {
+    background-color: transparent;
+}
+
+.lead {
+    font-weight: normal;
+}
+
+/* Navbar y Footer */
+#navbar {
+    z-index: 2;
+    background: var(--navbar-gradient);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-nav .nav-link {
+    transition: background 0.2s, color 0.2s;
+    border-radius: 0.5rem;
+    margin-right: 0.2rem;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    color: var(--light-text) !important; /* Bootstrap puede requerir !important aquí por especificidad */
+}
+
+.nav-user{
+    z-index: 99;
+    position: relative;
+
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    background: rgba(255, 255, 255, 0.10);
+    color: #fff !important;
+}
+
+.navbar {
+    border-bottom: 1px solid #222;
+}
+
+
+
+.user-initials-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: #0d6efd; /* Color primario de Bootstrap, puedes cambiarlo */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+/* Wrapper para alinear iconos de la navbar */
+.nav-icon-wrapper {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Necesario para el badge de notificaciones */
+}
+
+
+#footer {
+    z-index: 1;
+    position: relative;
+    background: var(--footer-gradient);
+}
+
+#footer a.text-white:hover i {
+    color: #0dcaf0;
+    transform: scale(1.2);
+    transition: all 0.2s;
+}
+
+/* Estilo profesional para los modales legales */
+.modal-content {
+    border-radius: var(--modal-border-radius);
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
+    border: none;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary-gradient);
+    color: #fff;
+    border-top-left-radius: var(--modal-border-radius);
+    border-top-right-radius: var(--modal-border-radius);
+    border-bottom: none;
+}
+
+.modal-title {
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.modal-body {
+    background: #f8f9fa;
+    color: var(--dark-text);
+    border-bottom-left-radius: var(--modal-border-radius);
+    border-bottom-right-radius: var(--modal-border-radius);
+    padding: 2rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-body h6 {
+    color: #0d6efd;
+    margin-top: 1.5rem;
+    font-weight: 600;
+}
+
+.modal-body p {
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+/* Navbar y Footer */
+
+/* Login y Register */
+
+#container-auth {
+    background: url("../images/fondo-login-register.jpg") no-repeat center center fixed;
+    background-size: cover;
+    min-height: 90vh;
+    width: 100%;
+    display: block;
+}
+
+
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Login y Register */
+
+
+/* Ver Empleados */
+#empleados {
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
+        url('../images/fondo-empleados.avif') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 90vh;
+
+
+}
+
+.fondo-semi {
+    background: rgba(255, 255, 255, 0.65);
+    /* Blanco con 85% de opacidad */
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Ver Empleados */
+
+
+/* Recibos */
+/* .dataTables_filter {
+    display: none;
+} */
+
+.box-periodo {
+    display: inline;
+
+}
+
+/* Recibos */
+
+
+/* HORARIOS */
+.container-horarios {
+    min-height: 90vh;
+}
+
+/* recibos */
+.container-ver-recibo {
+    min-height: 90vh;
+}
+
+
+/* Incidentes */
+
+#box-incidentes,
+#box-sanciones,
+#box-det-incidente,
+#box-incidentes-registro {
+    width: 70%;
+}
+
+.btn-det-incid{
+    width: 40%;
+    margin: 0px auto;
+}
+
+/* Asistencias */
+.box-asis,.box-incid{
+    width: 70%; /* Se puede combinar con los selectores de incidentes si el ancho es el mismo */
+    margin: 0px auto;
+}
+
+@media (max-width: 993px) {
+
+    .fondo-semi {
+        width: 90%;
+    }
+}
+
+@media (max-width: 767px) {
+
+    /* Tus estilos aquí */
+    .card {
+        width: 90%;
+        display: block;
+        margin: 0px auto;
+    }
+
+    /* .table-responsive {
+        font-size: 0.95rem;
+    }
+    Agrega más reglas según lo que necesites */
+
+    /* Incidentes */
+
+    #box-incidentes,
+    #box-sanciones,
+    #box-det-incidente,
+    #box-incidentes-registro {
+        width: 85%;
+    }
+
+}

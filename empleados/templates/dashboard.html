@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Resumen (Admin){% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Empleados</h3>
+            <i data-lucide="users" class="text-red-600"></i>
+        </div>
+        <p class="mt-2 text-3xl font-bold">{{ total_empleados }}</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Asistencia Hoy</h3>
+            <i data-lucide="user-check" class="text-green-500"></i>
+        </div>
+        <p class="mt-2 text-3xl font-bold">{{ asistencia_hoy }} / {{ total_empleados }}</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Sanciones Mes</h3>
+            <i data-lucide="shield-alert" class="text-yellow-500"></i>
+        </div>
+        <p class="mt-2 text-3xl font-bold">{{ sanciones_mes }}</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Nuevas Contrataciones</h3>
+            <i data-lucide="user-plus" class="text-blue-500"></i>
+        </div>
+        <p class="mt-2 text-3xl font-bold">0</p> {# Placeholder #}
+    </div>
+</div>
+
+<div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mt-8">
+    <h2 class="text-lg font-semibold mb-4 ml-2">Actividad Reciente</h2>
+    <ul class="space-y-4">
+        <li class="flex items-center gap-4">
+            <div class="bg-green-100 dark:bg-green-900 p-2 rounded-full"><i data-lucide="log-in" class="text-green-500"></i></div>
+            <p class="text-sm flex-1"><span class="font-semibold">Ana Torres</span> marcó su asistencia a las 09:02 AM.</p>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Hace 5 min</span>
+        </li>
+        <li class="flex items-center gap-4">
+            <div class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-full"><i data-lucide="alert-triangle" class="text-yellow-500"></i></div>
+            <p class="text-sm flex-1">Se reportó un incidente para <span class="font-semibold">Carlos Vega</span>.</p>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Hace 1 hora</span>
+        </li>
+        <li class="flex items-center gap-4">
+            <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full"><i data-lucide="user-plus" class="text-blue-500"></i></div>
+            <p class="text-sm flex-1">Nuevo empleado <span class="font-semibold">Laura Méndez</span> ha sido añadido al sistema.</p>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Hace 3 horas</span>
+        </li>
+    </ul>
+</div>
+{% endblock content %}

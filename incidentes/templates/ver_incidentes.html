@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h1 class="text-2xl font-bold">Gestión de Incidentes</h1>
+        <a href="{% url 'registrar_incidente' %}" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
+            <i data-lucide="plus"></i><span>Registrar Incidente</span>
+        </a>
+    </div>
+
+    {% if incidentes_empleado %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                    <tr>
+                        <th class="p-4">Incidente</th>
+                        <th class="p-4">Empleado</th>
+                        <th class="p-4">Fecha</th>
+                        <th class="p-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for ie in incidentes_empleado %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="p-4">
+                                <p class="font-medium">{{ ie.id_incidente.tipo_incid }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ ie.id_incidente.descripcion_incid }}</p>
+                            </td>
+                            <td class="p-4">
+                                <p class="font-medium">{{ ie.id_empl.nombre }} {{ ie.id_empl.apellido }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ ie.id_empl.dni }}</p>
+                            </td>
+                            <td class="p-4 text-gray-600 dark:text-gray-300">{{ ie.fecha_ocurrencia|date:"d/m/Y" }}</td>
+                            <td class="p-4">
+                                <a href="{% url 'detalle_incidente' ie.id_incidente.id %}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No hay incidentes</h3>
+            <p class="mt-1 text-sm text-gray-500">Aún no se han registrado incidentes.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

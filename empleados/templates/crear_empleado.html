@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Empleado{% endblock %}
+
+{% block page_title %}Formulario de Empleado{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm max-w-4xl mx-auto">
+        <!-- Stepper -->
+        <ol class="flex items-center w-full mb-8">
+            <li id="step-indicator-1" class="flex w-full items-center text-sm font-medium text-gray-500 dark:text-gray-400 after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:inline-block dark:after:border-gray-700"><span class="flex items-center justify-center w-8 h-8 rounded-full shrink-0">1</span></li>
+            <li id="step-indicator-2" class="flex w-full items-center text-sm font-medium text-gray-500 dark:text-gray-400 after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:inline-block dark:after:border-gray-700"><span class="flex items-center justify-center w-8 h-8 rounded-full shrink-0">2</span></li>
+            <li id="step-indicator-3" class="flex w-full items-center text-sm font-medium text-gray-500 dark:text-gray-400 after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:inline-block dark:after:border-gray-700"><span class="flex items-center justify-center w-8 h-8 rounded-full shrink-0">3</span></li>
+            <li id="step-indicator-4" class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400"><span class="flex items-center justify-center w-8 h-8 rounded-full shrink-0">4</span></li>
+        </ol>
+
+        {% if form.non_field_errors %}
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if error %}
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+                <p>{{ error }}</p>
+            </div>
+        {% endif %}
+
+        <!-- Step 1: Datos Personales -->
+        <div id="form-step-1" class="form-step">
+            <h3 class="text-lg font-semibold mb-4">1. Datos Personales</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for field in form %}
+                    {% if field.name == 'nombre' or field.name == 'apellido' or field.name == 'dni' or field.name == 'fecha_nacimiento' or field.name == 'genero' or field.name == 'estado_civil' or field.name == 'grupo' or field.name == 'estado' %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Step 2: Datos de Contacto -->
+        <div id="form-step-2" class="form-step hidden">
+            <h3 class="text-lg font-semibold mb-4">2. Datos de Contacto</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for field in form %}
+                    {% if field.name == 'telefono' or field.name == 'email' %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Step 3: Foto del Empleado -->
+        <div id="form-step-3" class="form-step hidden">
+            <h3 class="text-lg font-semibold mb-4">3. Foto del Empleado</h3>
+            <div>
+                <label for="{{ form.ruta_foto.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.ruta_foto.label }}</label>
+                {{ form.ruta_foto }}
+                {% if form.ruta_foto.errors %}
+                    <div class="text-red-500 text-sm mt-1">{{ form.ruta_foto.errors|striptags }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Step 4: Documentación -->
+        <div id="form-step-4" class="form-step hidden">
+            <h3 class="text-lg font-semibold mb-4">4. Documentación Requerida</h3>
+            <div class="space-y-3">
+                {% for req in requisitos %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <p class="text-sm font-medium">{{ req.nombre_doc }} {% if req.obligatorio %}<span class="text-red-500">*</span>{% endif %}</p>
+                    <input type="file" name="doc_{{ req.id }}" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 dark:file:bg-red-900/50 dark:file:text-red-300 dark:hover:file:bg-red-900" {% if req.obligatorio %}required{% endif %}>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="mt-8 pt-4 border-t dark:border-gray-700 flex justify-between items-center">
+            <button type="button" id="form-prev-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50" disabled>Anterior</button>
+            <div>
+                <a href="{% url 'empleados' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">Cancelar</a>
+                <button type="button" id="form-next-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Siguiente</button>
+                <button type="submit" id="form-submit-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 hidden">Finalizar</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock content %}
+
+{% block page_scripts %}
+<script>
+let currentFormStep = 1;
+
+function updateFormStepUI() {
+    document.querySelectorAll('.form-step').forEach(step => step.classList.add('hidden'));
+    document.getElementById(`form-step-${currentFormStep}`).classList.remove('hidden');
+
+    const nextBtn = document.getElementById('form-next-btn');
+    const prevBtn = document.getElementById('form-prev-btn');
+    const submitBtn = document.getElementById('form-submit-btn');
+
+    for (let i = 1; i <= 4; i++) {
+        const indicator = document.getElementById(`step-indicator-${i}`);
+        indicator.classList.remove('step-active', 'step-completed');
+        if (i < currentFormStep) {
+            indicator.classList.add('step-completed');
+        } else if (i === currentFormStep) {
+            indicator.classList.add('step-active');
+        }
+    }
+
+    prevBtn.disabled = currentFormStep === 1;
+    if (currentFormStep === 4) {
+        nextBtn.classList.add('hidden');
+        submitBtn.classList.remove('hidden');
+    } else {
+        nextBtn.classList.remove('hidden');
+        submitBtn.classList.add('hidden');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const nextBtn = document.getElementById('form-next-btn');
+    const prevBtn = document.getElementById('form-prev-btn');
+
+    nextBtn.addEventListener('click', () => {
+        if (currentFormStep < 4) {
+            currentFormStep++;
+            updateFormStepUI();
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentFormStep > 1) {
+            currentFormStep--;
+            updateFormStepUI();
+        }
+    });
+
+    // Initialize
+    updateFormStepUI();
+});
+
+// Add Tailwind classes to form fields generated by Django
+document.addEventListener('DOMContentLoaded', function() {
+    const formFields = document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="date"], input[type="tel"], select');
+    formFields.forEach(field => {
+        field.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'dark:border-gray-600', 'dark:bg-gray-700', 'shadow-sm');
+    });
+    const fileFields = document.querySelectorAll('input[type="file"]');
+    fileFields.forEach(field => {
+        if (field.name.startsWith('doc_')) return; // Don't style the document uploads yet
+        field.classList.add('mt-1', 'block', 'w-full', 'text-sm', 'text-gray-500', 'file:mr-4', 'file:py-2', 'file:px-4', 'file:rounded-full', 'file:border-0', 'file:text-sm', 'file:font-semibold', 'file:bg-gray-50', 'file:text-gray-700', 'hover:file:bg-gray-100', 'dark:file:bg-gray-700', 'dark:file:text-gray-300', 'dark:hover:file:bg-gray-600');
+    });
+});
+
+</script>
+{% endblock page_scripts %}

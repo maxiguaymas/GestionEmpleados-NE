@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="py-5 " id="empleados">
+    <div class="container">
+        <div class="card shadow fondo-semi">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Registrar Rostro de Empleado</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>Seleccione un empleado y presione "Capturar Rostro" cuando esté listo.</p>
+                        <div class="mb-3">
+                            <label for="empleadoSelect" class="form-label">Empleado</label>
+                            <select id="empleadoSelect" class="form-select">
+                                <option value="">Seleccione un empleado...</option>
+                                {% for empleado in empleados %}
+                                    <option value="{{ empleado.id }}">{{ empleado.nombre }} {{ empleado.apellido }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="camera-container border rounded bg-dark">
+                            <video id="video" width="100%" height="auto" autoplay></video>
+                        </div>
+                        <button id="captureBtn" class="btn btn-primary mt-3 w-100">Capturar y Registrar Rostro</button>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center justify-content-center">
+                        <canvas id="canvas" style="display:none;"></canvas>
+                        <div id="result" class="text-center">
+                            <p class="text-muted">La vista previa de la captura aparecerá aquí.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const empleadoSelect = document.getElementById('empleadoSelect');
+
+    // Acceder a la cámara
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(err => {
+            console.error("Error al acceder a la cámara: ", err);
+            Swal.fire('Error', 'No se pudo acceder a la cámara. Verifique los permisos.', 'error');
+        });
+
+    captureBtn.addEventListener('click', () => {
+        const empleadoId = empleadoSelect.value;
+        if (!empleadoId) {
+            Swal.fire('Atención', 'Por favor, seleccione un empleado.', 'warning');
+            return;
+        }
+
+        // Capturar frame
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        // Enviar al backend
+        const formData = new FormData();
+        formData.append('empleado_id', empleadoId);
+        formData.append('image', imageData);
+
+        fetch("{% url 'api_guardar_rostro' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire('¡Éxito!', data.message, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Error en la petición:', err);
+            Swal.fire('Error', 'Ocurrió un problema al comunicarse con el servidor.', 'error');
+        });
+    });
+});
+</script>
+{% endblock %}

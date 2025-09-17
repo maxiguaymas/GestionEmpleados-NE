@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recibos de Sueldo{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <div class="relative w-full sm:max-w-xs">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+            <input id="payslip-dni-input" type="text" placeholder="Buscar por DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+            <button id="payslip-search-btn" class="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><i data-lucide="search" class="w-5 h-5"></i></button>
+        </div>
+        <button id="upload-payslip-btn" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
+            <i data-lucide="upload"></i>
+            <span>Cargar Recibo</span>
+        </button>
+    </div>
+    <div id="payslip-results-container" class="hidden">
+        <h2 class="text-xl font-bold mb-4">Resultados para <span id="payslip-employee-name"></span></h2>
+        <div id="payslip-list" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"></div>
+    </div>
+    <div id="payslip-no-search-message" class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <i data-lucide="receipt" class="mx-auto h-12 w-12 text-gray-400"></i>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Buscar recibos de sueldo</h3>
+        <p class="mt-1 text-sm text-gray-500">Ingresa un DNI para ver los recibos de un empleado.</p>
+    </div>
+</div>
+
+<!-- Modal: Cargar Recibo -->
+<div id="upload-payslip-modal" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 m-4" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold">Cargar Nuevo Recibo</h2>
+            <button onclick="closeModal('upload-payslip-modal')" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x"></i></button>
+        </div>
+        <form action="{% url 'cargar_recibo' %}" method="post" enctype="multipart/form-data" class="mt-6 space-y-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="pt-4 flex justify-end gap-3">
+                <button type="button" onclick="closeModal('upload-payslip-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar Recibo</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+
+    document.getElementById('upload-payslip-btn').addEventListener('click', () => openModal('upload-payslip-modal'));
+
+    // Script for payslip search
+    const searchBtn = document.getElementById('payslip-search-btn');
+    const dniInput = document.getElementById('payslip-dni-input');
+    const resultsContainer = document.getElementById('payslip-results-container');
+    const employeeNameSpan = document.getElementById('payslip-employee-name');
+    const listContainer = document.getElementById('payslip-list');
+    const noSearchMessage = document.getElementById('payslip-no-search-message');
+
+    searchBtn.addEventListener('click', () => {
+        const dni = dniInput.value;
+        if (!dni) {
+            return;
+        }
+
+        fetch(`/recibos/api/ver-recibos/${dni}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    employeeNameSpan.textContent = `${data.empleado.nombre} ${data.empleado.apellido}`;
+                    let p_list = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha de EmisiÃ³n</th><th class="p-4">PerÃ­odo</th><th class="p-4">Archivos</th></tr></thead><tbody>';
+                    data.recibos.forEach(recibo => {
+                        const fecha = new Date(recibo.fecha_emision);
+                        p_list += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString()}</td><td class="p-4">${recibo.periodo}</td><td class="p-4"><div class="flex items-center gap-2">`;
+                        if(recibo.ruta_pdf){
+                            p_list += `<a href="/media/${recibo.ruta_pdf}" class="flex items-center gap-1 text-sm text-red-600 hover:underline"><i data-lucide="file-text" class="w-4 h-4"></i>PDF</a>`;
+                        }
+                        if(recibo.ruta_imagen){
+                            p_list += `<a href="/media/${recibo.ruta_imagen}" class="flex items-center gap-1 text-sm text-blue-600 hover:underline"><i data-lucide="image" class="w-4 h-4"></i>Imagen</a>`;
+                        }
+                        p_list += `</div></td></tr>`;
+                    });
+                    p_list += '</tbody></table>';
+                    listContainer.innerHTML = p_list;
+                    resultsContainer.classList.remove('hidden');
+                    noSearchMessage.classList.add('hidden');
+                } else {
+                    // Handle error
+                }
+            });
+    });
+</script>
+{% endblock %}

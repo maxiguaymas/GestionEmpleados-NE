@@ -1,0 +1,117 @@
+<head>
+    <title>Iniciar sesión</title>
+</head>
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<main class="pt-5" id="container-auth">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="text-center my-4">
+                        <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Logo" style="max-width: 100px;">
+                        <h3 class="mt-3 mb-0">Iniciar sesión</h3>
+                    </div>
+                    {% if error %}
+                    <div class="alert alert-danger mt-3" id="bloqueo-msg">
+                        {{ error|safe }}
+                    </div>
+                    {% endif %}
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nombre de usuario: </label>
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="Ingrese su nombre de usuario" {% if bloqueado %}disabled{% endif %}>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña: </label>
+                            <div class="d-flex align-items-center">
+                                <input type="password" class="form-control" id="password" name="password" required placeholder="Ingrese su contraseña" {% if bloqueado %}disabled{% endif %}>
+                                <button type="button"
+                                    class="btn btn-outline-secondary btn-sm ms-2"
+                                    id="togglePassword"
+                                    tabindex="-1"
+                                    style="padding: 2px 6px; border-radius: 50%;">
+                                    <span id="icon-eye">
+                                        <!-- Ojo abierto SVG -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.12 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z"/>
+                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm0 1a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        {% if not bloqueado %}
+                        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+                        {% endif %}
+                    </form>
+                    <div class="mt-3 text-center">
+                        <span>¿No tienes cuenta?</span>
+                        <a href="{% url 'register' %}">Regístrate aquí</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% if error %}
+<script>
+    let tiempoElem = document.getElementById('tiempo-bloqueo');
+    let alertaElem = document.getElementById('bloqueo-msg');
+    if (tiempoElem) {
+        let regex = /(\d+)\s*m\s+y\s*(\d+)\s*s/;
+        let match = tiempoElem.innerText.match(regex);
+        if (match) {
+            let minutos = parseInt(match[1]);
+            let segundos = parseInt(match[2]);
+            let total = minutos * 60 + segundos;
+            let intervalo = setInterval(function () {
+                if (total <= 0) {
+                    clearInterval(intervalo);
+                    location.reload(); // <-- Esto recarga la página
+                    return;
+                }
+                total--;
+                let m = Math.floor(total / 60);
+                let s = total % 60;
+                tiempoElem.innerText = m + ' m y ' + s + ' s';
+            }, 1000);
+        }
+    }
+</script>
+{% endif %}
+<script>
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const iconEye = document.getElementById('icon-eye');
+
+    // SVGs minimalistas para ojo abierto y cerrado
+    const eyeOpen = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <ellipse cx="12" cy="12" rx="9" ry="5"/>
+            <circle cx="12" cy="12" r="2"/>
+        </svg>`;
+    const eyeClosed = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <ellipse cx="12" cy="12" rx="9" ry="5"/>
+            <circle cx="12" cy="12" r="2"/>
+            <line x1="4" y1="20" x2="20" y2="4"/>
+        </svg>`;
+
+    if (togglePassword && passwordInput && iconEye) {
+        // Por defecto, el ojo está cerrado (contraseña oculta)
+        iconEye.innerHTML = eyeClosed;
+        togglePassword.addEventListener('click', function () {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                iconEye.innerHTML = eyeOpen; // Ojo abierto, se ve la contraseña
+            } else {
+                passwordInput.type = 'password';
+                iconEye.innerHTML = eyeClosed; // Ojo cerrado, no se ve la contraseña
+            }
+        });
+    }
+</script>
+{% endblock %}

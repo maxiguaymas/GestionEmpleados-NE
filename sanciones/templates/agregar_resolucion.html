@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main class="py-5 min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h4 class="mb-0">Agregar Resolución de Sanción</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Empleado:</strong> {{ sancion.id_empl.nombre }} {{ sancion.id_empl.apellido }}</p>
+                        <p><strong>Tipo de Sanción:</strong> {{ sancion.id_sancion.tipo }}</p>
+                        <p><strong>Motivo:</strong> {{ sancion.motivo }}</p>
+                        <p><strong>Fecha de Inicio:</strong> {{ sancion.fecha_inicio|date:"d/m/Y" }}</p>
+                        <hr>
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <div class="d-flex justify-content-end mt-4">
+                                <a href="{% url 'sanciones_empleado' sancion.id_empl.id %}" class="btn btn-secondary me-2">Cancelar</a>
+                                <button type="submit" class="btn btn-primary">Guardar Resolución</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
