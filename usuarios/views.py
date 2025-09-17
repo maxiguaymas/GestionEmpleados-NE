@@ -7,8 +7,8 @@ from datetime import timedelta
 
 # Create your views here.
 def login(request):
-    if request.user.is_authenticated:
-        return redirect('index')
+    # if request.user.is_authenticated:
+    #     return redirect('index')
     if 'login_attempts' not in request.session:
         request.session['login_attempts'] = 0
     if 'blocked_until' not in request.session:
@@ -59,7 +59,7 @@ def login(request):
     request.session['blocked_until'] = None
     request.session['block_count'] = 0
     auth_login(request, form.get_user())
-    return redirect('index')
+    return redirect('home')
     
 def logout(request):
     auth_logout(request)
