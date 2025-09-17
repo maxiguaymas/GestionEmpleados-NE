@@ -7,6 +7,7 @@
 
 {% block content %}
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+    {% for sancion in sanciones %}
     <table class="w-full">
         <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
             <tr>
@@ -16,25 +17,30 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            {% for sancion in sanciones %}
+            
             <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td class="p-4 text-gray-600 dark:text-gray-300">{{ sancion.id_sancion.nombre }}</td>
                 <td class="p-4 text-gray-600 dark:text-gray-300 hidden md:table-cell">
                     {{ sancion.fecha_inicio|date:"d/m/Y" }}
                     {% if sancion.fecha_fin %}
-                        - {{ sancion.fecha_fin|date:"d/m/Y" }}
+                    - {{ sancion.fecha_fin|date:"d/m/Y" }}
                     {% endif %}
                 </td>
                 <td class="p-4">
-                    <a href="{% url 'detalle_sancion' sancion.id %}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
+                    <a href="{% url 'detalle_sancion' sancion.id %}"
+                        class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
                 </td>
             </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="p-8 text-center text-gray-500">No tienes sanciones registradas.</td>
-            </tr>
-            {% endfor %}
+
         </tbody>
     </table>
+    
+    {% empty %}
+    <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes sanciones registradas</h3>
+        <p class="mt-1 text-sm text-gray-500">No tienes ninguna sanción registrada.</p>
+    </div>
+    {% endfor %}
 </div>
 {% endblock content %}

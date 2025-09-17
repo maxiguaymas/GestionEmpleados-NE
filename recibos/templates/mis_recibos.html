@@ -7,6 +7,7 @@
 
 {% block content %}
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+    {% for recibo in recibos %}
     <table class="w-full text-left">
         <thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300">
             <tr>
@@ -16,7 +17,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for recibo in recibos %}
+            
             <tr class="border-t dark:border-gray-700">
                 <td class="p-4 font-medium">{{ recibo.fecha_emision|date:"d/m/Y" }}</td>
                 <td class="p-4 hidden sm:table-cell text-gray-600 dark:text-gray-400">{{ recibo.periodo }}</td>
@@ -35,12 +36,14 @@
                     </div>
                 </td>
             </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="p-8 text-center text-gray-500">No tienes recibos de sueldo cargados.</td>
-            </tr>
-            {% endfor %}
         </tbody>
     </table>
+    {% empty %}
+    <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes recibos cargados.</h3>
+        <p class="mt-1 text-sm text-gray-500">Aun no tienes recibos cargados.</p>
+    </div>
+    {% endfor %}
 </div>
 {% endblock content %}

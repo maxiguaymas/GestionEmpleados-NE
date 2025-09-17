@@ -214,6 +214,8 @@ def grafico_empleados_pdf(request):
 
 @login_required
 def dashboard(request):
+    if not es_admin(request.user):
+        return redirect('ver_perfil')
     total_empleados = Empleado.objects.filter(estado='Activo').count()
     asistencia_hoy = Asistencia.objects.filter(fecha_hora__date=date.today()).count()
     
