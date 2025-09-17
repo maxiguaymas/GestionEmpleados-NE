@@ -11,6 +11,7 @@
   <li class="list-group-item">Navega a la carpeta del proyecto: <code>cd empleados-proy</code></li>
   <li class="list-group-item">Crea y activa un entorno virtual. Para Windows: <code>py -m venv env</code> y luego <code>.\env\Scripts\activate</code></li>
   <li class="list-group-item">Instala todas las dependencias: <code>pip install -r requirements.txt</code></li>
+  <li class="list-group-item">pip install setuptools</li>
   <li class="list-group-item">py manage.py makemigrations</li>
   <li class="list-group-item">py manage.py migrate</li>
   <li class="list-group-item">seguir pasos de datas.txt</li>
