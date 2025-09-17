@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        {% if user|has_group:'Administrador' %}
+        {% if user|is_admin %}
             {% if view_as_employee %}
             <a href="{% url 'switch_to_admin_view' %}" id="role-switcher"
                 class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2 text-sm whitespace-nowrap">
