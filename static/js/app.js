@@ -6,8 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentUserRole = 'admin'; // o 'employee'
 
 function initializeApp() {
-    lucide.createIcons();
-    setupThemeToggle();
+    try {
+        lucide.createIcons();
+    } catch (e) {
+        console.error("Lucide icons could not be created:", e);
+    }
+    
     setupMobileMenu();
     setupNotificationPanel();
     updateUserUI();
@@ -17,34 +21,7 @@ function initializeApp() {
 
 // --- LÓGICA DE LA APLICACIÓN ---
 
-function setupThemeToggle() {
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    if (!themeToggleBtn) return;
 
-    const darkIcon = document.getElementById('theme-toggle-dark-icon');
-    const lightIcon = document.getElementById('theme-toggle-light-icon');
-
-    const applyTheme = (theme) => {
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        if (darkIcon && lightIcon) {
-            darkIcon.classList.toggle('hidden', theme !== 'dark');
-            lightIcon.classList.toggle('hidden', theme === 'dark');
-        }
-    };
-
-    const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    applyTheme(currentTheme);
-
-    themeToggleBtn.addEventListener('click', () => {
-        const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-        localStorage.setItem('theme', newTheme);
-        applyTheme(newTheme);
-    });
-}
 
 function setupMobileMenu() {
     const openBtn = document.getElementById('open-mobile-menu');

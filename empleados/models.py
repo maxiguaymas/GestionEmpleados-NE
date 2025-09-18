@@ -208,7 +208,7 @@ class Notificacion(models.Model):
         """
         Representación en cadena del modelo, útil en el panel de administración.
         """
-        return f"Notificación para {self.destinatario.username} - Leída: {self.leida}"
+        return f"Notificación para {self.id_user.username} - Leída: {self.leida}"
 
     class Meta:
         ordering = ['-fecha_creacion']  # Ordena las notificaciones de más reciente a más antigua.

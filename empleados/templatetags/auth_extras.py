@@ -10,6 +10,13 @@ def has_group(user, group_name):
     """
     return user.groups.filter(name__iexact=group_name).exists()
 
+@register.filter(name='is_admin')
+def is_admin(user):
+    """
+    Verifica si un usuario es Administrador o superuser.
+    """
+    return user.groups.filter(name__iexact='Administrador').exists() or user.is_superuser
+
 @register.filter(name='get_initials')
 def get_initials(empleado):
     """
