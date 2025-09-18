@@ -1,7 +1,9 @@
 from django.urls import path
 from . import views
 
+app_name = 'notificaciones'
+
 urlpatterns = [
-    path('marcar-leida/<int:notificacion_id>/', views.marcar_notificacion_leida, name='marcar_leida'),
-    path('todas/', views.ver_todas_notificaciones, name='ver_todas_notificaciones'),
+    path('', views.centro_notificaciones, name='centro_notificaciones'),
+    path('marcar-leidas/', views.marcar_todas_como_leidas, name='marcar_todas_leidas'),
 ]
