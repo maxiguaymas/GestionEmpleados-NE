@@ -63,7 +63,7 @@ def login(request):
     
 def logout(request):
     auth_logout(request)
-    return redirect('index')
+    return redirect('login')
 
 def register(request):
     if request.user.is_authenticated:
