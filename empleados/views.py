@@ -239,7 +239,7 @@ def employee_dashboard(request):
 @login_required
 def switch_to_employee_view(request):
     if not es_admin(request.user):
-        return redirect('employee_dashboard')
+        return redirect('mi_perfil')
 
     # An admin wants to switch to an employee view.
     # We'll try to find an employee profile linked to the admin user.
@@ -255,8 +255,8 @@ def switch_to_employee_view(request):
             request.session['view_as_employee_id'] = first_employee.id
 
     # Add a cache-busting timestamp to prevent browser caching issues
-    redirect_url = f"{reverse('employee_dashboard')}?_t={int(timezone.now().timestamp())}"
-    return redirect(redirect_url)
+    # redirect_url = f"{reverse('employee_dashboard')}?_t={int(timezone.now().timestamp())}"
+    return redirect('ver_perfil')
 
 @login_required
 def switch_to_admin_view(request):

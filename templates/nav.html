@@ -20,18 +20,37 @@
             <button id="notification-toggle"
                 class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
                 <i data-lucide="bell"></i>
+                {% if notificaciones_count > 0 %}
                 <span id="notification-badge"
-                    class="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800 hidden"></span>
+                    class="absolute top-1 right-1 flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                  </span>
+                {% endif %}
             </button>
             <div id="notification-panel"
                 class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border dark:border-gray-700 z-20">
                 <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-                    <h3 class="font-semibold">Notificaciones</h3>
-                    <button id="mark-all-read-btn" class="text-sm text-red-600 hover:underline">Marcar como
-                        leídas</button>
+                    <h3 class="font-semibold">Notificaciones ({{ notificaciones_count }})</h3>
+                    <form action="{% url 'notificaciones:marcar_todas_leidas' %}" method="POST" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-sm text-red-600 hover:underline bg-transparent border-none cursor-pointer p-0">Marcar como leídas</button>
+                    </form>
                 </div>
                 <div id="notification-list" class="max-h-96 overflow-y-auto divide-y dark:divide-gray-700">
-                    <p class="p-4 text-center text-sm text-gray-500">No hay notificaciones</p>
+                    {% if notificaciones_no_leidas %}
+                        {% for notificacion in notificaciones_no_leidas %}
+                        <a href="{{ notificacion.enlace|default:'#' }}" class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ notificacion.mensaje }}</p>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ notificacion.fecha_creacion|timesince }} atrás</span>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <p class="p-4 text-center text-sm text-gray-500">No tienes notificaciones nuevas.</p>
+                    {% endif %}
+                </div>
+                <div class="p-2 bg-gray-50 dark:bg-gray-700/50 border-t dark:border-gray-700 text-center">
+                    <a href="{% url 'notificaciones:centro_notificaciones' %}" class="text-sm text-gray-600 dark:text-gray-300 hover:underline">Ver todas las notificaciones</a>
                 </div>
             </div>
         </div>
