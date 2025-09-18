@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'sanciones',
     'incidentes',
     'asistencia',
-    'notificaciones'
+    'notificaciones',
+    'reportes',
 ]
 
 MIDDLEWARE = [
