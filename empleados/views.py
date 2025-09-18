@@ -68,7 +68,7 @@ def crear_empleado(request):
                     ruta_archivo=archivo if archivo else None,
                     estado_doc=bool(archivo)
                 )
-            return redirect('ver_empleados')
+            return redirect('empleados')
         else:
             return render(request, 'crear_empleado.html', {'form': form, 'error': error or 'Por favor corrige los errores.', 'requisitos': requisitos})
 
@@ -98,7 +98,7 @@ def editar_empleado(request, id):
                         doc.ruta_archivo = archivo
                         doc.estado_doc = True
                         doc.save()
-            return redirect('ver_empleados')
+            return redirect('empleados')
         else:
             return render(request, 'editar_empleado.html', {
                 'form': form,
@@ -158,16 +158,22 @@ def ver_perfil(request):
         return redirect('home')
 
     legajo = getattr(empleado, 'legajo', None)
-    # Assuming RequisitoDocumento holds all possible documents.
-    # We want to show the status for all required documents.
     todos_requisitos = RequisitoDocumento.objects.all()
-    documentos_entregados = Documento.objects.filter(id_leg=legajo).values_list('id_requisito', flat=True) if legajo else []
+    
+    documentos_entregados = {}
+    if legajo:
+        # Un documento se considera entregado si tiene un archivo asociado (ruta_archivo no está vacía).
+        for doc in Documento.objects.filter(id_leg=legajo).exclude(ruta_archivo=''):
+            if doc.id_requisito:
+                documentos_entregados[doc.id_requisito.id] = doc
 
     documentos_status = []
     for req in todos_requisitos:
+        doc = documentos_entregados.get(req.id)
         documentos_status.append({
             'nombre': req.nombre_doc,
-            'entregado': req.id in documentos_entregados
+            'entregado': doc is not None,
+            'url': doc.ruta_archivo.url if doc and doc.ruta_archivo else None
         })
 
     context = {

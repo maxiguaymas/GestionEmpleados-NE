@@ -46,6 +46,26 @@
         .dark .tab-active {
             background-color: rgba(217, 35, 45, 0.1);
         }
+
+        /* Estilos para el stepper del formulario */
+        .step-active span {
+            background-color: #D9232D;
+            color: white;
+        }
+
+        .step-active:after {
+            background-color: #D9232D;
+        }
+
+        .step-completed span {
+            background-color: #16A34A;
+            /* green-600 */
+            color: white;
+        }
+
+        .step-completed:after {
+            background-color: #16A34A;
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
