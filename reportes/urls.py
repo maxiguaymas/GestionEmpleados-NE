@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import GenerarReporteAsistencia
+from .views import reporte_estado_empleados, reportes_home
 
 urlpatterns = [
-    path('asistencia/', GenerarReporteAsistencia.as_view(), name='reporte_asistencia'),
+    path('', reportes_home, name='reportes_home'),
+    path('estado_empleados/', reporte_estado_empleados, name='reporte_estado_empleados'),
 ]
