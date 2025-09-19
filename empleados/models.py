@@ -166,6 +166,7 @@ class Sancion(models.Model):
 class SancionEmpleado(models.Model):
     id_empl = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='sanciones_empleado')
     id_sancion = models.ForeignKey(Sancion, on_delete=models.CASCADE)
+    incidente_asociado = models.ForeignKey('IncidenteEmpleado', on_delete=models.SET_NULL, null=True, blank=True, related_name='sanciones')
     fecha_sancion = models.DateField(auto_now_add=True)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField(blank=True, null=True)
