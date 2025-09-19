@@ -46,7 +46,7 @@ def agregar_sancion_empleado(request):
             sancion_empleado.responsable = request.user.get_full_name() or request.user.username
             sancion_empleado.save()
             messages.success(request, f"Sanción agregada exitosamente a {empleado.nombre} {empleado.apellido}.")
-            return redirect('sanciones_empleado', empleado_id=empleado.id)
+            return redirect('detalle', sancion_empleado.id)
     # Si se encontró un empleado (por GET), mostrar el formulario para llenarlo
     elif empleado:
         form = SancionEmpleadoForm()
