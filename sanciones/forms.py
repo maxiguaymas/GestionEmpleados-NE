@@ -6,6 +6,8 @@ class SancionEmpleadoForm(forms.ModelForm):
     id_sancion = forms.ModelChoiceField(
         queryset=Sancion.objects.filter(estado=True),
         label="Tipo de Sanción",
+        required=False,
+        empty_label="No aplicar sanción",
         widget=forms.Select(attrs={'class': 'mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm'})
     )
 
@@ -43,7 +45,7 @@ class SancionMasivaForm(forms.Form):
 class ResolucionForm(forms.ModelForm):
     class Meta:
         model = Resolucion
-        fields = ['fecha_resolucion', 'descripcion']
+        fields = ['descripcion']
         widgets = {
             'fecha_resolucion': forms.DateInput(attrs={'type': 'date', 'class': 'mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm'}),
             'descripcion': forms.Textarea(attrs={'class': 'mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm', 'rows': 4}),

@@ -64,48 +64,40 @@ def agregar_sancion_empleado(request):
 @transaction.atomic
 def aplicar_sancion_masiva(request, incidente_id):
     incidente = get_object_or_404(Incidente, id=incidente_id)
+    involucrados_qs = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl')
+    
+    # Exclude already sanctioned employees for this incident
+    sancionados_ids = SancionEmpleado.objects.filter(incidente_asociado__in=involucrados_qs).values_list('incidente_asociado__id_empl_id', flat=True)
+    involucrados_a_sancionar = involucrados_qs.exclude(id_empl_id__in=sancionados_ids)
+
+    if not involucrados_a_sancionar:
+        messages.info(request, "Todos los empleados de este incidente ya tienen una sanción asociada.")
+        return redirect('detalle_incidente', incidente_id=incidente.id)
+
     if request.method == 'POST':
-        form = SancionMasivaForm(request.POST)
-        # Obtenemos la lista de IDs de los registros IncidenteEmpleadoDescargo seleccionados
-        involucrados_ids = request.POST.getlist('involucrados_a_sancionar')
-
-        if not involucrados_ids:
-            messages.error(request, 'Debe seleccionar al menos un empleado para aplicar la sanción.')
+        forms = [SancionEmpleadoForm(request.POST, prefix=str(inv.id)) for inv in involucrados_a_sancionar]
+        if all(form.is_valid() for form in forms):
+            for i, form in enumerate(forms):
+                # Only save if a sanction type was selected
+                if form.cleaned_data.get('id_sancion'):
+                    sancion = form.save(commit=False)
+                    involucrado = involucrados_a_sancionar[i]
+                    sancion.id_empl = involucrado.id_empl
+                    sancion.incidente_asociado = involucrado
+                    sancion.responsable = request.user.get_full_name() or request.user.username
+                    sancion.save()
+            messages.success(request, "Sanciones aplicadas correctamente.")
             return redirect('detalle_incidente', incidente_id=incidente.id)
+    else:
+        forms = [SancionEmpleadoForm(prefix=str(inv.id), initial={'motivo': f"Derivado del incidente: '{incidente.tipo_incid}'"}) for inv in involucrados_a_sancionar]
 
-        if form.is_valid():
-            datos_sancion = form.cleaned_data
-            responsable = request.user.get_full_name() or request.user.username
-            
-            involucrados = IncidenteEmpleado.objects.filter(id__in=involucrados_ids)
+    involucrados_forms = zip(involucrados_a_sancionar, forms)
 
-            for involucrado in involucrados:
-                SancionEmpleado.objects.create(
-                    id_empl=involucrado.id_empl,
-                    id_sancion=datos_sancion['id_sancion'],
-                    incidente_asociado=involucrado,
-                    fecha_inicio=datos_sancion['fecha_inicio'],
-                    fecha_fin=datos_sancion['fecha_fin'],
-                    motivo=datos_sancion['motivo'],
-                    responsable=responsable,
-                )
-            
-            messages.success(request, f'Se aplicó la sanción a {len(involucrados_ids)} empleado(s) exitosamente.')
-            return redirect('detalle_incidente', incidente_id=incidente.id)
-        else:
-            # Si el formulario no es válido, volvemos a renderizar la página de detalle
-            # con el formulario y sus errores.
-            messages.error(request, 'Por favor, corrija los errores en el formulario de sanción.')
-            # Re-obtenemos los datos para la plantilla
-            involucrados = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl')
-            return render(request, 'detalle_incidente.html', {
-                'incidente': incidente,
-                'involucrados': involucrados,
-                'sancion_form': form # Pasamos el formulario con errores
-            })
-
-    # Si el método no es POST, simplemente redirigimos
-    return redirect('detalle_incidente', incidente_id=incidente.id)
+    context = {
+        'incidente': incidente,
+        'involucrados_forms': involucrados_forms,
+    }
+    return render(request, 'aplicar_sancion_masiva.html', context)
 
 @login_required
 @user_passes_test(es_admin)

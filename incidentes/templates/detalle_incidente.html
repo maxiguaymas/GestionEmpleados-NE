@@ -42,21 +42,112 @@
             </div>
         </div>
 
-        <div class="mt-8 pt-6 border-t dark:border-gray-700">
-            <h3 class="text-lg font-semibold mb-4">Aplicar Sanción Masiva</h3>
-            <form method="post" action="{% url 'aplicar_sancion_masiva' %}">
-                {% csrf_token %}
-                <input type="hidden" name="incidente_id" value="{{ incidente.id }}">
-                {{ sancion_form.as_p }}
-                <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 mt-4">Aplicar Sanción a Involucrados no Sancionados</button>
-            </form>
+        <!-- Timeline -->
+        <h4 class="text-sm font-semibold text-gray-500 mt-6 mb-3">Historial del Caso</h4>
+        <ol class="relative border-l border-gray-200 dark:border-gray-700 ml-2">
+            <li class="mb-6 ml-6">
+                <span class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-blue-900">
+                    <i data-lucide="file-plus" class="w-3 h-3 text-blue-800 dark:text-blue-300"></i>
+                </span>
+                <h3 class="flex items-center mb-1 text-md font-semibold text-gray-900 dark:text-white">Incidente Reportado</h3>
+                <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">Reportado el {{ fecha_incidente|date:"d/m/Y" }}</time>
+            </li>
+
+            {% if descargos %}
+            <li class="mb-6 ml-6">
+                <span class="absolute flex items-center justify-center w-6 h-6 bg-cyan-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-cyan-900">
+                    <i data-lucide="message-square" class="w-3 h-3 text-cyan-800 dark:text-cyan-300"></i>
+                </span>
+                <h3 class="text-md font-semibold text-gray-900 dark:text-white">Descargos Recibidos</h3>
+                {% for item in descargos %}
+                <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center gap-2 mb-2">
+                        <p class="text-sm font-semibold">{{ item.empleado.nombre }} {{ item.empleado.apellido }}</p>
+                        <time class="text-xs text-gray-400 dark:text-gray-500 ml-auto">{{ item.descargo.fecha_descargo|date:"d/m/Y" }}</time>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 italic">"{{ item.descargo.contenido_descargo }}"</p>
+                    {% if item.descargo.ruta_archivo_descargo %}
+                    <div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <a href="{{ item.descargo.ruta_archivo_descargo.url }}" class="flex items-center gap-2 text-xs text-blue-600 hover:underline">
+                            <i data-lucide="paperclip" class="w-3 h-3"></i><span>Archivo Adjunto</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </li>
+            {% else %}
+            <li class="mb-6 ml-6">
+                <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-gray-700">
+                    <i data-lucide="message-square" class="w-3 h-3 text-gray-500"></i>
+                </span>
+                <h3 class="text-md font-semibold text-gray-500 dark:text-gray-400">Sin Descargos</h3>
+                <p class="text-sm font-normal text-gray-500 dark:text-gray-400">No se han registrado descargos de los involucrados.</p>
+            </li>
+            {% endif %}
+
+            {% if resolucion %}
+            <li class="ml-6">
+                <span class="absolute flex items-center justify-center w-6 h-6 bg-green-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-green-900">
+                    <i data-lucide="gavel" class="w-3 h-3 text-green-800 dark:text-green-300"></i>
+                </span>
+                <h3 class="text-md font-semibold text-gray-900 dark:text-white">Incidente Resuelto</h3>
+                <time class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">Resuelto el {{ resolucion.fecha_resolucion|date:"d/m/Y" }}</time>
+                <p class="text-sm font-normal text-gray-500 dark:text-gray-400">{{ resolucion.descripcion }}</p>
+            </li>
+            {% else %}
+            <li class="ml-6">
+                <span class="absolute flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-800 dark:bg-gray-700">
+                    <i data-lucide="gavel" class="w-3 h-3 text-gray-800 dark:text-gray-300"></i>
+                </span>
+                <h3 class="text-md font-semibold text-gray-500 dark:text-gray-400">Resolución Pendiente</h3>
+            </li>
+            {% endif %}
+        </ol>
+
+        {% if not resolucion %}
+        <div id="incident-actions-container" class="mt-8 pt-6 border-t dark:border-gray-700">
+            <div class="flex justify-end">
+                <button onclick="openModal('resolve-incident-modal')" class="bg-red-600 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
+                    <i data-lucide="gavel"></i><span>Registrar Resolución</span>
+                </button>
+            </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
+{% block modals %}
+<div id="resolve-incident-modal" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 m-4" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold">Registrar Resolución de Incidente</h2>
+            <button onclick="closeModal('resolve-incident-modal')" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x"></i></button>
+        </div>
+        <form method="post" action="{% url 'resolver_incidente' incidente.id %}" class="mt-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label for="{{ resolucion_form.descripcion.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ resolucion_form.descripcion.label }}</label>
+                {{ resolucion_form.descripcion }}
+            </div>
+            <div class="pt-4 flex flex-col sm:flex-row justify-end gap-3">
+                <button type="submit" name="action" value="cerrar" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Solo Cerrar Incidente</button>
+                <button type="submit" name="action" value="sancionar" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"><i data-lucide="shield-plus"></i>Guardar y Aplicar Sanción</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock modals %}
+
 {% block page_scripts %}
 <script>
     lucide.createIcons();
+    // Add Tailwind classes to form fields generated by Django
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('textarea').forEach(field => {
+            field.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'dark:border-gray-600', 'dark:bg-gray-700', 'shadow-sm');
+        });
+    });
 </script>
 {% endblock %}
