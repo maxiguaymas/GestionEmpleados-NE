@@ -2,12 +2,12 @@ py manage.py shell
 
 from empleados.models import Sancion
 
-Sancion.objects.create(nombre="Apercibimiento Verbal", tipo="Leve", fecha="2025-07-10", descripcion="Advertencia informal al empleado sobre una falta menor.", estado=True)
-Sancion.objects.create(nombre="Apercibimiento Escrito", tipo="Leve", fecha="2025-07-10", descripcion="Advertencia formal por escrito que se coloca en el expediente.", estado=True)
-Sancion.objects.create(nombre="Suspensión sin Goce de Haberes", tipo="Moderada", fecha="2025-07-10", descripcion="Suspensión de las funciones por un período determinado sin salario.", estado=True)
-Sancion.objects.create(nombre="Cambio de Tareas o Responsabilidades", tipo="Moderada", fecha="2025-07-10", descripcion="Reasignación a otras tareas o eliminación de responsabilidades.", estado=True)
-Sancion.objects.create(nombre="Suspensión Prolongada sin Goce de Haberes", tipo="Grave", fecha="2025-07-10", descripcion="Suspensión por un período extenso, según gravedad y política interna.", estado=True)
-Sancion.objects.create(nombre="Despido con Causa", tipo="Grave", fecha="2025-07-10", descripcion="Terminación del contrato por falta grave, según reglamento.", estado=True)
+Sancion.objects.create(nombre="Apercibimiento Verbal", tipo="Leve", descripcion="Advertencia informal al empleado sobre una falta menor.", estado=True)
+Sancion.objects.create(nombre="Apercibimiento Escrito", tipo="Leve", descripcion="Advertencia formal por escrito que se coloca en el expediente.", estado=True)
+Sancion.objects.create(nombre="Suspensión sin Goce de Haberes", tipo="Moderada", descripcion="Suspensión de las funciones por un período determinado sin salario.", estado=True)
+Sancion.objects.create(nombre="Cambio de Tareas o Responsabilidades", tipo="Moderada", descripcion="Reasignación a otras tareas o eliminación de responsabilidades.", estado=True)
+Sancion.objects.create(nombre="Suspensión Prolongada sin Goce de Haberes", tipo="Grave", descripcion="Suspensión por un período extenso, según gravedad y política interna.", estado=True)
+Sancion.objects.create(nombre="Despido con Causa", tipo="Grave", descripcion="Terminación del contrato por falta grave, según reglamento.", estado=True)
 
 from empleados.models import RequisitoDocumento
 

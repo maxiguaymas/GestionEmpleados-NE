@@ -173,7 +173,6 @@ class SancionEmpleado(models.Model):
     responsable = models.CharField(max_length=255)
 
     class Meta:
-        unique_together = ('id_empl', 'id_sancion', 'fecha_inicio')
         verbose_name = "Sanción de Empleado"
         verbose_name_plural = "Sanciones de Empleados"
 
