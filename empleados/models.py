@@ -78,32 +78,29 @@ class Recibo_Sueldos(models.Model):
   
 # MODELS DE HORARIOS
 class Horarios(models.Model):
-    turno = models.CharField(max_length=20, choices=[('Mañana', 'Mañana'), ('Tarde', 'Tarde')], default='Mañana')
-    dia = models.CharField(max_length=10, choices=[('Lunes', 'Lunes'), ('Martes', 'Martes'), ('Miércoles', 'Miércoles'), ('Jueves', 'Jueves'), ('Viernes', 'Viernes')])
-    HORA_ENTRADA_CHOICES = [
-        (time(9, 0), '09:00'),
-        (time(14, 0), '14:00'),
-    ]
-    HORA_SALIDA_CHOICES = [
-        (time(13, 0), '13:00'),
-        (time(18, 0), '18:00'),
-    ]
-    hora_entrada = models.TimeField(choices=HORA_ENTRADA_CHOICES)
-    hora_salida = models.TimeField(choices=HORA_SALIDA_CHOICES)
-    cantidad_personal = models.IntegerField(default=1)
-
+    nombre = models.CharField(max_length=100, unique=True)
+    hora_entrada = models.TimeField()
+    hora_salida = models.TimeField()
+    lunes = models.BooleanField(default=True)
+    martes = models.BooleanField(default=True)
+    miercoles = models.BooleanField(default=True)
+    jueves = models.BooleanField(default=True)
+    viernes = models.BooleanField(default=True)
+    sabado = models.BooleanField(default=False)
+    domingo = models.BooleanField(default=False)
+    cantidad_personal_requerida = models.PositiveIntegerField(default=1, verbose_name="Cantidad de Personal Requerida")
 
     def __str__(self):
-        return f"Horario {self.turno} {self.hora_entrada} - {self.dia}"
+        return f"{self.nombre} ({self.hora_entrada.strftime('%H:%M')} - {self.hora_salida.strftime('%H:%M')})"
 
 class AsignacionHorario(models.Model):
-    id_empl = models.ForeignKey(Empleado, on_delete=models.CASCADE)
-    id_horario = models.ForeignKey(Horarios, on_delete=models.CASCADE)
+    id_empl = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='asignaciones_horario')
+    id_horario = models.ForeignKey(Horarios, on_delete=models.CASCADE, related_name='asignaciones')
     fecha_asignacion = models.DateField(auto_now_add=True)
     estado = models.BooleanField(default=True)
     
     def __str__(self):
-        return f"Asignación de {self.id_empl.nombre} {self.id_empl.apellido} - {self.id_horario.dia} {self.id_horario.turno}"
+        return f"Asignación de {self.id_empl.nombre} {self.id_empl.apellido} - {self.id_horario.nombre}"
     
 # INCIDENTES
 class Incidente(models.Model):

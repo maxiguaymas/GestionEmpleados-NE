@@ -1,24 +1,53 @@
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-    <table class="w-full">
-        <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-            <tr>
-                <th class="p-4">Empleado</th>
-                <th class="p-4">DNI</th>
-                <th class="p-4">DÃ­a</th>
-                <th class="p-4">Hora de Entrada</th>
-                <th class="p-4">Hora de Salida</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            {% for horario in horarios %}
-            <tr>
-                <td class="p-4">{{ horario.id_empl.nombre }} {{ horario.id_empl.apellido }}</td>
-                <td class="p-4">{{ horario.id_empl.dni }}</td>
-                <td class="p-4">{{ horario.id_horario.dia }}</td>
-                <td class="p-4">{{ horario.id_horario.hora_entrada|time:"H:i" }}</td>
-                <td class="p-4">{{ horario.id_horario.hora_salida|time:"H:i" }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<h3 class="text-lg font-semibold mb-4">Horarios y Personal Asignado</h3>
+<div class="space-y-4">
+    {% for horario in horarios_con_conteo %}
+    <details class="group bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+        <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
+            <div>
+                <h4 class="font-bold">{{ horario.nombre }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ horario.hora_entrada|time:"H:i" }} - {{ horario.hora_salida|time:"H:i" }}
+                </p>
+                <div class="text-xs text-gray-500 mt-1 flex gap-2">
+                    {% if horario.lunes %}<span>Lun</span>{% endif %}
+                    {% if horario.martes %}<span>Mar</span>{% endif %}
+                    {% if horario.miercoles %}<span>Mié</span>{% endif %}
+                    {% if horario.jueves %}<span>Jue</span>{% endif %}
+                    {% if horario.viernes %}<span>Vie</span>{% endif %}
+                    {% if horario.sabado %}<span>Sáb</span>{% endif %}
+                    {% if horario.domingo %}<span>Dom</span>{% endif %}
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-semibold">
+                    {{ horario.personal_asignado }} / {{ horario.cantidad_personal_requerida }} Asignados
+                </span>
+                <span class="transition group-open:rotate-180">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m6 9 6 6 6-6"/></svg>
+                </span>
+            </div>
+        </summary>
+        <div class="mt-4 border-t pt-4 dark:border-gray-600">
+            {% if horario.asignaciones.all %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                {% for asignacion in horario.asignaciones.all %}
+                    <div class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <div>
+                            <p class="font-semibold text-sm">{{ asignacion.id_empl.nombre }} {{ asignacion.id_empl.apellido }}</p>
+                            <p class="text-xs text-gray-500">{{ asignacion.id_empl.dni }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-sm text-gray-500">No hay empleados asignados a este horario.</p>
+            {% endif %}
+        </div>
+    </details>
+    {% empty %}
+    <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No hay horarios creados</h3>
+        <p class="mt-1 text-sm text-gray-500">Crea un nuevo horario en la pestaña "Crear Horario".</p>
+    </div>
+    {% endfor %}
 </div>

@@ -23,7 +23,7 @@
             </form>
         </div>
         <div id="create-schedule-tab" class="schedule-tab-content hidden">
-            <form action="{% url 'cargar_horario' %}" method="post">
+            <form action="{% url 'crear_horario' %}" method="post">
                 {% csrf_token %}
                 {% include 'cargar_horario_tab.html' %}
             </form>
@@ -34,6 +34,7 @@
 
 {% block page_scripts %}
 <script>
+    // --- Lógica para las pestañas principales ---
     function setupTabs(prefix) {
         document.querySelectorAll(`.${prefix}-tab`).forEach(button => {
             button.addEventListener('click', (e) => {
@@ -66,7 +67,148 @@
         }
     }
 
+    // --- Lógica para la pestaña de CREAR HORARIO ---
+    function setupCreateScheduleTabs() {
+        const presetBtn = document.getElementById('preset-tab-button');
+        const customBtn = document.getElementById('custom-tab-button');
+        const presetContent = document.getElementById('preset-tab-content');
+        const customContent = document.getElementById('custom-tab-content');
+
+        function switchCreateTab(tab) {
+            if (tab === 'preset') {
+                presetContent.classList.remove('hidden');
+                customContent.classList.add('hidden');
+                presetBtn.classList.add('tab-active');
+                customBtn.classList.remove('tab-active');
+            } else {
+                presetContent.classList.add('hidden');
+                customContent.classList.remove('hidden');
+                presetBtn.classList.remove('tab-active');
+                customBtn.classList.add('tab-active');
+            }
+        }
+
+        presetBtn.addEventListener('click', () => switchCreateTab('preset'));
+        customBtn.addEventListener('click', () => switchCreateTab('custom'));
+        
+        // Estado inicial
+        switchCreateTab('preset');
+    }
+
+    // --- Lógica para la pestaña de ASIGNAR HORARIOS ---
+    function setupAssignmentUI() {
+        const scheduleSelect = document.getElementById('schedule-select-for-assignment');
+        const assignmentUI = document.getElementById('assignment-ui');
+        const availableList = document.getElementById('available-employees');
+        const assignedList = document.getElementById('assigned-employees');
+        const hiddenInputsContainer = document.getElementById('assigned-employee-inputs');
+
+        scheduleSelect.addEventListener('change', async function() {
+            const scheduleId = this.value;
+            if (!scheduleId) {
+                assignmentUI.classList.add('hidden');
+                return;
+            }
+
+            const response = await fetch(`/horarios/api/get-empleados/${scheduleId}/`);
+            const data = await response.json();
+
+            renderEmployeeLists(data.disponibles, data.asignados);
+            assignmentUI.classList.remove('hidden');
+        });
+
+        function renderEmployeeLists(available, assigned) {
+            availableList.innerHTML = '';
+            assignedList.innerHTML = '';
+            hiddenInputsContainer.innerHTML = '';
+
+            if (available.length === 0) {
+                availableList.innerHTML = `<div class="flex items-center justify-center h-full text-sm text-gray-500 p-4">No hay más empleados disponibles.</div>`;
+            } else {
+                available.forEach(emp => {
+                    const div = createEmployeeElement(emp);
+                    div.addEventListener('click', () => moveEmployee(emp, 'assign'));
+                    availableList.appendChild(div);
+                });
+            }
+
+            if (assigned.length === 0) {
+                assignedList.innerHTML = `<div class="flex items-center justify-center h-full text-sm text-gray-500 p-4">Aún no hay empleados asignados.</div>`;
+            } else {
+                assigned.forEach(emp => {
+                    const div = createEmployeeElement(emp);
+                    div.addEventListener('click', () => moveEmployee(emp, 'unassign'));
+                    assignedList.appendChild(div);
+                    addHiddenInput(emp.id);
+                });
+            }
+        }
+
+        function createEmployeeElement(employee) {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-3 p-2 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
+            div.dataset.id = employee.id;
+            div.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-400 flex-shrink-0"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="text-sm font-medium">${employee.nombre} ${employee.apellido}</span>
+            `;
+            return div;
+        }
+
+        function moveEmployee(employee, action) {
+            const element = document.querySelector(`#assign-schedules-tab [data-id='${employee.id}']`);
+            if (element) {
+                element.remove();
+            }
+
+            if (action === 'assign') {
+                const newElement = createEmployeeElement(employee);
+                newElement.addEventListener('click', () => moveEmployee(employee, 'unassign'));
+                assignedList.appendChild(newElement);
+                addHiddenInput(employee.id);
+            } else { // unassign
+                const newElement = createEmployeeElement(employee);
+                newElement.addEventListener('click', () => moveEmployee(employee, 'assign'));
+                availableList.appendChild(newElement);
+                removeHiddenInput(employee.id);
+            }
+            
+            // Actualizar mensajes de "lista vacía"
+            if (availableList.children.length === 0) {
+                 availableList.innerHTML = `<div class="flex items-center justify-center h-full text-sm text-gray-500 p-4">No hay más empleados disponibles.</div>`;
+            } else if (availableList.querySelector('div.text-gray-500')) {
+                availableList.innerHTML = ''; // Limpiar mensaje si se añade un empleado
+                moveEmployee(employee, 'unassign'); // Re-llamar para añadir el elemento
+            }
+
+            if (assignedList.children.length === 0) {
+                assignedList.innerHTML = `<div class="flex items-center justify-center h-full text-sm text-gray-500 p-4">Aún no hay empleados asignados.</div>`;
+            } else if (assignedList.querySelector('div.text-gray-500')) {
+                assignedList.innerHTML = ''; // Limpiar mensaje si se añade un empleado
+                moveEmployee(employee, 'assign'); // Re-llamar para añadir el elemento
+            }
+        }
+
+        function addHiddenInput(employeeId) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'empleados';
+            input.value = employeeId;
+            input.id = `input-emp-${employeeId}`;
+            hiddenInputsContainer.appendChild(input);
+        }
+
+        function removeHiddenInput(employeeId) {
+            const input = document.getElementById(`input-emp-${employeeId}`);
+            if (input) {
+                input.remove();
+            }
+        }
+    }
+
+    // --- INICIALIZACIÓN ---
     document.addEventListener('DOMContentLoaded', function() {
+        // Pestañas principales
         setupTabs('schedule');
         const hash = window.location.hash.substring(1);
         const validTabs = ['view-assignments', 'assign-schedules', 'create-schedule'];
@@ -75,6 +217,12 @@
         } else {
             switchTab('schedule', 'view-assignments');
         }
+
+        // Sub-pestañas en Crear Horario
+        setupCreateScheduleTabs();
+
+        // UI de Asignación
+        setupAssignmentUI();
     });
 </script>
 {% endblock %}
