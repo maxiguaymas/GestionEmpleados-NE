@@ -1,43 +1,33 @@
-<form method="post">
-    {% csrf_token %}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-        <table class="w-full">
-            <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-                <tr>
-                    <th class="p-4">Turno</th>
-                    <th class="p-4">DÃ­a</th>
-                    <th class="p-4">Hora Entrada</th>
-                    <th class="p-4">Hora Salida</th>
-                    <th class="p-4">Cantidad Personal</th>
-                    <th class="p-4">Seleccionar Empleados</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                {% for horario in horarios %}
-                <tr>
-                    <td class="p-4">{{ horario.turno }}</td>
-                    <td class="p-4">{{ horario.dia }}</td>
-                    <td class="p-4">{{ horario.hora_entrada|time:"H:i" }}</td>
-                    <td class="p-4">{{ horario.hora_salida|time:"H:i" }}</td>
-                    <td class="p-4">{{ horario.cantidad_personal }}</td>
-                    <td class="p-4">
-                        {% for i in "x"|ljust:horario.cantidad_personal %}
-                        <select name="empleado_{{ horario.id }}_{{ forloop.counter }}"
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
-                            <option value="">Seleccione empleado</option>
-                            {% for empleado in empleados %}
-                            <option value="{{ empleado.id }}">{{ empleado.nombre }} {{ empleado.apellido }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                        {% endfor %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<h3 class="text-lg font-semibold mb-4">Asignar Empleados a un Horario</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="md:col-span-1">
+        <label for="schedule-select-for-assignment" class="block text-sm font-medium mb-1">1. Seleccionar Horario</label>
+        <select id="schedule-select-for-assignment" name="horario_id" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-red-500 focus:ring-red-500">
+            <option value="">Seleccionar...</option>
+            {% for horario in horarios_todos %}
+                <option value="{{ horario.id }}">{{ horario.nombre }}</option>
+            {% endfor %}
+        </select>
     </div>
-    <div class="mt-8 flex justify-end">
-        <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Asignar Empleados</button>
+    <div id="assignment-ui" class="md:col-span-2 hidden">
+        <label class="block text-sm font-medium mb-1">2. Asignar Empleados</label>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <h4 class="text-sm font-semibold mb-2">Empleados Disponibles</h4>
+                <div id="available-employees" class="p-2 border rounded-lg max-h-60 overflow-y-auto min-h-[15rem] dark:border-gray-600">
+                    <!-- JS will populate this -->
+                </div>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold mb-2">Empleados Asignados</h4>
+                <div id="assigned-employees" class="p-2 border rounded-lg max-h-60 overflow-y-auto min-h-[15rem] dark:border-gray-600">
+                    <!-- JS will populate this -->
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="mt-4 w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Guardar Asignación</button>
     </div>
-</form>
+</div>
+
+<!-- Hidden inputs will be managed by JS to submit the final list -->
+<div id="assigned-employee-inputs"></div>
