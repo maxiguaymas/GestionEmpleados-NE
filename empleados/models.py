@@ -2,7 +2,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.contrib.auth.models import User
-from datetime import time
+from django.conf import settings
+
 
 # Create your models here.
 def validar_mayor_18(value):
@@ -130,6 +131,12 @@ class Resolucion(models.Model):
         return f"Resolucion para sanción ID: {self.sancion_empleado.id}"
 
 class IncidenteEmpleado(models.Model):
+    ESTADO_CHOICES = [
+        ('ABIERTO', 'Abierto'),
+        ('CERRADO', 'Cerrado'),
+        ('CORREGIDO', 'Corregido'),
+    ]
+
     id_incidente = models.ForeignKey(Incidente, on_delete=models.CASCADE)
     id_empl = models.ForeignKey(Empleado, on_delete=models.CASCADE)
     id_descargo = models.ForeignKey(Descargo, on_delete=models.SET_NULL, null=True, blank=True)
@@ -137,14 +144,24 @@ class IncidenteEmpleado(models.Model):
     fecha_ocurrencia = models.DateField()
     observaciones = models.CharField(max_length=255)
     responsable_registro = models.CharField(max_length=255)
-    estado = models.BooleanField(default=True)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ABIERTO')
+    
+    # Campo para versionado
+    incidente_anterior = models.OneToOneField(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='incidente_siguiente'
+    )
 
     class Meta:
         unique_together = ('id_incidente', 'id_empl') # Assuming composite key, or just a unique ID for the relationship
                                                     # Based on the ERD, it seems id_incid_empl is the primary key.
 
     def __str__(self):
-        return f"Inc. {self.id_incidente.nombre_incid} - Emp. {self.id_empl.nombre} {self.id_empl.apellido}"
+        # Corregido para usar tipo_incid que sí existe en el modelo Incidente
+        return f"Inc. {self.id_incidente.tipo_incid} - Emp. {self.id_empl.nombre} {self.id_empl.apellido}"
 
 
 
@@ -211,3 +228,70 @@ class Notificacion(models.Model):
         ordering = ['-fecha_creacion']  # Ordena las notificaciones de más reciente a más antigua.
         verbose_name = "Notificación"
         verbose_name_plural = "Notificaciones"
+        
+    
+
+# AUDITORIA
+class Auditoria(models.Model):
+    """
+    Modelo para registrar eventos de auditoría (creación, actualización, eliminación)
+    en otras tablas del sistema, vinculando directamente al usuario que realiza la acción.
+    """
+
+    class Accion(models.TextChoices):
+        """Define las acciones posibles que se pueden auditar."""
+        INSERT = 'INSERT', 'Inserción'
+        UPDATE = 'UPDATE', 'Actualización'
+        DELETE = 'DELETE', 'Eliminación'
+
+    # --- Campos de la tabla ---
+
+    tabla = models.CharField(
+        max_length=64,
+        help_text="Nombre de la tabla afectada."
+    )
+    registro_id = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Clave primaria (ID) del registro afectado."
+    )
+    accion = models.CharField(
+        max_length=6,
+        choices=Accion.choices,
+        help_text="Acción realizada sobre el registro (INSERT, UPDATE, DELETE)."
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,  # Vincula al modelo de usuario activo en tu proyecto
+        on_delete=models.SET_NULL, # Si se elimina el usuario, el campo actor queda en NULL
+        null=True,
+        blank=True,
+        related_name='acciones_auditoria', # Permite acceder a las auditorías desde un usuario
+        help_text="Usuario que realizó la acción."
+    )
+    datos = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Datos del registro en formato JSON (ej. estado anterior o posterior)."
+    )
+    creado_en = models.DateTimeField(
+        auto_now_add=True, # Establece la fecha y hora automáticamente al crear el registro
+        help_text="Fecha y hora en que se registró el evento."
+    )
+
+    # --- Configuración del modelo (Meta) ---
+
+    class Meta:
+        db_table = 'auditoria'  # Asegura que el nombre de la tabla en la BD sea 'auditoria'
+        ordering = ['-creado_en'] # Ordena los registros por fecha descendente por defecto
+        verbose_name = 'Registro de Auditoría'
+        verbose_name_plural = 'Registros de Auditoría'
+
+    # --- Representación en texto del objeto ---
+
+    def __str__(self):
+        """
+        Devuelve una representación legible del objeto en el admin de Django
+        y en otras partes del sistema.
+        """
+        actor_info = self.actor.username if self.actor else "Sistema"
+        return f'{self.accion} en {self.tabla} (ID: {self.pk}) por {actor_info}'

@@ -1,5 +1,5 @@
 from django import forms
-from empleados.models import Incidente, Empleado, Resolucion
+from empleados.models import Incidente, Empleado, Resolucion, IncidenteEmpleado
 
 class IncidenteForm(forms.ModelForm):
     empleados_involucrados = forms.ModelMultipleChoiceField(
@@ -37,3 +37,4 @@ class IncidenteForm(forms.ModelForm):
         labels = {
             'descripcion_incid': 'Descripción',
         }
+

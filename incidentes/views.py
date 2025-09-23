@@ -49,7 +49,7 @@ def registrar_incidente(request):
                     fecha_ocurrencia=fecha_incidente,
                     observaciones=observaciones,
                     responsable_registro=responsable,
-                    estado=True # O el estado inicial que definas
+                    estado='ABIERTO' # Corregido
                 )
             
             messages.success(request, 'El incidente ha sido registrado exitosamente.')
@@ -60,63 +60,72 @@ def registrar_incidente(request):
 
     return render(request, 'registrar_incidente.html', {'form': form})
 
+
 @login_required
 @user_passes_test(es_admin)
 @transaction.atomic
-def editar_incidente(request, incidente_id):
-    incidente = get_object_or_404(Incidente, id=incidente_id)
+def corregir_incidente(request, incidente_id):
+    incidente_original = get_object_or_404(Incidente, id=incidente_id)
+    
     if request.method == 'POST':
-        form = IncidenteForm(request.POST, instance=incidente)
+        form = IncidenteForm(request.POST)
         if form.is_valid():
-            incidente = form.save(commit=False)
-            
+            # Crear un nuevo incidente
+            nuevo_incidente = Incidente.objects.create(
+                tipo_incid=incidente_original.tipo_incid,
+                descripcion_incid=f"(Corrección del incidente #{incidente_original.id}) {incidente_original.descripcion_incid}"
+            )
+
+            # Obtener datos del formulario
             empleados_seleccionados = form.cleaned_data['empleados_involucrados']
-            
-            IncidenteEmpleado.objects.filter(id_incidente=incidente).delete()
-            
             observaciones = form.cleaned_data['observaciones']
+            fecha_incidente = form.cleaned_data['fecha_incid']
             responsable = request.user.get_full_name() or request.user.username
+
+            # Crear nuevos registros de IncidenteEmpleado
             for empleado in empleados_seleccionados:
                 IncidenteEmpleado.objects.create(
-                    id_incidente=incidente,
+                    id_incidente=nuevo_incidente,
                     id_empl=empleado,
+                    fecha_ocurrencia=fecha_incidente,
                     observaciones=observaciones,
                     responsable_registro=responsable,
-                    estado=True
+                    estado='ABIERTO'
                 )
-            
-            incidente.save()
-            messages.success(request, 'El incidente ha sido actualizado exitosamente.')
-            return redirect('detalle_incidente', incidente_id=incidente.id)
+
+            # Cerrar los registros del incidente original
+            IncidenteEmpleado.objects.filter(id_incidente=incidente_original).update(estado='CERRADO')
+
+            messages.success(request, 'El incidente ha sido corregido exitosamente. Se ha creado un nuevo incidente.')
+            return redirect('detalle_incidente', incidente_id=nuevo_incidente.id)
     else:
-        current_involved_employees = IncidenteEmpleado.objects.filter(id_incidente=incidente).values_list('id_empl', flat=True)
+        # Pre-rellenar el formulario con los datos del incidente original
+        involucrados_originales = IncidenteEmpleado.objects.filter(id_incidente=incidente_original)
+        empleados_originales = [ie.id_empl.id for ie in involucrados_originales]
         
-        first_inc_empl = IncidenteEmpleado.objects.filter(id_incidente=incidente).first()
-        initial_observaciones = first_inc_empl.observaciones if first_inc_empl else ''
+        initial_data = {
+            'tipo_incid': incidente_original.tipo_incid,
+            'empleados_involucrados': empleados_originales,
+            'observaciones': involucrados_originales.first().observaciones if involucrados_originales.exists() else '',
+            'fecha_incid': involucrados_originales.first().fecha_ocurrencia if involucrados_originales.exists() else timezone.now().date(),
+        }
+        form = IncidenteForm(initial=initial_data)
 
-        form = IncidenteForm(instance=incidente, initial={
-            'empleados_involucrados': list(current_involved_employees),
-            'observaciones': initial_observaciones
-        })
-    return render(request, 'editar_incidente.html', {'form': form, 'incidente': incidente})
+    return render(request, 'corregir_incidente.html', {
+        'form': form,
+        'incidente': incidente_original
+    })
 
-@login_required
-@user_passes_test(es_admin)
-def eliminar_incidente(request, incidente_id):
-    incidente = get_object_or_404(Incidente, id=incidente_id)
-    if request.method == 'POST':
-        incidente.delete()
-        messages.success(request, 'El incidente ha sido eliminado exitosamente.')
-        return redirect('ver_incidentes')
-    messages.error(request, 'Método no permitido para eliminar directamente. Por favor, confirma la eliminación.')
-    return redirect('detalle_incidente', incidente_id=incidente.id)
+
+
+
 
 @login_required
 @user_passes_test(es_admin)
 def detalle_incidente(request, incidente_id):
     incidente = get_object_or_404(Incidente, id=incidente_id)
     
-    involucrados_qs = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl', 'id_descargo', 'id_resolucion')
+    involucrados_qs = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl', 'id_descargo', 'id_resolucion', 'incidente_anterior', 'incidente_siguiente')
     
     sanciones_existentes = SancionEmpleado.objects.filter(incidente_asociado__in=involucrados_qs).values_list('incidente_asociado_id', flat=True)
 
@@ -207,3 +216,4 @@ def resolver_incidente(request, incidente_id):
     
     messages.error(request, 'Hubo un error al procesar la resolución. Por favor, inténtalo de nuevo.')
     return redirect('detalle_incidente', incidente_id=incidente.id)
+
