@@ -6,35 +6,21 @@
 {% block page_title %}Mis Sanciones{% endblock %}
 
 {% block content %}
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for sancion in sanciones %}
-    <table class="w-full">
-        <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-            <tr>
-                <th class="p-4">Tipo</th>
-                <th class="p-4 hidden md:table-cell">Período</th>
-                <th class="p-4">Acciones</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            
-            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-                <td class="p-4 text-gray-600 dark:text-gray-300">{{ sancion.id_sancion.nombre }}</td>
-                <td class="p-4 text-gray-600 dark:text-gray-300 hidden md:table-cell">
-                    {{ sancion.fecha_inicio|date:"d/m/Y" }}
-                    {% if sancion.fecha_fin %}
-                    - {{ sancion.fecha_fin|date:"d/m/Y" }}
-                    {% endif %}
-                </td>
-                <td class="p-4">
-                    <a href="{% url 'detalle_sancion' sancion.id %}"
-                        class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
-                </td>
-            </tr>
-
-        </tbody>
-    </table>
-    
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col">
+        <div class="flex-1">
+            <div class="flex justify-between items-start">
+                <h3 class="font-bold text-lg mb-1">{{ sancion.id_sancion.nombre }}</h3>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ sancion.fecha_inicio|date:"d/m/Y" }}</span>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{{ sancion.motivo }}</p>
+        </div>
+        <div class="border-t dark:border-gray-700 pt-4 flex justify-between items-center">
+            <div></div>
+            <a href="{% url 'detalle_sancion' sancion.id %}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
+        </div>
+    </div>
     {% empty %}
     <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>

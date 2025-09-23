@@ -10,36 +10,35 @@
     </div>
 
     {% if sanciones %}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-                    <tr>
-                        <th class="p-4">Empleado</th>
-                        <th class="p-4">Tipo</th>
-                        <th class="p-4 hidden md:table-cell">Período</th>
-                        <th class="p-4">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    {% for sancion in sanciones %}
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td class="p-4">
-                                <div class="flex items-center gap-3">
-                                    <div>
-                                        <p class="font-medium">{{ sancion.id_empl.nombre }} {{ sancion.id_empl.apellido }}</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ sancion.id_empl.dni }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="p-4 text-gray-600 dark:text-gray-300">{{ sancion.id_sancion.nombre }}</td>
-                            <td class="p-4 text-gray-600 dark:text-gray-300 hidden md:table-cell">{{ sancion.fecha_inicio|date:"d/m/Y" }} {% if sancion.fecha_fin %}- {{ sancion.fecha_fin|date:"d/m/Y" }}{% endif %}</td>
-                            <td class="p-4">
-                                <a href="{% url 'detalle_sancion' sancion.id %}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for sancion in sanciones %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg mb-1">{{ sancion.id_sancion.nombre }}</h3>
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ sancion.fecha_inicio|date:"d/m/Y" }}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{{ sancion.motivo }}</p>
+                    </div>
+                    <div class="border-t dark:border-gray-700 pt-4 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <span class="text-sm mr-2 text-gray-500">Sancionado:</span>
+                            <div class="flex -space-x-2">
+                                {% with empleado=sancion.id_empl %}
+                                    {% if empleado.ruta_foto %}
+                                        <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800" src="{{ empleado.ruta_foto.url }}" alt="{{ empleado.nombre }}" title="{{ empleado.nombre }} {{ empleado.apellido }}">
+                                    {% else %}
+                                        <span class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500 text-xs" title="{{ empleado.nombre }} {{ empleado.apellido }}">
+                                            {{ empleado.nombre|slice:":1" }}{{ empleado.apellido|slice:":1" }}
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        <a href="{% url 'detalle_sancion' sancion.id %}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     {% else %}
         <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">

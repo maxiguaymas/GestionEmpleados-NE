@@ -7,11 +7,13 @@
 
 {% block content %}
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    {% if asistencias %}
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h3 class="text-lg font-semibold">Mis Registros de Asistencia</h3>
         <!-- Month filter can be added later -->
     </div>
     <div class="overflow-hidden">
+
         <table class="w-full">
             <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
                 <tr>
@@ -25,13 +27,16 @@
                     <td class="p-4 text-gray-600 dark:text-gray-300">{{ asistencia.fecha_hora|date:"d/m/Y" }}</td>
                     <td class="p-4 font-semibold">{{ asistencia.fecha_hora|time:"H:i:s" }}</td>
                 </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2" class="p-8 text-center text-gray-500">No tienes registros de asistencia.</td>
-                </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes asistencias registradas</h3>
+            <p class="mt-1 text-sm text-gray-500">Aun no tienes asistencias registradas.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock content %}
