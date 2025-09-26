@@ -6,9 +6,13 @@
 {% block page_title %}Formulario de Empleado{% endblock %}
 
 {% block content %}
+<div class="max-w-4xl mx-auto">
+    <a href="{% url 'ver_empleado' form.instance.id %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+        <i data-lucide="arrow-left"></i> Volver al Perfil
+    </a>
 <form method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
         <h2 class="text-2xl font-bold text-center mb-8">Editar Empleado</h2>
         <!-- Stepper -->
         <ol class="flex items-center w-full mb-8">
@@ -109,7 +113,7 @@
         <div class="mt-8 pt-4 border-t dark:border-gray-700 flex justify-between items-center">
             <button type="button" id="form-prev-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50" disabled>Anterior</button>
             <div>
-                <a href="{% url 'empleados' %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">Cancelar</a>
+                <a href="{% url 'ver_empleado' form.instance.id %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">Cancelar</a>
                 <button type="button" id="form-next-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Siguiente</button>
                 <button type="submit" id="form-submit-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 hidden">Guardar Cambios</button>
             </div>

@@ -9,9 +9,13 @@
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
         <div class="flex justify-between items-start">
             <h2 class="text-2xl font-bold mb-4">Detalle del Incidente</h2>
-            <div>
+            <div class="flex items-center gap-2">
+                {% if corrected_incident_id %}
+                    <a href="{% url 'detalle_incidente' corrected_incident_id %}" class="bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-emerald-700 text-sm">
+                        <i data-lucide="history" class="w-4 h-4"></i> Ver Incidente Original
+                    </a>
+                {% endif %}
                 <a href="{% url 'corregir_incidente' incidente.id %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700"><i data-lucide="pencil" class="w-4 h-4"></i>Corregir</a>
-                
             </div>
         </div>
 

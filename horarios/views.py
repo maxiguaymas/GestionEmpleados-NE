@@ -153,3 +153,13 @@ def get_empleados_por_horario(request, horario_id):
         'asignados': list(empleados_asignados.values('id', 'nombre', 'apellido')),
         'disponibles': list(empleados_disponibles.values('id', 'nombre', 'apellido')),
     })
+
+@login_required
+def ver_horarios_empleado(request, empleado_id):
+    empleado = get_object_or_404(Empleado, id=empleado_id)
+    asignaciones = AsignacionHorario.objects.filter(id_empl=empleado).select_related('id_horario').order_by('-fecha_asignacion')
+    context = {
+        'empleado': empleado,
+        'asignaciones': asignaciones,
+    }
+    return render(request, 'ver_horarios_empleado.html', context)

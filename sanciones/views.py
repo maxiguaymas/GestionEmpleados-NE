@@ -16,8 +16,8 @@ def sanciones_empleado(request, empleado_id):
     es_propietario = hasattr(request.user, 'empleado') and request.user.empleado.id == empleado.id
     if not (es_admin(request.user) or es_propietario):
         raise PermissionDenied
-    sanciones = SancionEmpleado.objects.filter(id_empl=empleado).select_related('id_sancion').prefetch_related('resoluciones')
-    return render(request, 'ver_sanciones.html', {
+    sanciones = SancionEmpleado.objects.filter(id_empl=empleado).select_related('id_sancion').order_by('-fecha_inicio')
+    return render(request, 'sanciones_empleado.html', {
         'empleado': empleado,
         'sanciones': sanciones,
     })

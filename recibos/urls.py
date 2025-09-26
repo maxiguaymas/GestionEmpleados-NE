@@ -7,4 +7,5 @@ urlpatterns = [
     path('mis-recibos/', views.mis_recibos, name='mis_recibos'),
     path('api/ver-recibos/<int:dni>/', views.api_ver_recibos_empleado, name='api_ver_recibos_empleado'),
     path('ajax/buscar-empleado/', views.ajax_buscar_empleado, name='ajax_buscar_empleado'),
+    path('empleado/<int:empleado_id>/', views.ver_recibos_empleado, name='ver_recibos_empleado'),
 ]
