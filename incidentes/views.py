@@ -9,6 +9,7 @@ from .forms import IncidenteForm
 from sanciones.forms import ResolucionForm
 from sanciones.forms import SancionMasivaForm
 from django.utils import timezone
+import re
 
 @login_required
 @user_passes_test(es_admin)
@@ -125,6 +126,12 @@ def corregir_incidente(request, incidente_id):
 def detalle_incidente(request, incidente_id):
     incidente = get_object_or_404(Incidente, id=incidente_id)
     
+    corrected_incident_id = None
+    if incidente.descripcion_incid:
+        match = re.search(r'\(Corrección del incidente #(\d+)\)', incidente.descripcion_incid)
+        if match:
+            corrected_incident_id = int(match.group(1))
+
     involucrados_qs = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl', 'id_descargo', 'id_resolucion', 'incidente_anterior', 'incidente_siguiente')
     
     sanciones_existentes = SancionEmpleado.objects.filter(incidente_asociado__in=involucrados_qs).values_list('incidente_asociado_id', flat=True)
@@ -157,6 +164,7 @@ def detalle_incidente(request, incidente_id):
         'descargos': descargos,
         'resolucion': resolucion,
         'resolucion_form': resolucion_form,
+        'corrected_incident_id': corrected_incident_id,
     }
     return render(request, 'detalle_incidente.html', context)
 

@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from empleados.models import Recibo_Sueldos as Recibo, Empleado
 from .forms import ReciboSueldoForm
@@ -37,6 +37,16 @@ def mis_recibos(request):
     return render(request, 'mis_recibos.html', {
         'recibos': recibos,
         'empleado_seleccionado': empleado,
+    })
+
+def ver_recibos_empleado(request, empleado_id):
+    print(f"DEBUG: Accediendo a ver_recibos_empleado para empleado_id: {empleado_id}")
+    empleado = get_object_or_404(Empleado, pk=empleado_id)
+    recibos = Recibo.objects.filter(id_empl=empleado).order_by('-fecha_emision')
+    return render(request, 'ver_recibos_empleado.html', {
+        'empleado': empleado,
+        'recibos': recibos,
+        'empleado_seleccionado': empleado, # For consistency with other views
     })
 
 def api_ver_recibos_empleado(request, dni):

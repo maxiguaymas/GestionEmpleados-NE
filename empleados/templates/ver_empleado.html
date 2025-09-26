@@ -36,11 +36,11 @@
                         <span class="font-medium">Administrar Sanciones</span>
                         <i data-lucide="shield-alert" class="w-5 h-5 text-gray-500"></i>
                     </a>
-                    <a href="{% url 'mis_horarios' empleado.id %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="{% url 'ver_horarios_empleado' empleado.id %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                         <span class="font-medium">Administrar Horarios</span>
                         <i data-lucide="clock" class="w-5 h-5 text-gray-500"></i>
                     </a>
-                    <a href="{% url 'mis_recibos' %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="{% url 'ver_recibos_empleado' empleado.id %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                         <span class="font-medium">Ver Recibos de Sueldo</span>
                         <i data-lucide="receipt" class="w-5 h-5 text-gray-500"></i>
                     </a>

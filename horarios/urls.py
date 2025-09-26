@@ -16,6 +16,7 @@ urlpatterns = [
 
     # Vistas para los empleados
     path('mis-horarios/', views.mis_horarios_empleado, name='mis_horarios_empleado'),
+    path('ver/<int:empleado_id>/', views.ver_horarios_empleado, name='ver_horarios_empleado'),
 
     # Rutas antiguas (opcional, se pueden eliminar o redirigir si ya no se usan)
     path('ver/', views.ver_horarios_asig, name='ver_horarios_asig'),
