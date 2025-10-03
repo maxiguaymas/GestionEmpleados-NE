@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import View
-from empleados.models import Empleado
+from empleados.models import Empleado, SancionEmpleado, Sancion, Incidente # Importa Sancion y SancionEmpleado desde empleados.models
 from django.db.models import Count
 
 def reportes_home(request):
@@ -16,3 +16,18 @@ def reporte_estado_empleados(request):
         'conteo_estados': conteo_estados
     }
     return render(request, 'reportes/reporte_estado_empleados.html', context)
+
+def reportes_sanciones_por_tipo(request):
+    conteo_sanciones = Sancion.objects.values('tipo').annotate(total=Count('tipo')).order_by('tipo')
+    context = {
+        'conteo_sanciones': conteo_sanciones
+    }
+    return render(request, 'reportes/reporte_sanciones_por_tipo.html', context)
+
+def reporte_incidentes_por_tipo(request):
+    conteo_incidentes = Incidente.objects.values('tipo_incid').annotate(total=Count('tipo_incid')).order_by('tipo_incid')
+    context = {
+        'conteo_incidentes': conteo_incidentes
+    }
+    return render(request, 'reportes/reporte_incidentes_por_tipo.html', context)
+

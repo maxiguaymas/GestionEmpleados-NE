@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte de Sanciones por Tipo{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-8">
+        <div>
+            <h2 class="text-2xl font-semibold leading-tight">Reporte de Sanciones por Tipo</h2>
+        </div>
+        <div class="my-4">
+            <a href="{% url 'reportes_home' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Volver
+            </a>
+        </div>
+        <div class="my-2 flex sm:flex-row flex-col">
+            <div class="flex flex-row mb-1 sm:mb-0">
+            </div>
+        </div>
+        <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+            <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
+                <canvas id="sancionesChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('sancionesChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in conteo_sanciones %}'{{ item.tipo }}',{% endfor %}],
+    datasets: [{
+        label: 'Cantidad de Sanciones',
+        data: [{% for item in conteo_sanciones %}{{ item.total }}, {% endfor %}],
+        backgroundColor: [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+        ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+                borderWidth: 1
+            }]
+        },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+    });
+</script>
+{% endblock %}
