@@ -11,6 +11,32 @@
         <h1 class="text-2xl font-bold">Recibos de Sueldo de {{ empleado.nombre }} {{ empleado.apellido }}</h1>
     </div>
 
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+        <form method="get" action="">
+            <div class="flex items-center space-x-4">
+                <div>
+                    <label for="mes" class="text-sm font-medium text-gray-700 dark:text-gray-300">Mes</label>
+                    <select name="mes" id="mes" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        {% for i in "123456789012"|make_list %}
+                            <option value="{{ forloop.counter }}" {% if selected_month == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="anio" class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
+                    <select name="anio" id="anio" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        {% for year in years %}
+                            <option value="{{ year.year }}" {% if selected_year == year.year %}selected{% endif %}>{{ year.year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="mt-5 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Filtrar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     {% if recibos %}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -49,7 +75,7 @@
         <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <i data-lucide="file-text" class="mx-auto h-12 w-12 text-gray-400"></i>
             <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Sin Recibos</h3>
-            <p class="mt-1 text-sm text-gray-500">Este empleado no tiene recibos de sueldo registrados.</p>
+            <p class="mt-1 text-sm text-gray-500">Este empleado no tiene recibos de sueldo registrados para el período seleccionado.</p>
         </div>
     {% endif %}
 </div>

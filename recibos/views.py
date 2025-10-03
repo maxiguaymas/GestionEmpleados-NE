@@ -6,6 +6,7 @@ from .forms import ReciboSueldoForm
 from empleados.views import es_admin
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
+import datetime
 
 @user_passes_test(es_admin)
 def cargar_recibo(request):
@@ -43,22 +44,49 @@ def mis_recibos(request):
     try:
         empleado = request.user.empleado
         recibos = Recibo.objects.filter(id_empl=empleado).order_by('-fecha_emision')
+        
+        # Lógica de filtrado
+        mes = request.GET.get('mes')
+        anio = request.GET.get('anio')
+        
+        years = Recibo.objects.filter(id_empl=empleado).dates('fecha_emision', 'year').distinct()
+        
+        if mes and anio:
+            recibos = recibos.filter(fecha_emision__month=mes, fecha_emision__year=anio)
+
     except AttributeError:
         recibos = Recibo.objects.none()
         empleado = None
+        years = []
+
     return render(request, 'mis_recibos.html', {
         'recibos': recibos,
         'empleado_seleccionado': empleado,
+        'years': years,
+        'selected_month': int(mes) if mes else None,
+        'selected_year': int(anio) if anio else None,
     })
 
 def ver_recibos_empleado(request, empleado_id):
-    print(f"DEBUG: Accediendo a ver_recibos_empleado para empleado_id: {empleado_id}")
     empleado = get_object_or_404(Empleado, pk=empleado_id)
     recibos = Recibo.objects.filter(id_empl=empleado).order_by('-fecha_emision')
+
+    # Lógica de filtrado
+    mes = request.GET.get('mes')
+    anio = request.GET.get('anio')
+
+    years = Recibo.objects.filter(id_empl=empleado).dates('fecha_emision', 'year').distinct()
+
+    if mes and anio:
+        recibos = recibos.filter(fecha_emision__month=mes, fecha_emision__year=anio)
+
     return render(request, 'ver_recibos_empleado.html', {
         'empleado': empleado,
         'recibos': recibos,
-        'empleado_seleccionado': empleado, # For consistency with other views
+        'empleado_seleccionado': empleado,
+        'years': years,
+        'selected_month': int(mes) if mes else None,
+        'selected_year': int(anio) if anio else None,
     })
 
 def api_ver_recibos_empleado(request, dni):
