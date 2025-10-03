@@ -67,6 +67,16 @@ def crear_horario(request):
 
     return redirect('horarios_admin')
 
+from django.shortcuts import get_object_or_404, render, redirect
+from .forms import HorarioForm, HorarioPresetForm, AsignarHorarioForm
+from empleados.models import Horarios, Empleado, AsignacionHorario, Notificacion
+from django.contrib import messages
+from empleados.views import es_admin
+from django.contrib.auth.decorators import user_passes_test, login_required
+from django.http import JsonResponse
+from django.db.models import Count
+from django.urls import reverse
+
 @user_passes_test(es_admin)
 def asignar_horario(request):
     """
@@ -106,6 +116,16 @@ def asignar_horario(request):
             ]
             AsignacionHorario.objects.bulk_create(nuevas_asignaciones)
 
+            # Create notifications for newly assigned employees
+            link = reverse('mis_horarios_empleado')
+            for empleado in empleados_a_asignar:
+                mensaje = f"Se te ha asignado un nuevo horario: {horario.nombre}."
+                Notificacion.objects.create(
+                    id_user=empleado.user,
+                    mensaje=mensaje,
+                    enlace=link
+                )
+
         messages.success(request, f'Se actualizaron las asignaciones para el horario "{horario.nombre}".')
         return redirect('horarios_admin')
 
@@ -120,18 +140,17 @@ def ver_horarios_asig(request):
 @login_required
 def mis_horarios_empleado(request):
     """
-    Muestra el horario asignado al empleado que ha iniciado sesión.
+    Muestra los horarios asignados al empleado que ha iniciado sesión.
     """
     try:
-        # Accedemos al empleado a través de la relación inversa del usuario
         empleado = request.user.empleado
-        # Usamos first() porque asumimos que un empleado solo tiene una asignación activa
-        asignacion = AsignacionHorario.objects.filter(id_empl=empleado, estado=True).select_related('id_horario').first()
+        # Filtramos todas las asignaciones activas
+        asignaciones = AsignacionHorario.objects.filter(id_empl=empleado, estado=True).select_related('id_horario')
     except Empleado.DoesNotExist:
-        asignacion = None
+        asignaciones = []
     
     context = {
-        'asignacion': asignacion,
+        'asignaciones': asignaciones,
     }
     return render(request, 'mis_horarios.html', context)
 

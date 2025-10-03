@@ -4,7 +4,8 @@ from django.db import transaction
 from django.contrib import messages
 from empleados.views import es_admin
 from django.core.exceptions import PermissionDenied
-from empleados.models import Incidente, IncidenteEmpleado, Empleado, SancionEmpleado, Resolucion
+from empleados.models import Incidente, IncidenteEmpleado, Empleado, SancionEmpleado, Resolucion, Notificacion
+from django.urls import reverse
 from .forms import IncidenteForm
 from sanciones.forms import ResolucionForm
 from sanciones.forms import SancionMasivaForm
@@ -52,6 +53,15 @@ def registrar_incidente(request):
                     responsable_registro=responsable,
                     estado='ABIERTO' # Corregido
                 )
+                
+                # Create notification
+                mensaje = f"Has sido involucrado en un nuevo incidente: {incidente.tipo_incid}."
+                link = reverse('detalle_incidente', args=[incidente.id])
+                Notificacion.objects.create(
+                    id_user=empleado.user,
+                    mensaje=mensaje,
+                    enlace=link
+                )
             
             messages.success(request, 'El incidente ha sido registrado exitosamente.')
             return redirect('ver_incidentes')
@@ -94,10 +104,20 @@ def corregir_incidente(request, incidente_id):
                     estado='ABIERTO'
                 )
 
-            # Cerrar los registros del incidente original
-            IncidenteEmpleado.objects.filter(id_incidente=incidente_original).update(estado='CERRADO')
+            # Crear una resolución para el incidente original
+            resolucion_cierre = Resolucion.objects.create(
+                descripcion=f"Incidente cerrado automáticamente por corrección. Ver incidente #{nuevo_incidente.id}.",
+                fecha_resolucion=timezone.now().date(),
+                responsable=request.user.get_full_name() or request.user.username
+            )
 
-            messages.success(request, 'El incidente ha sido corregido exitosamente. Se ha creado un nuevo incidente.')
+            # Cerrar los registros del incidente original y asociar la resolución
+            IncidenteEmpleado.objects.filter(id_incidente=incidente_original).update(
+                estado='CERRADO',
+                id_resolucion=resolucion_cierre
+            )
+
+            messages.success(request, 'El incidente ha sido corregido exitosamente. Se ha creado un nuevo incidente y el original ha sido cerrado.')
             return redirect('detalle_incidente', incidente_id=nuevo_incidente.id)
     else:
         # Pre-rellenar el formulario con los datos del incidente original
@@ -208,17 +228,19 @@ def resolver_incidente(request, incidente_id):
     form = ResolucionForm(request.POST)
 
     if form.is_valid():
-        resolucion = form.save(commit=False)
-        resolucion.responsable = request.user.get_full_name() or request.user.username
-        resolucion.fecha_resolucion = timezone.now().date()
-        resolucion.save()
-
-        IncidenteEmpleado.objects.filter(id_incidente=incidente).update(id_resolucion=resolucion)
-
         action = request.POST.get('action')
         if action == 'sancionar':
+            # Store resolution description in session and redirect to apply sanctions
+            request.session['resolucion_descripcion'] = form.cleaned_data['descripcion']
             return redirect('aplicar_sancion_masiva', incidente_id=incidente.id)
         else:
+            # Just close the incident
+            resolucion = form.save(commit=False)
+            resolucion.responsable = request.user.get_full_name() or request.user.username
+            resolucion.fecha_resolucion = timezone.now().date()
+            resolucion.save()
+
+            IncidenteEmpleado.objects.filter(id_incidente=incidente).update(id_resolucion=resolucion)
             messages.success(request, 'El incidente ha sido marcado como resuelto.')
             return redirect('detalle_incidente', incidente_id=incidente.id)
     

@@ -1,21 +1,33 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from empleados.models import Recibo_Sueldos as Recibo, Empleado
+from empleados.models import Recibo_Sueldos as Recibo, Empleado, Notificacion
 from .forms import ReciboSueldoForm
 from empleados.views import es_admin
 from django.contrib.auth.decorators import user_passes_test
+from django.urls import reverse
 
 @user_passes_test(es_admin)
 def cargar_recibo(request):
     if not request.user.is_authenticated:
-        messages.error(request, "Debes iniciar sesiÃ³n para cargar un recibo.")
+        messages.error(request, "Debes iniciar sesión para cargar un recibo.")
         return redirect('login')
     
     if request.method == 'POST':
         form = ReciboSueldoForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            recibo = form.save()
+            
+            # Crear notificación
+            empleado = recibo.id_empl
+            mensaje = f"Se ha cargado tu recibo de sueldo para el período {recibo.periodo}."
+            link = reverse('mis_recibos')
+            Notificacion.objects.create(
+                id_user=empleado.user,
+                mensaje=mensaje,
+                enlace=link
+            )
+
             messages.success(request, "Recibo cargado correctamente.")
             return redirect('recibos_admin')
     else:
