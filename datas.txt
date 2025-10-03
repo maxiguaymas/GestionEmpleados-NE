@@ -23,3 +23,13 @@ RequisitoDocumento.objects.create(nombre_doc="Afiliación a Obra Social", estado
 RequisitoDocumento.objects.create(nombre_doc="Declaración Jurada de Cargas de Familia (F.572 AFIP)", estado_doc=True, obligatorio=False)
 RequisitoDocumento.objects.create(nombre_doc="Copia de la libreta de asignaciones familiares", estado_doc=True, obligatorio=False)
 RequisitoDocumento.objects.create(nombre_doc="Títulos académicos o certificados de estudios", estado_doc=True, obligatorio=False)
+
+
+from empleados.models import Incidente
+Incidente.objects.bulk_create([
+    Incidente(id=1, descripcion_incid="Incidentes relacionados con conducta y disciplina.", tipo_incid="Conducta y Disciplina", estado_incid=1),
+    Incidente(id=2, descripcion_incid="Incidentes relacionados con seguridad y salud.", tipo_incid="Seguridad y Salud", estado_incid=1),
+    Incidente(id=3, descripcion_incid="Incidentes relacionados con asistencia y desempeño.", tipo_incid="Asistencia y Desempeño", estado_incid=1),
+    Incidente(id=4, descripcion_incid="Incidentes relacionados con operativos y de propiedad.", tipo_incid="Operativos y de Propiedad", estado_incid=1),
+    Incidente(id=5, descripcion_incid="Incidentes relacionados con seguridad de la información.", tipo_incid="Seguridad de la Información", estado_incid=1),
+])

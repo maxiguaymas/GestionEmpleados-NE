@@ -12,7 +12,7 @@ def centro_notificaciones(request):
 
     notificaciones_list = Notificacion.objects.filter(id_user=request.user)
 
-    return render(request, 'notificaciones/centro_notificaciones.html', {
+    return render(request, 'centro_notificaciones.html', {
         'notificaciones_list': notificaciones_list,
         'just_read_ids': no_leidas_ids, # Pasamos los IDs a la plantilla
     })

@@ -15,7 +15,9 @@
                         <i data-lucide="history" class="w-4 h-4"></i> Ver Incidente Original
                     </a>
                 {% endif %}
+                {% if not resolucion %}
                 <a href="{% url 'corregir_incidente' incidente.id %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700"><i data-lucide="pencil" class="w-4 h-4"></i>Corregir</a>
+                {% endif %}
             </div>
         </div>
 

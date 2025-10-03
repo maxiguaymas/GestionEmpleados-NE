@@ -7,16 +7,16 @@
 
 {% block content %}
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-    {% if asignacion %}
-    <h3 class="text-lg font-semibold mb-4">Tu Horario Asignado</h3>
-    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-        <h4 class="font-bold text-xl">Turno {{ asignacion.id_horario.get_turno_display }}</h4>
-        <p class="text-gray-600 dark:text-gray-400">{{ asignacion.id_horario.hora_entrada|time:"H:i" }} - {{
-            asignacion.id_horario.hora_salida|time:"H:i" }}</p>
+    {% if asignaciones %}
+    <h3 class="text-lg font-semibold mb-4">Tus Horarios Asignados</h3>
+    {% for asignacion in asignaciones %}
+    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4">
+        <h4 class="font-bold text-xl">{{ asignacion.id_horario.nombre }}</h4>
+        <p class="text-gray-600 dark:text-gray-400">{{ asignacion.id_horario.hora_entrada|time:"H:i" }} - {{ asignacion.id_horario.hora_salida|time:"H:i" }}</p>
         <p class="text-sm text-gray-500">{{ asignacion.id_horario.get_dia_display }}</p>
     </div>
+    {% endfor %}
     {% else %}
-
     <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
         <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes horarios asignados</h3>

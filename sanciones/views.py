@@ -1,12 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from empleados.views import es_admin
-from empleados.models import Empleado, SancionEmpleado, IncidenteEmpleado, Incidente, Sancion, Resolucion
+from empleados.models import Empleado, SancionEmpleado, IncidenteEmpleado, Incidente, Sancion, Resolucion, Notificacion
 from .forms import SancionEmpleadoForm, SancionMasivaForm, ResolucionForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.urls import reverse
+from django.utils import timezone
 
 @login_required
 def sanciones_empleado(request, empleado_id):
@@ -45,8 +46,16 @@ def agregar_sancion_empleado(request):
             sancion_empleado.id_empl = empleado
             sancion_empleado.responsable = request.user.get_full_name() or request.user.username
             sancion_empleado.save()
+
+            # Crear notificación
+            Notificacion.objects.create(
+                id_user=empleado.user,
+                mensaje=f"Se le ha registrado una nueva sanción: {sancion_empleado.id_sancion.nombre}",
+                enlace=reverse('detalle_sancion', args=[sancion_empleado.id])
+            )
+
             messages.success(request, f"Sanción agregada exitosamente a {empleado.nombre} {empleado.apellido}.")
-            return redirect('detalle', sancion_empleado.id)
+            return redirect('detalle_sancion', sancion_empleado.id)
     # Si se encontró un empleado (por GET), mostrar el formulario para llenarlo
     elif empleado:
         form = SancionEmpleadoForm()
@@ -77,6 +86,7 @@ def aplicar_sancion_masiva(request, incidente_id):
     if request.method == 'POST':
         forms = [SancionEmpleadoForm(request.POST, prefix=str(inv.id)) for inv in involucrados_a_sancionar]
         if all(form.is_valid() for form in forms):
+            sanciones_creadas = False
             for i, form in enumerate(forms):
                 # Only save if a sanction type was selected
                 if form.cleaned_data.get('id_sancion'):
@@ -86,6 +96,28 @@ def aplicar_sancion_masiva(request, incidente_id):
                     sancion.incidente_asociado = involucrado
                     sancion.responsable = request.user.get_full_name() or request.user.username
                     sancion.save()
+
+                    # Crear notificación
+                    Notificacion.objects.create(
+                        id_user=sancion.id_empl.user,
+                        mensaje=f"Se le ha registrado una nueva sanción: {sancion.id_sancion.nombre}",
+                        enlace=reverse('detalle_sancion', args=[sancion.id])
+                    )
+
+                    sanciones_creadas = True
+            
+            # If at least one sanction was created, create the resolution
+            if sanciones_creadas:
+                resolucion_descripcion = request.session.get('resolucion_descripcion')
+                if resolucion_descripcion:
+                    resolucion = Resolucion.objects.create(
+                        descripcion=resolucion_descripcion,
+                        responsable=request.user.get_full_name() or request.user.username,
+                        fecha_resolucion=timezone.now().date()
+                    )
+                    involucrados_qs.update(id_resolucion=resolucion)
+                    del request.session['resolucion_descripcion']
+
             messages.success(request, "Sanciones aplicadas correctamente.")
             return redirect('detalle_incidente', incidente_id=incidente.id)
     else:
