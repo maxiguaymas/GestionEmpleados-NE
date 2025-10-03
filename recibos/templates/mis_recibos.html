@@ -6,7 +6,32 @@
 {% block page_title %}Mis Recibos{% endblock %}
 
 {% block content %}
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm ">
+    <div class="p-4">
+        <form method="get" action="">
+            <div class="flex items-center space-x-4">
+                <div>
+                    <label for="mes" class="text-sm font-medium text-gray-700 dark:text-gray-300">Mes</label>
+                    <select name="mes" id="mes" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        {% for i in "123456789012"|make_list %}
+                            <option value="{{ forloop.counter }}" {% if selected_month == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="anio" class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
+                    <select name="anio" id="anio" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        {% for year in years %}
+                            <option value="{{ year.year }}" {% if selected_year == year.year %}selected{% endif %}>{{ year.year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="mt-5 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Filtrar</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
     <table class="w-full text-left">
         <thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300">
@@ -45,8 +70,8 @@
     {% if not recibos %}
     <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
-        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes recibos cargados.</h3>
-        <p class="mt-1 text-sm text-gray-500">Aun no tienes recibos cargados.</p>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No se encontraron recibos con los filtros seleccionados.</h3>
+        <p class="mt-1 text-sm text-gray-500">Prueba con otros filtros o revisa si tienes recibos cargados.</p>
     </div>
     {% endif %}
 </div>
