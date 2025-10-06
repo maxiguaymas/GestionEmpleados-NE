@@ -72,7 +72,7 @@ def crear_empleado(request):
         else:
             return render(request, 'crear_empleado.html', {'form': form, 'error': error or 'Por favor corrige los errores.', 'requisitos': requisitos})
 
-    return render(request, 'crear_empleado.html', {'form': form, 'requisitos': requisitos})
+    return render(request, 'crear_empleado.html', {'form': form, 'requisitos': requisitos, 'page_title': 'Crear Empleado'})
 
 
 @login_required
@@ -116,6 +116,7 @@ def editar_empleado(request, id):
         'documentos': documentos,
         'requisitos': requisitos,
         'legajo': legajo,
+        'page_title': 'Editar Empleado',
     })
 
 @login_required
@@ -131,7 +132,7 @@ def eliminar_empleado(request, id):
 @user_passes_test(es_admin)
 def ver_empleados(request):
     empleados = Empleado.objects.filter(fecha_egreso__isnull=True)
-    return render(request, 'empleados.html', {'empleados': empleados})
+    return render(request, 'empleados.html', {'empleados': empleados, 'page_title': 'Empleados'})
 
 @login_required
 def ver_empleado(request, id):
@@ -147,6 +148,7 @@ def ver_empleado(request, id):
         'empleado': empleado,
         'legajo': legajo,
         'documentos': documentos,
+        'page_title': 'Ver Empleado',
     })
 
 @login_required
@@ -180,6 +182,7 @@ def ver_perfil(request):
         'empleado': empleado,
         'legajo': legajo,
         'documentos_status': documentos_status,
+        'page_title': 'Mi Perfil',
     }
     return render(request, 'perfil.html', context)
 
@@ -232,6 +235,7 @@ def dashboard(request):
         'total_empleados': total_empleados,
         'asistencia_hoy': asistencia_hoy,
         'sanciones_mes': sanciones_mes,
+        'page_title': 'Dashboard',
     }
     return render(request, 'dashboard.html', context)
 
@@ -240,7 +244,7 @@ def employee_dashboard(request):
     if request.user.is_staff:
         # Maybe redirect to admin dashboard or show a message
         pass
-    return render(request, 'dashboard_empleado.html')
+    return render(request, 'dashboard_empleado.html', {'page_title': 'Dashboard Empleado'})
 
 @login_required
 def switch_to_employee_view(request):

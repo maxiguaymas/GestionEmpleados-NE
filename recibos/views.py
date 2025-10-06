@@ -33,12 +33,12 @@ def cargar_recibo(request):
             return redirect('recibos_admin')
     else:
         form = ReciboSueldoForm()
-    return render(request, 'recibos.html', {'form': form})
+    return render(request, 'recibos.html', {'form': form, 'page_title': 'Cargar Recibo'})
 
 @user_passes_test(es_admin)
 def recibos_admin(request):
     form = ReciboSueldoForm()
-    return render(request, 'recibos.html', {'form': form})
+    return render(request, 'recibos.html', {'form': form, 'page_title': 'Recibos'})
 
 def mis_recibos(request):
     try:
@@ -65,6 +65,7 @@ def mis_recibos(request):
         'years': years,
         'selected_month': int(mes) if mes else None,
         'selected_year': int(anio) if anio else None,
+        'page_title': 'Mis Recibos',
     })
 
 def ver_recibos_empleado(request, empleado_id):
@@ -87,6 +88,7 @@ def ver_recibos_empleado(request, empleado_id):
         'years': years,
         'selected_month': int(mes) if mes else None,
         'selected_year': int(anio) if anio else None,
+        'page_title': 'Recibos del Empleado',
     })
 
 def api_ver_recibos_empleado(request, dni):
