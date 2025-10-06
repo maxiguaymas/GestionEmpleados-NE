@@ -58,15 +58,17 @@
         {% if user|is_admin %}
             {% if view_as_employee %}
             <a href="{% url 'switch_to_admin_view' %}" id="role-switcher"
-                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2 text-sm whitespace-nowrap">
+                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2 text-sm whitespace-nowrap"
+                title="Modo Admin">
                 <i data-lucide="user-cog"></i>
-                <span>Modo Admin</span>
+                <span class="hidden sm:inline">Modo Admin</span>
             </a>
             {% else %}
             <a href="{% url 'switch_to_employee_view' %}" id="role-switcher"
-                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2 text-sm whitespace-nowrap">
+                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2 text-sm whitespace-nowrap"
+                title="Modo Empleado">
                 <i data-lucide="user"></i>
-                <span>Modo Empleado</span>
+                <span class="hidden sm:inline">Modo Empleado</span>
             </a>
             {% endif %}
         {% endif %}
