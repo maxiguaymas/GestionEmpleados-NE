@@ -127,7 +127,7 @@ def eliminar_empleado(request, id):
     empleado.fecha_egreso = timezone.now().date()
     empleado.estado = 'Inactivo'
     empleado.save()
-    return redirect('ver_empleados')
+    return redirect('empleados')
 
 @login_required
 @user_passes_test(es_admin)
