@@ -6,6 +6,60 @@
 {% block page_title %}Mis Sanciones{% endblock %}
 
 {% block content %}
+<!-- Filter Form -->
+<form method="get" action="{% url 'mis_sanciones' %}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <!-- Filter by Period -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
+            <div class="flex gap-2 mt-1">
+                <select name="month" id="month" class="w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                    <option value="">Mes</option>
+                    <option value="1" {% if filter_values.month == '1' %}selected{% endif %}>Enero</option>
+                    <option value="2" {% if filter_values.month == '2' %}selected{% endif %}>Febrero</option>
+                    <option value="3" {% if filter_values.month == '3' %}selected{% endif %}>Marzo</option>
+                    <option value="4" {% if filter_values.month == '4' %}selected{% endif %}>Abril</option>
+                    <option value="5" {% if filter_values.month == '5' %}selected{% endif %}>Mayo</option>
+                    <option value="6" {% if filter_values.month == '6' %}selected{% endif %}>Junio</option>
+                    <option value="7" {% if filter_values.month == '7' %}selected{% endif %}>Julio</option>
+                    <option value="8" {% if filter_values.month == '8' %}selected{% endif %}>Agosto</option>
+                    <option value="9" {% if filter_values.month == '9' %}selected{% endif %}>Septiembre</option>
+                    <option value="10" {% if filter_values.month == '10' %}selected{% endif %}>Octubre</option>
+                    <option value="11" {% if filter_values.month == '11' %}selected{% endif %}>Noviembre</option>
+                    <option value="12" {% if filter_values.month == '12' %}selected{% endif %}>Diciembre</option>
+                </select>
+                <select name="year" id="year" class="w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                    <option value="">Año</option>
+                    {% for y in year_options %}
+                    <option value="{{ y }}" {% if filter_values.year|add:0 == y %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Filter by Type -->
+        <div>
+            <label for="tipo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de Sanción</label>
+            <select name="tipo" id="tipo" class="mt-1 w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                <option value="">Todos</option>
+                {% for tipo in tipos_sancion %}
+                <option value="{{ tipo }}" {% if filter_values.tipo == tipo %}selected{% endif %}>{{ tipo|capfirst }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex gap-2">
+            <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
+                <i data-lucide="filter"></i><span>Filtrar</span>
+            </button>
+            <a href="{% url 'mis_sanciones' %}" class="w-full bg-gray-300 text-gray-800 px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">
+                <i data-lucide="rotate-cw"></i><span>Limpiar</span>
+            </a>
+        </div>
+    </div>
+</form>
+
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for sancion in sanciones %}
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col">
@@ -23,7 +77,7 @@
     </div>
     {% empty %}
     <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
+        <i data-lucide="shield-off" class="mx-auto h-12 w-12 text-gray-400"></i>
         <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes sanciones registradas</h3>
         <p class="mt-1 text-sm text-gray-500">No tienes ninguna sanción registrada.</p>
     </div>
