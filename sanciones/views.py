@@ -226,12 +226,39 @@ def detalle_sancion(request, sancion_id):
 def mis_sanciones(request):
     try:
         empleado = request.user.empleado
-        sanciones = SancionEmpleado.objects.filter(id_empl=empleado).select_related('id_sancion').order_by('-fecha_inicio')
+        sanciones_query = SancionEmpleado.objects.filter(id_empl=empleado).select_related('id_sancion').order_by('-fecha_inicio')
     except Empleado.DoesNotExist:
-        sanciones = SancionEmpleado.objects.none()
-    
+        sanciones_query = SancionEmpleado.objects.none()
+
+    # Get filter parameters
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    tipo_sancion = request.GET.get('tipo')
+
+    # Apply filters
+    if month and year:
+        try:
+            sanciones_query = sanciones_query.filter(
+                fecha_inicio__month=int(month),
+                fecha_inicio__year=int(year)
+            )
+        except (ValueError, TypeError):
+            pass
+
+    if tipo_sancion:
+        sanciones_query = sanciones_query.filter(id_sancion__tipo__iexact=tipo_sancion)
+
+    # Get distinct sanction types for the filter dropdown
+    tipos_sancion = Sancion.objects.values_list('tipo', flat=True).distinct()
+
+    # Get the range of years present in the data for the current employee
+    years = SancionEmpleado.objects.filter(id_empl=request.user.empleado).dates('fecha_inicio', 'year').reverse() if hasattr(request.user, 'empleado') else []
+
     context = {
-        'sanciones': sanciones,
+        'sanciones': sanciones_query,
         'page_title': 'Mis Sanciones',
+        'filter_values': request.GET,
+        'tipos_sancion': tipos_sancion,
+        'year_options': [d.year for d in years]
     }
     return render(request, 'mis_sanciones.html', context)
