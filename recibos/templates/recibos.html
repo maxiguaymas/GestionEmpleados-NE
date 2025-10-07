@@ -70,7 +70,26 @@
         </div>
         <form action="{% url 'cargar_recibo' %}" method="post" enctype="multipart/form-data" class="mt-6 space-y-4">
             {% csrf_token %}
-            {{ form.as_p }}
+            <div>
+                <label for="{{ form.id_empl.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.id_empl.label }}</label>
+                {{ form.id_empl }}
+            </div>
+            <div>
+                <label for="{{ form.fecha_emision.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.fecha_emision.label }}</label>
+                {{ form.fecha_emision }}
+            </div>
+            <div>
+                <label for="{{ form.periodo.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.periodo.label }}</label>
+                {{ form.periodo }}
+            </div>
+            <div>
+                <label for="{{ form.ruta_pdf.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.ruta_pdf.label }}</label>
+                {{ form.ruta_pdf }}
+            </div>
+            <div>
+                <label for="{{ form.ruta_imagen.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.ruta_imagen.label }}</label>
+                {{ form.ruta_imagen }}
+            </div>
             <div class="pt-4 flex justify-end gap-3">
                 <button type="button" onclick="closeModal('upload-payslip-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
                 <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar Recibo</button>
@@ -82,6 +101,13 @@
 
 {% block page_scripts %}
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('upload-payslip-modal');
+        const formFields = modal.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="date"], input[type="tel"], select, textarea');
+        formFields.forEach(field => {
+            field.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'dark:border-gray-600', 'dark:bg-gray-700', 'shadow-sm');
+        });
+    });
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
