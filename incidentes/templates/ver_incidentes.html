@@ -11,47 +11,117 @@
         </a>
     </div>
 
+    <!-- Filter Form -->
+    <form method="get" action="{% url 'ver_incidentes' %}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <!-- Search by Name/DNI -->
+            <div>
+                <label for="q" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Buscar por Empleado</label>
+                <input type="text" name="q" id="q" value="{{ filter_values.q|default:'' }}" placeholder="Nombre o DNI..." class="mt-1 w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+            </div>
+
+            <!-- Filter by Period -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
+                <div class="flex gap-2 mt-1">
+                    <select name="month" id="month" class="w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                        <option value="">Mes</option>
+                        <option value="1" {% if filter_values.month == '1' %}selected{% endif %}>Enero</option>
+                        <option value="2" {% if filter_values.month == '2' %}selected{% endif %}>Febrero</option>
+                        <option value="3" {% if filter_values.month == '3' %}selected{% endif %}>Marzo</option>
+                        <option value="4" {% if filter_values.month == '4' %}selected{% endif %}>Abril</option>
+                        <option value="5" {% if filter_values.month == '5' %}selected{% endif %}>Mayo</option>
+                        <option value="6" {% if filter_values.month == '6' %}selected{% endif %}>Junio</option>
+                        <option value="7" {% if filter_values.month == '7' %}selected{% endif %}>Julio</option>
+                        <option value="8" {% if filter_values.month == '8' %}selected{% endif %}>Agosto</option>
+                        <option value="9" {% if filter_values.month == '9' %}selected{% endif %}>Septiembre</option>
+                        <option value="10" {% if filter_values.month == '10' %}selected{% endif %}>Octubre</option>
+                        <option value="11" {% if filter_values.month == '11' %}selected{% endif %}>Noviembre</option>
+                        <option value="12" {% if filter_values.month == '12' %}selected{% endif %}>Diciembre</option>
+                    </select>
+                    <select name="year" id="year" class="w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                        <option value="">Año</option>
+                        {% for y in year_options %}
+                        <option value="{{ y }}" {% if filter_values.year|add:0 == y %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Filter by Status -->
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                <select name="status" id="status" class="mt-1 w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                    <option value="">Todos</option>
+                    <option value="ABIERTO" {% if filter_values.status == 'ABIERTO' %}selected{% endif %}>Abierto</option>
+                    <option value="CERRADO" {% if filter_values.status == 'CERRADO' %}selected{% endif %}>Cerrado</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex gap-2">
+                <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
+                    <i data-lucide="filter"></i><span>Filtrar</span>
+                </button>
+                <a href="{% url 'ver_incidentes' %}" class="w-full bg-gray-300 text-gray-800 px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500">
+                    <i data-lucide="rotate-cw"></i><span>Limpiar</span>
+                </a>
+            </div>
+        </div>
+    </form>
+
     {% if incidentes_list %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="incidentesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for item in incidentes_list %}
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col">
-                    <div class="flex-1">
-                        <div class="flex justify-between items-start">
-                            <h3 class="font-bold text-lg mb-1">{{ item.incidente.tipo_incid }}</h3>
-                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ item.fecha_ocurrencia|date:"d/m/Y" }}</span>
+                <div class="incidente-card bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 flex flex-col border dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div class="flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-gray-100">{{ item.incidente.tipo_incid }}</h3>
+                            {% if item.estado == 'ABIERTO' %}
+                                <span class="px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full dark:bg-yellow-900 dark:text-yellow-300">Abierto</span>
+                            {% elif item.estado == 'CERRADO' %}
+                                <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded-full dark:bg-green-900 dark:text-green-300">Cerrado</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-200 rounded-full dark:bg-gray-700 dark:text-gray-300">{{ item.estado|capfirst }}</span>
+                            {% endif %}
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{{ item.incidente.descripcion_incid }}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 h-10 overflow-hidden">{{ item.incidente.descripcion_incid }}</p>
                     </div>
-                    <div class="border-t dark:border-gray-700 pt-4 flex justify-between items-center">
-                        <div class="flex items-center">
-                            <span class="text-sm mr-2 text-gray-500">Involucrados:</span>
-                            <div class="flex -space-x-2">
-                                {% for empleado in item.involucrados %}
-                                    {% if empleado.ruta_foto %}
-                                        <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800" src="{{ empleado.ruta_foto.url }}" alt="{{ empleado.nombre }}" title="{{ empleado.nombre }} {{ empleado.apellido }}">
-                                    {% else %}
-                                        <span class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500 text-xs" title="{{ empleado.nombre }} {{ empleado.apellido }}">
-                                            {{ empleado.nombre|slice:":1" }}{{ empleado.apellido|slice:":1" }}
-                                        </span>
-                                    {% endif %}
-                                {% endfor %}
+                    <div class="border-t dark:border-gray-700 pt-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Involucrados:</span>
+                                <div class="flex -space-x-2 mt-2">
+                                    {% for empleado in item.involucrados %}
+                                        {% if empleado.ruta_foto %}
+                                            <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800" src="{{ empleado.ruta_foto.url }}" alt="{{ empleado.nombre }}" title="{{ empleado.nombre }} {{ empleado.apellido }}">
+                                        {% else %}
+                                            <span class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500 text-xs" title="{{ empleado.nombre }} {{ empleado.apellido }}">
+                                                {{ empleado.nombre|slice:":1" }}{{ empleado.apellido|slice:":1" }}
+                                            </span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ item.fecha_ocurrencia|date:"d/m/Y" }}</span>
+                                <a href="{% url 'detalle_incidente' item.incidente.id %}" class="block mt-2 text-sm font-semibold text-red-600 hover:text-red-800 dark:hover:text-red-400">Ver Detalle <i data-lucide="arrow-right" class="inline-block h-4 w-4"></i></a>
                             </div>
                         </div>
-                        <a href="{% url 'detalle_incidente' item.incidente.id %}" class="text-sm font-semibold text-red-600 hover:underline">Ver Detalle</a>
                     </div>
                 </div>
             {% endfor %}
+        </div>
+        <div id="noResultsMessage" class="hidden text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <i data-lucide="search-x" class="mx-auto h-12 w-12 text-gray-400"></i>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No se encontraron resultados</h3>
+            <p class="mt-1 text-sm text-gray-500">Intenta con otros términos de búsqueda o limpia los filtros.</p>
         </div>
     {% else %}
         <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
             <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No hay incidentes</h3>
-            <p class="mt-1 text-sm text-gray-500">Aún no se han registrado incidentes.</p>
-            <div class="mt-6">
-                <a href="{% url 'registrar_incidente' %}" class="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700 max-w-xs mx-auto">
-                    <i data-lucide="plus"></i><span>Registrar Primer Incidente</span>
-                </a>
-            </div>
+            <p class="mt-1 text-sm text-gray-500">No se encontraron incidentes con los filtros aplicados. Puedes <a href="{% url 'registrar_incidente' %}" class="text-red-500 hover:underline">registrar uno nuevo</a> o <a href="{% url 'ver_incidentes' %}" class="text-red-500 hover:underline">limpiar los filtros</a>.</p>
         </div>
     {% endif %}
 </div>
