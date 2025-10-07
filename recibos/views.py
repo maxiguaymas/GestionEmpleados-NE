@@ -33,12 +33,12 @@ def cargar_recibo(request):
             return redirect('recibos_admin')
     else:
         form = ReciboSueldoForm()
-    return render(request, 'recibos.html', {'form': form})
+    return render(request, 'recibos.html', {'form': form, 'page_title': 'Cargar Recibo'})
 
 @user_passes_test(es_admin)
 def recibos_admin(request):
     form = ReciboSueldoForm()
-    return render(request, 'recibos.html', {'form': form})
+    return render(request, 'recibos.html', {'form': form, 'page_title': 'Recibos'})
 
 def mis_recibos(request):
     try:
@@ -65,6 +65,7 @@ def mis_recibos(request):
         'years': years,
         'selected_month': int(mes) if mes else None,
         'selected_year': int(anio) if anio else None,
+        'page_title': 'Mis Recibos',
     })
 
 def ver_recibos_empleado(request, empleado_id):
@@ -87,19 +88,31 @@ def ver_recibos_empleado(request, empleado_id):
         'years': years,
         'selected_month': int(mes) if mes else None,
         'selected_year': int(anio) if anio else None,
+        'page_title': 'Recibos del Empleado',
     })
 
 def api_ver_recibos_empleado(request, dni):
     try:
         empleado = Empleado.objects.get(dni=dni)
         recibos = Recibo.objects.filter(id_empl=empleado).order_by('-fecha_emision')
+
+        # Lógica de filtrado
+        mes = request.GET.get('mes')
+        anio = request.GET.get('anio')
+
+        years = Recibo.objects.filter(id_empl=empleado).dates('fecha_emision', 'year').distinct()
+
+        if mes and anio:
+            recibos = recibos.filter(fecha_emision__month=mes, fecha_emision__year=anio)
+            
         data = {
             'status': 'success',
             'empleado': {
                 'nombre': empleado.nombre,
                 'apellido': empleado.apellido,
             },
-            'recibos': list(recibos.values('fecha_emision', 'periodo', 'ruta_pdf', 'ruta_imagen'))
+            'recibos': list(recibos.values('fecha_emision', 'periodo', 'ruta_pdf', 'ruta_imagen')),
+            'years': [year.year for year in years]
         }
         return JsonResponse(data)
     except Empleado.DoesNotExist:

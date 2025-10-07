@@ -33,6 +33,7 @@ def horarios_admin(request):
         # Para la pestaña "Crear Horario"
         'preset_form': HorarioPresetForm(),
         'custom_form': HorarioForm(),
+        'page_title': 'Horarios',
     }
     return render(request, 'horarios.html', context)
 
@@ -151,6 +152,7 @@ def mis_horarios_empleado(request):
     
     context = {
         'asignaciones': asignaciones,
+        'page_title': 'Mis Horarios',
     }
     return render(request, 'mis_horarios.html', context)
 
@@ -180,5 +182,6 @@ def ver_horarios_empleado(request, empleado_id):
     context = {
         'empleado': empleado,
         'asignaciones': asignaciones,
+        'page_title': 'Horarios del Empleado',
     }
     return render(request, 'ver_horarios_empleado.html', context)
