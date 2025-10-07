@@ -22,7 +22,8 @@ def vista_registrar_rostro(request):
     empleados_registrados_ids = Rostro.objects.values_list('id_empl_id', flat=True)
     empleados_sin_rostro = Empleado.objects.exclude(id__in=empleados_registrados_ids)
     context = {
-        'empleados': empleados_sin_rostro
+        'empleados': empleados_sin_rostro,
+        'page_title': 'Asistencias'
     }
     return render(request, 'registrar_rostro.html', context)
 
@@ -131,7 +132,8 @@ def ver_asistencias_empleado(request, empleado_id):
     
     context = {
         'empleado': empleado,
-        'asistencias': asistencias
+        'asistencias': asistencias,
+        'page_title': 'Asistencias'
     }
     return render(request, 'ver_asistencias.html', context)
 
@@ -142,6 +144,7 @@ def asistencia_admin(request):
     
     context = {
         'empleados_sin_rostro': empleados_sin_rostro,
+        'page_title': 'Asistencias'
     }
     return render(request, 'asistencia.html', context)
 
@@ -172,5 +175,6 @@ def mis_asistencias(request):
     
     context = {
         'asistencias': asistencias,
+        'page_title': 'Asistencias'
     }
     return render(request, 'mis_asistencias.html', context)

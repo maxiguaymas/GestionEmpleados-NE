@@ -111,7 +111,7 @@ def registrar_incidente(request):
     else:
         form = IncidenteForm()
 
-    return render(request, 'registrar_incidente.html', {'form': form})
+    return render(request, 'registrar_incidente.html', {'form': form, 'page_title': 'Registrar Incidente'})
 
 
 @login_required
@@ -176,7 +176,8 @@ def corregir_incidente(request, incidente_id):
 
     return render(request, 'corregir_incidente.html', {
         'form': form,
-        'incidente': incidente_original
+        'incidente': incidente_original,
+        'page_title': 'Corregir Incidente',
     })
 
 
@@ -227,6 +228,7 @@ def detalle_incidente(request, incidente_id):
         'resolucion': resolucion,
         'resolucion_form': resolucion_form,
         'corrected_incident_id': corrected_incident_id,
+        'page_title': 'Detalle de Incidente',
     }
     return render(request, 'detalle_incidente.html', context)
 
@@ -241,7 +243,8 @@ def ver_incidentes_empleado(request, empleado_id):
 
     context = {
         'empleado': empleado,
-        'incidentes_empleado': incidentes_empleado
+        'incidentes_empleado': incidentes_empleado,
+        'page_title': 'Incidentes del Empleado',
     }
 
     return render(request, 'ver_incidentes_empleado.html', context)
@@ -256,6 +259,7 @@ def mis_incidentes(request):
     
     context = {
         'incidentes_empleado': incidentes,
+        'page_title': 'Mis Incidentes',
     }
     return render(request, 'mis_incidentes.html', context)
 
