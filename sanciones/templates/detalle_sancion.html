@@ -1,10 +1,17 @@
 {% extends 'base.html' %}
+{% load auth_extras %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <a href="{% url 'ver_todas_sanciones' %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
-        <i data-lucide="arrow-left"></i> Volver a Sanciones
-    </a>
+    {% if user|has_group:"Administrador" %}
+        <a href="{{ request.META.HTTP_REFERER|default_if_none:request.build_absolute_uri }}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+            <i data-lucide="arrow-left"></i> Volver
+        </a>
+    {% else %}
+        <a href="{% url 'mis_sanciones' %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+            <i data-lucide="arrow-left"></i> Volver a Mis Sanciones
+        </a>
+    {% endif %}
 
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
         <h2 class="text-2xl font-bold mb-2">Detalle de la Sanción</h2>

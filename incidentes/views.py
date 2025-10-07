@@ -50,7 +50,7 @@ def ver_incidentes(request):
     # Build the list for the template
     incidentes_list = []
     for incidente in incidentes:
-        involucrados = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl')
+        involucrados = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl').defer('id_descargo', 'id_resolucion')
         if involucrados.exists():
             incidentes_list.append({
                 'incidente': incidente,
@@ -270,7 +270,7 @@ def ver_incidentes_empleado(request, empleado_id):
 def mis_incidentes(request):
     try:
         empleado = request.user.empleado
-        incidentes_qs = IncidenteEmpleado.objects.filter(id_empl=empleado).select_related('id_incidente').order_by('-fecha_ocurrencia')
+        incidentes = IncidenteEmpleado.objects.filter(id_empl=empleado).select_related('id_incidente').defer('id_descargo', 'id_resolucion').order_by('-fecha_ocurrencia')
     except Empleado.DoesNotExist:
         incidentes_qs = IncidenteEmpleado.objects.none()
 
