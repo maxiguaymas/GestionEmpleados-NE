@@ -11,11 +11,43 @@ from sanciones.forms import ResolucionForm
 from sanciones.forms import SancionMasivaForm
 from django.utils import timezone
 import re
+from django.db.models import Q
 
 @login_required
 @user_passes_test(es_admin)
 def ver_incidentes(request):
-    incidentes = Incidente.objects.all().order_by('-id')
+    incidentes_query = Incidente.objects.all().order_by('-id')
+
+    # Get filter parameters
+    search_query = request.GET.get('q')
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    status = request.GET.get('status')
+
+    # Apply filters
+    if search_query:
+        incidentes_query = incidentes_query.filter(
+            Q(incidenteempleado__id_empl__nombre__icontains=search_query) |
+            Q(incidenteempleado__id_empl__apellido__icontains=search_query) |
+            Q(incidenteempleado__id_empl__dni__icontains=search_query)
+        )
+
+    if month and year:
+        try:
+            incidentes_query = incidentes_query.filter(
+                incidenteempleado__fecha_ocurrencia__month=int(month),
+                incidenteempleado__fecha_ocurrencia__year=int(year)
+            )
+        except (ValueError, TypeError):
+            pass # Or add a message
+
+    if status:
+        incidentes_query = incidentes_query.filter(incidenteempleado__estado__iexact=status)
+    
+    # Get unique incidents
+    incidentes = incidentes_query.distinct()
+
+    # Build the list for the template
     incidentes_list = []
     for incidente in incidentes:
         involucrados = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl')
@@ -24,8 +56,18 @@ def ver_incidentes(request):
                 'incidente': incidente,
                 'involucrados': [ie.id_empl for ie in involucrados],
                 'fecha_ocurrencia': involucrados.first().fecha_ocurrencia,
+                'estado': involucrados.first().estado,
             })
-    return render(request, 'ver_incidentes.html', {'incidentes_list': incidentes_list})
+    
+    # For the year dropdown, find the range of years present in the data
+    years = IncidenteEmpleado.objects.dates('fecha_ocurrencia', 'year').reverse()
+
+    context = {
+        'incidentes_list': incidentes_list,
+        'filter_values': request.GET,
+        'year_options': [d.year for d in years]
+    }
+    return render(request, 'ver_incidentes.html', context)
 
 @login_required
 @user_passes_test(es_admin)
