@@ -235,7 +235,7 @@ def dashboard(request):
         'total_empleados': total_empleados,
         'asistencia_hoy': asistencia_hoy,
         'sanciones_mes': sanciones_mes,
-        'page_title': 'Dashboard',
+        'page_title': 'Inicio',
     }
     return render(request, 'dashboard.html', context)
 

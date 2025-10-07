@@ -18,10 +18,42 @@
             <span>Cargar Recibo</span>
         </button>
     </div>
-    <div id="payslip-results-container" class="hidden">
-        <h2 class="text-xl font-bold mb-4">Resultados para <span id="payslip-employee-name"></span></h2>
-        <div id="payslip-list" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"></div>
+    
+    <div id="payslip-results-container" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <div class="p-6">
+            <h2 class="text-xl font-bold">Resultados para <span id="payslip-employee-name"></span></h2>
+        </div>
+        <div id="payslip-filter-form" class="p-4 bg-gray-50 dark:bg-gray-900 border-t border-b dark:border-gray-700">
+            <form id="filter-form" class="flex items-end space-x-4">
+                <div>
+                    <label for="mes" class="text-sm font-medium text-gray-700 dark:text-gray-300">Mes</label>
+                    <select name="mes" id="mes" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="anio" class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
+                    <select name="anio" id="anio" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Filtrar</button>
+            </form>
+        </div>
+        <div id="payslip-list" class="overflow-hidden"></div>
     </div>
+
     <div id="payslip-no-search-message" class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <i data-lucide="receipt" class="mx-auto h-12 w-12 text-gray-400"></i>
         <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Buscar recibos de sueldo</h3>
@@ -75,38 +107,102 @@
     const employeeNameSpan = document.getElementById('payslip-employee-name');
     const listContainer = document.getElementById('payslip-list');
     const noSearchMessage = document.getElementById('payslip-no-search-message');
+    const filterForm = document.getElementById('filter-form');
+    const anioSelect = document.getElementById('anio');
 
-    searchBtn.addEventListener('click', () => {
-        const dni = dniInput.value;
-        if (!dni) {
+    function renderTable(recibos) {
+        if (recibos.length === 0) {
+            listContainer.innerHTML = `<div class="text-center py-10 px-6"><p class="text-gray-500">No se encontraron recibos para los filtros seleccionados.</p></div>`;
             return;
         }
 
-        fetch(`/recibos/api/ver-recibos/${dni}/`)
+        let p_list = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha de Emisión</th><th class="p-4">Período</th><th class="p-4">Archivos</th></tr></thead><tbody>';
+        recibos.forEach(recibo => {
+            const fecha = new Date(recibo.fecha_emision);
+            p_list += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString()}</td><td class="p-4">${recibo.periodo}</td><td class="p-4"><div class="flex items-center gap-2">`;
+            if (recibo.ruta_pdf) {
+                p_list += `<a href="/media/${recibo.ruta_pdf}" target="_blank" class="flex items-center gap-1 text-sm text-red-600 hover:underline"><i data-lucide="file-text" class="w-4 h-4"></i>PDF</a>`;
+            }
+            if (recibo.ruta_imagen) {
+                p_list += `<a href="/media/${recibo.ruta_imagen}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline"><i data-lucide="image" class="w-4 h-4"></i>Imagen</a>`;
+            }
+            p_list += `</div></td></tr>`;
+        });
+        p_list += '</tbody></table>';
+        listContainer.innerHTML = p_list;
+        
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
+    function fetchRecibos(dni, mes, anio) {
+        let url = `/recibos/api/ver-recibos/${dni}/`;
+        const params = new URLSearchParams();
+        if (mes) params.append('mes', mes);
+        if (anio) params.append('anio', anio);
+        
+        const queryString = params.toString();
+        if (queryString) {
+            url += `?${queryString}`;
+        }
+
+        fetch(url)
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     employeeNameSpan.textContent = `${data.empleado.nombre} ${data.empleado.apellido}`;
-                    let p_list = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha de EmisiÃ³n</th><th class="p-4">PerÃ­odo</th><th class="p-4">Archivos</th></tr></thead><tbody>';
-                    data.recibos.forEach(recibo => {
-                        const fecha = new Date(recibo.fecha_emision);
-                        p_list += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString()}</td><td class="p-4">${recibo.periodo}</td><td class="p-4"><div class="flex items-center gap-2">`;
-                        if(recibo.ruta_pdf){
-                            p_list += `<a href="/media/${recibo.ruta_pdf}" class="flex items-center gap-1 text-sm text-red-600 hover:underline"><i data-lucide="file-text" class="w-4 h-4"></i>PDF</a>`;
-                        }
-                        if(recibo.ruta_imagen){
-                            p_list += `<a href="/media/${recibo.ruta_imagen}" class="flex items-center gap-1 text-sm text-blue-600 hover:underline"><i data-lucide="image" class="w-4 h-4"></i>Imagen</a>`;
-                        }
-                        p_list += `</div></td></tr>`;
-                    });
-                    p_list += '</tbody></table>';
-                    listContainer.innerHTML = p_list;
+                    
+                    if (!mes && !anio) {
+                        const currentYear = new Date().getFullYear();
+                        anioSelect.innerHTML = ''; // Clear previous options
+                        data.years.sort((a, b) => b - a).forEach(year => {
+                            const option = document.createElement('option');
+                            option.value = year;
+                            option.textContent = year;
+                            if(year === currentYear) {
+                                option.selected = true;
+                            }
+                            anioSelect.appendChild(option);
+                        });
+                    }
+
+                    renderTable(data.recibos);
                     resultsContainer.classList.remove('hidden');
                     noSearchMessage.classList.add('hidden');
                 } else {
-                    // Handle error
+                    listContainer.innerHTML = `<div class="text-center py-10 px-6"><p class="text-red-500">Error: ${data.message}</p></div>`;
+                    resultsContainer.classList.remove('hidden');
+                    noSearchMessage.classList.add('hidden');
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching recibos:', error);
+                listContainer.innerHTML = `<div class="text-center py-10 px-6"><p class="text-red-500">Ocurrió un error al buscar los recibos.</p></div>`;
             });
+    }
+
+    function handleSearch() {
+        const dni = dniInput.value;
+        if (!dni) return;
+        fetchRecibos(dni, null, null);
+    }
+
+    searchBtn.addEventListener('click', handleSearch);
+    dniInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    });
+
+    filterForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dni = dniInput.value;
+        if (!dni) return;
+        
+        const mes = e.target.elements.mes.value;
+        const anio = e.target.elements.anio.value;
+        fetchRecibos(dni, mes, anio);
     });
 </script>
 {% endblock %}

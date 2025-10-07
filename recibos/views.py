@@ -95,13 +95,24 @@ def api_ver_recibos_empleado(request, dni):
     try:
         empleado = Empleado.objects.get(dni=dni)
         recibos = Recibo.objects.filter(id_empl=empleado).order_by('-fecha_emision')
+
+        # Lógica de filtrado
+        mes = request.GET.get('mes')
+        anio = request.GET.get('anio')
+
+        years = Recibo.objects.filter(id_empl=empleado).dates('fecha_emision', 'year').distinct()
+
+        if mes and anio:
+            recibos = recibos.filter(fecha_emision__month=mes, fecha_emision__year=anio)
+            
         data = {
             'status': 'success',
             'empleado': {
                 'nombre': empleado.nombre,
                 'apellido': empleado.apellido,
             },
-            'recibos': list(recibos.values('fecha_emision', 'periodo', 'ruta_pdf', 'ruta_imagen'))
+            'recibos': list(recibos.values('fecha_emision', 'periodo', 'ruta_pdf', 'ruta_imagen')),
+            'years': [year.year for year in years]
         }
         return JsonResponse(data)
     except Empleado.DoesNotExist:
