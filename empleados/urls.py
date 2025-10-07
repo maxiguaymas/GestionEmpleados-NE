@@ -10,6 +10,7 @@ urlpatterns = [
     path('eliminar/<int:id>/', views.eliminar_empleado, name='eliminar_empleado'),
     path('ver/', views.ver_empleados, name='empleados'), # Renombrado de ver_empleados a empleados
     path('ver/<int:id>/', views.ver_empleado, name='ver_empleado'),
+    path('buscar/', views.buscar_empleados, name='buscar_empleados'),
     path('perfil/', views.ver_perfil, name='ver_perfil'),
     path('grafico-empleados/', views.grafico_empleados_activos_inactivos, name='grafico_empleados'),
     path('grafico-empleados/pdf/', views.grafico_empleados_pdf, name='grafico_empleados_pdf'),

@@ -9,7 +9,7 @@
 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
     <div class="relative w-full sm:max-w-xs">
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-        <input type="text" placeholder="Buscar por nombre o DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+        <input type="text" id="search-input" placeholder="Buscar por nombre o DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
     </div>
     <a href="{% url 'crear_empleado' %}" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
         <i data-lucide="plus"></i>
@@ -17,121 +17,27 @@
     </a>
 </div>
 
-<!-- Card View for Mobile -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
-    {% for empleado in empleados %}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex flex-col justify-between">
-        <div>
-            <div class="flex items-center gap-4 mb-4">
-                {% if empleado.ruta_foto %}
-                    <img src="{{ empleado.ruta_foto.url }}" class="h-16 w-16 rounded-full object-cover">
-                {% else %}
-                    <span class="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500 text-xl">
-                        {{ empleado.nombre|slice:":1" }}{{ empleado.apellido|slice:":1" }}
-                    </span>
-                {% endif %}
-                <div class="flex-1">
-                    <h3 class="font-bold text-lg text-gray-800 dark:text-gray-100">{{ empleado.nombre }} {{ empleado.apellido }}</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">DNI: {{ empleado.dni }}</p>
-                </div>
-            </div>
-            
-            <div class="space-y-3 text-sm mb-4">
-                <p class="flex items-center gap-2 text-gray-600 dark:text-gray-300 truncate">
-                    <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>
-                    <span class="truncate" title="{{ empleado.email }}">{{ empleado.email }}</span>
-                </p>
-                <div class="flex items-center gap-2">
-                    <i data-lucide="shield" class="w-4 h-4 flex-shrink-0 {% if empleado.estado == 'Activo' %}text-green-500{% else %}text-yellow-500{% endif %}"></i>
-                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                        {% if empleado.estado == 'Activo' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">
-                        {{ empleado.estado }}
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex justify-end items-center border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-             <div class="relative" data-menu-container>
-                <button data-action="toggle-menu" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i data-lucide="more-horizontal" class="text-gray-500 dark:text-gray-400"></i>
-                </button>
-                <div class="hidden absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-20 border dark:border-gray-700 py-1" data-menu>
-                    <a href="{% url 'ver_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="eye" class="w-4 h-4"></i>Ver Perfil</a>
-                    <a href="{% url 'editar_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="edit-2" class="w-4 h-4"></i>Editar</a>
-                    <a href="{% url 'eliminar_empleado' empleado.id %}" data-action="delete-employee" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"><i data-lucide="trash-2" class="w-4 h-4"></i>Eliminar</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <div class="col-span-full p-8 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-        No hay empleados registrados.
-    </div>
-    {% endfor %}
-</div>
-
-<!-- Table View for Desktop -->
-<div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-x-auto">
-    <table class="w-full">
-        <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-            <tr>
-                <th class="p-4">Foto</th>
-                <th class="p-4">Nombre</th>
-                <th class="p-4">DNI</th>
-                <th class="p-4">Email</th>
-                <th class="p-4">Estado</th>
-                <th class="p-4">Acciones</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            {% for empleado in empleados %}
-            <tr>
-                <td class="p-4">
-                    {% if empleado.ruta_foto %}
-                        <img src="{{ empleado.ruta_foto.url }}" class="h-10 w-10 rounded-full object-cover">
-                    {% else %}
-                        <span class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500">
-                            {{ empleado.nombre|slice:":1" }}{{ empleado.apellido|slice:":1" }}
-                        </span>
-                    {% endif %}
-                </td>
-                <td class="p-4 font-medium text-gray-800 dark:text-gray-100">{{ empleado.nombre }} {{ empleado.apellido }}</td>
-                <td class="p-4 text-gray-600 dark:text-gray-300">{{ empleado.dni }}</td>
-                <td class="p-4 text-gray-600 dark:text-gray-300">{{ empleado.email }}</td>
-                <td class="p-4">
-                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                        {% if empleado.estado == 'Activo' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">
-                        {{ empleado.estado }}
-                    </span>
-                </td>
-                <td class="p-4">
-                    <div class="relative" data-menu-container>
-                        <button data-action="toggle-menu" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i data-lucide="more-horizontal" class="text-gray-500 dark:text-gray-400"></i>
-                        </button>
-                        <div class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-10 border dark:border-gray-700 py-1" data-menu>
-                            <a href="{% url 'ver_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="eye" class="w-4 h-4"></i>Ver Perfil</a>
-                            <a href="{% url 'editar_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="edit-2" class="w-4 h-4"></i>Editar</a>
-                            <a href="{% url 'eliminar_empleado' empleado.id %}" data-action="delete-employee" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"><i data-lucide="trash-2" class="w-4 h-4"></i>Eliminar</a>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="p-8 text-center text-gray-500">
-                    No hay empleados registrados.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div id="employee-list">
+    {% include 'lista_empleados.html' %}
 </div>
 {% endblock content %}
 
 {% block page_scripts %}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const employeeList = document.getElementById('employee-list');
+
+    searchInput.addEventListener('keyup', function() {
+        const query = searchInput.value;
+        fetch(`{% url 'buscar_empleados' %}?q=${query}`)
+            .then(response => response.text())
+            .then(html => {
+                employeeList.innerHTML = html;
+            });
+    });
+});
+
 document.addEventListener('click', function(e) {
     // Cerrar todos los menús si se hace clic afuera
     if (!e.target.closest('[data-menu-container]')) {

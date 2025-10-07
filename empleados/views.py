@@ -11,6 +11,7 @@ from .models import Empleado, Notificacion
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Q
 from empleados.models import Legajo, Documento, RequisitoDocumento
 
 def es_admin(user):
@@ -132,6 +133,22 @@ def eliminar_empleado(request, id):
 def ver_empleados(request):
     empleados = Empleado.objects.filter(fecha_egreso__isnull=True)
     return render(request, 'empleados.html', {'empleados': empleados})
+
+@login_required
+@user_passes_test(es_admin)
+def buscar_empleados(request):
+    query = request.GET.get('q')
+    if query:
+        empleados = Empleado.objects.filter(
+            Q(nombre__icontains=query) |
+            Q(apellido__icontains=query) |
+            Q(dni__icontains=query),
+            fecha_egreso__isnull=True
+        )
+    else:
+        empleados = Empleado.objects.filter(fecha_egreso__isnull=True)
+    
+    return render(request, 'lista_empleados.html', {'empleados': empleados})
 
 @login_required
 def ver_empleado(request, id):
