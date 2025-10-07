@@ -21,6 +21,7 @@ def sanciones_empleado(request, empleado_id):
     return render(request, 'sanciones_empleado.html', {
         'empleado': empleado,
         'sanciones': sanciones,
+        'page_title': 'Sanciones del Empleado',
     })
 
 @login_required
@@ -66,6 +67,7 @@ def agregar_sancion_empleado(request):
         'empleado': empleado,
         'form': form,
         'mensaje': mensaje,
+        'page_title': 'Agregar Sanción',
     })
 
 @login_required
@@ -128,6 +130,7 @@ def aplicar_sancion_masiva(request, incidente_id):
     context = {
         'incidente': incidente,
         'involucrados_forms': involucrados_forms,
+        'page_title': 'Aplicar Sanción Masiva',
     }
     return render(request, 'aplicar_sancion_masiva.html', context)
 
@@ -139,7 +142,8 @@ def ver_todas_sanciones(request):
     sanciones = SancionEmpleado.objects.select_related('id_empl', 'id_sancion').order_by('-fecha_inicio')
     return render(request, 'ver_todas_sanciones.html', {
         'sanciones': sanciones,
-        'titulo': 'Historial de Sanciones'
+        'titulo': 'Historial de Sanciones',
+        'page_title': 'Sanciones',
     })
 
 @login_required
@@ -164,7 +168,8 @@ def agregar_resolucion(request, sancion_empleado_id):
 
     return render(request, 'agregar_resolucion.html', {
         'form': form,
-        'sancion': sancion_empleado
+        'sancion': sancion_empleado,
+        'page_title': 'Agregar Resolución',
     })
     
     
@@ -177,7 +182,8 @@ def detalle_sancion(request, sancion_id):
     
     context = {
         'sancion_empleado': sancionEmpleado,
-        'sancion': sancion
+        'sancion': sancion,
+        'page_title': 'Detalle de Sanción',
     }
     return render(request, 'detalle_sancion.html', context)
 
@@ -191,5 +197,6 @@ def mis_sanciones(request):
     
     context = {
         'sanciones': sanciones,
+        'page_title': 'Mis Sanciones',
     }
     return render(request, 'mis_sanciones.html', context)
