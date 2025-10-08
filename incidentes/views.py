@@ -270,7 +270,7 @@ def ver_incidentes_empleado(request, empleado_id):
 def mis_incidentes(request):
     try:
         empleado = request.user.empleado
-        incidentes = IncidenteEmpleado.objects.filter(id_empl=empleado).select_related('id_incidente').defer('id_descargo', 'id_resolucion').order_by('-fecha_ocurrencia')
+        incidentes_qs = IncidenteEmpleado.objects.filter(id_empl=empleado).select_related('id_incidente').defer('id_descargo', 'id_resolucion').order_by('-fecha_ocurrencia')
     except Empleado.DoesNotExist:
         incidentes_qs = IncidenteEmpleado.objects.none()
 
