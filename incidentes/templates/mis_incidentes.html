@@ -6,6 +6,27 @@
 {% block page_title %}Mis Incidentes{% endblock %}
 
 {% block content %}
+<!-- Filter Form -->
+<form method="get" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="sm:col-span-2">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Periodo</label>
+            <div class="flex items-center gap-2">
+                {{ filter_form.month }}
+                {{ filter_form.year }}
+            </div>
+        </div>
+        <div>
+            <label for="{{ filter_form.status.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Estado</label>
+            {{ filter_form.status }}
+        </div>
+        <div class="flex items-end gap-2">
+            <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Filtrar</button>
+            <a href="{% url 'mis_incidentes' %}" class="w-full text-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Limpiar</a>
+        </div>
+    </div>
+</form>
+
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for incidente_empleado in incidentes_empleado %}
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col">
@@ -24,8 +45,8 @@
     {% empty %}
     <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
-        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes incidentes registrados</h3>
-        <p class="mt-1 text-sm text-gray-500">No has estado involucrado en ningún incidente.</p>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No se encontraron incidentes</h3>
+        <p class="mt-1 text-sm text-gray-500">No se encontraron incidentes que coincidan con los filtros aplicados o no tienes incidentes registrados.</p>
     </div>
     {% endfor %}
 </div>

@@ -6,7 +6,7 @@ from empleados.views import es_admin
 from django.core.exceptions import PermissionDenied
 from empleados.models import Incidente, IncidenteEmpleado, Empleado, SancionEmpleado, Resolucion, Notificacion
 from django.urls import reverse
-from .forms import IncidenteForm
+from .forms import IncidenteForm, IncidenteEmpleadoFilterForm
 from sanciones.forms import ResolucionForm
 from sanciones.forms import SancionMasivaForm
 from django.utils import timezone
@@ -239,11 +239,28 @@ def ver_incidentes_empleado(request, empleado_id):
     if not (es_admin(request.user) or es_propietario):
         raise PermissionDenied
 
-    incidentes_empleado = IncidenteEmpleado.objects.filter(id_empl=empleado).select_related('id_incidente').order_by('-fecha_ocurrencia')
+    incidentes_empleado_qs = IncidenteEmpleado.objects.filter(id_empl=empleado).select_related('id_incidente').order_by('-fecha_ocurrencia')
+
+    # Instanciar el formulario con los datos de GET
+    filter_form = IncidenteEmpleadoFilterForm(request.GET)
+
+    # Aplicar filtros si el formulario es válido (aunque no se "envíe" como POST)
+    if filter_form.is_valid():
+        month = filter_form.cleaned_data.get('month')
+        year = filter_form.cleaned_data.get('year')
+        status = filter_form.cleaned_data.get('status')
+
+        if month:
+            incidentes_empleado_qs = incidentes_empleado_qs.filter(fecha_ocurrencia__month=month)
+        if year:
+            incidentes_empleado_qs = incidentes_empleado_qs.filter(fecha_ocurrencia__year=year)
+        if status:
+            incidentes_empleado_qs = incidentes_empleado_qs.filter(estado__iexact=status)
 
     context = {
         'empleado': empleado,
-        'incidentes_empleado': incidentes_empleado,
+        'incidentes_empleado': incidentes_empleado_qs,
+        'filter_form': filter_form,
         'page_title': 'Incidentes del Empleado',
     }
 
@@ -253,12 +270,26 @@ def ver_incidentes_empleado(request, empleado_id):
 def mis_incidentes(request):
     try:
         empleado = request.user.empleado
-        incidentes = IncidenteEmpleado.objects.filter(id_empl=empleado).select_related('id_incidente').defer('id_descargo', 'id_resolucion').order_by('-fecha_ocurrencia')
+        incidentes_qs = IncidenteEmpleado.objects.filter(id_empl=empleado).select_related('id_incidente').defer('id_descargo', 'id_resolucion').order_by('-fecha_ocurrencia')
     except Empleado.DoesNotExist:
-        incidentes = IncidenteEmpleado.objects.none()
+        incidentes_qs = IncidenteEmpleado.objects.none()
+
+    filter_form = IncidenteEmpleadoFilterForm(request.GET)
+    if filter_form.is_valid():
+        month = filter_form.cleaned_data.get('month')
+        year = filter_form.cleaned_data.get('year')
+        status = filter_form.cleaned_data.get('status')
+
+        if month:
+            incidentes_qs = incidentes_qs.filter(fecha_ocurrencia__month=month)
+        if year:
+            incidentes_qs = incidentes_qs.filter(fecha_ocurrencia__year=year)
+        if status:
+            incidentes_qs = incidentes_qs.filter(estado__iexact=status)
     
     context = {
-        'incidentes_empleado': incidentes,
+        'incidentes_empleado': incidentes_qs,
+        'filter_form': filter_form,
         'page_title': 'Mis Incidentes',
     }
     return render(request, 'mis_incidentes.html', context)
