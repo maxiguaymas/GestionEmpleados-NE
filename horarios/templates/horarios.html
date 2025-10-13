@@ -13,6 +13,7 @@
             <a href="#view-assignments" data-tab="view-assignments" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Ver Asignaciones</a>
             <a href="#assign-schedules" data-tab="assign-schedules" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Asignar Horarios</a>
             <a href="#create-schedule" data-tab="create-schedule" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Crear Horario</a>
+            <a href="#history" data-tab="history" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Historial</a>
         </nav>
     </div>
     <div class="p-6">
@@ -30,6 +31,9 @@
                 {% csrf_token %}
                 {% include 'cargar_horario_tab.html' %}
             </form>
+        </div>
+        <div id="history-tab" class="schedule-tab-content hidden">
+            {% include 'historial_horarios_tab.html' %}
         </div>
     </div>
 </div>
@@ -77,6 +81,8 @@
         const presetContent = document.getElementById('preset-tab-content');
         const customContent = document.getElementById('custom-tab-content');
 
+        if (!presetBtn) return; // Salir si los elementos no existen
+
         function switchCreateTab(tab) {
             if (tab === 'preset') {
                 presetContent.classList.remove('hidden');
@@ -105,6 +111,8 @@
         const availableList = document.getElementById('available-employees');
         const assignedList = document.getElementById('assigned-employees');
         const hiddenInputsContainer = document.getElementById('assigned-employee-inputs');
+
+        if (!scheduleSelect) return; // Salir si los elementos no existen
 
         scheduleSelect.addEventListener('change', async function() {
             const scheduleId = this.value;
@@ -165,30 +173,34 @@
             }
 
             if (action === 'assign') {
+                if (assignedList.querySelector('div.text-gray-500')) {
+                    assignedList.innerHTML = '';
+                }
                 const newElement = createEmployeeElement(employee);
                 newElement.addEventListener('click', () => moveEmployee(employee, 'unassign'));
                 assignedList.appendChild(newElement);
                 addHiddenInput(employee.id);
             } else { // unassign
+                if (availableList.querySelector('div.text-gray-500')) {
+                    availableList.innerHTML = '';
+                }
                 const newElement = createEmployeeElement(employee);
                 newElement.addEventListener('click', () => moveEmployee(employee, 'assign'));
                 availableList.appendChild(newElement);
                 removeHiddenInput(employee.id);
             }
             
-            // Actualizar mensajes de "lista vacía"
             if (availableList.children.length === 0) {
                  availableList.innerHTML = `<div class="flex items-center justify-center h-full text-sm text-gray-500 p-4">No hay más empleados disponibles.</div>`;
-            } else if (availableList.querySelector('div.text-gray-500')) {
-                availableList.innerHTML = ''; // Limpiar mensaje si se añade un empleado
-                moveEmployee(employee, 'unassign'); // Re-llamar para añadir el elemento
             }
 
             if (assignedList.children.length === 0) {
                 assignedList.innerHTML = `<div class="flex items-center justify-center h-full text-sm text-gray-500 p-4">Aún no hay empleados asignados.</div>`;
-            } else if (assignedList.querySelector('div.text-gray-500')) {
-                assignedList.innerHTML = ''; // Limpiar mensaje si se añade un empleado
-                moveEmployee(employee, 'assign'); // Re-llamar para añadir el elemento
+            }
+
+            // Refrescar el historial en tiempo real
+            if (window.refreshHistorial) {
+                window.refreshHistorial();
             }
         }
 
@@ -209,23 +221,90 @@
         }
     }
 
+    // --- Lógica para la pestaña de HISTORIAL ---
+    function setupHistorialTab() {
+        const form = document.getElementById('historial-filters-form');
+        const tbody = document.getElementById('historial-tbody');
+
+        if (!form || !tbody) return;
+
+        const debounce = (func, delay) => {
+            let timeoutId;
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
+        };
+
+        const fetchAndRenderHistorial = async () => {
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (value) {
+                    params.append(key, value);
+                }
+            }
+
+            try {
+                const response = await fetch(`/horarios/api/historial/?${params.toString()}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No se encontraron registros.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(asignacion => {
+                    const row = document.createElement('tr');
+                    const estadoBadge = asignacion.estado
+                        ? `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>`
+                        : `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>`;
+                    const fecha = new Date(asignacion.fecha_asignacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${asignacion.id_empl__nombre} ${asignacion.id_empl__apellido}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${asignacion.id_horario__nombre}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${fecha}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">${estadoBadge}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error("Error fetching historial:", error);
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-red-500">Error al cargar el historial.</td></tr>`;
+            }
+        };
+
+        const debouncedFetch = debounce(fetchAndRenderHistorial, 350);
+
+        form.addEventListener('input', debouncedFetch);
+        form.addEventListener('change', fetchAndRenderHistorial);
+
+        fetchAndRenderHistorial();
+
+        window.refreshHistorial = fetchAndRenderHistorial;
+    }
+
     // --- INICIALIZACIÓN ---
     document.addEventListener('DOMContentLoaded', function() {
-        // Pestañas principales
         setupTabs('schedule');
         const hash = window.location.hash.substring(1);
-        const validTabs = ['view-assignments', 'assign-schedules', 'create-schedule'];
+        const validTabs = ['view-assignments', 'assign-schedules', 'create-schedule', 'history'];
         if (hash && validTabs.includes(hash)) {
             switchTab('schedule', hash);
         } else {
             switchTab('schedule', 'view-assignments');
         }
 
-        // Sub-pestañas en Crear Horario
         setupCreateScheduleTabs();
-
-        // UI de Asignación
         setupAssignmentUI();
+        setupHistorialTab();
     });
 </script>
 {% endblock %}
