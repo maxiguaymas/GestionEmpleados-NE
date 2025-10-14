@@ -5,7 +5,52 @@ from django.contrib import messages
 from empleados.views import es_admin
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.http import JsonResponse
-from django.db.models import Count
+from django.db.models import Count, Q
+import datetime
+
+@user_passes_test(es_admin)
+def historial_api_view(request):
+    """
+    API endpoint to get the history of schedule assignments with filters.
+    """
+    asignaciones = AsignacionHorario.objects.select_related('id_empl', 'id_horario').order_by('-fecha_asignacion')
+
+    # Filter parameters
+    dni = request.GET.get('dni')
+    nombre = request.GET.get('nombre')
+    estado = request.GET.get('estado')
+    mes = request.GET.get('mes')
+    anio = request.GET.get('anio')
+
+    if dni:
+        asignaciones = asignaciones.filter(id_empl__dni__icontains=dni)
+    
+    if nombre:
+        asignaciones = asignaciones.filter(
+            Q(id_empl__nombre__icontains=nombre) | Q(id_empl__apellido__icontains=nombre)
+        )
+
+    if estado:
+        if estado == 'activo':
+            asignaciones = asignaciones.filter(estado=True)
+        elif estado == 'inactivo':
+            asignaciones = asignaciones.filter(estado=False)
+
+    if anio:
+        asignaciones = asignaciones.filter(fecha_asignacion__year=anio)
+
+    if mes:
+        asignaciones = asignaciones.filter(fecha_asignacion__month=mes)
+
+    data = list(asignaciones.values(
+        'id_empl__nombre',
+        'id_empl__apellido',
+        'id_horario__nombre',
+        'fecha_asignacion',
+        'estado'
+    ))
+
+    return JsonResponse(data, safe=False)
 
 @user_passes_test(es_admin)
 def horarios_admin(request):
@@ -21,6 +66,10 @@ def horarios_admin(request):
         personal_asignado=Count('asignaciones')
     )
 
+    # Para el filtro de historial
+    current_year = datetime.datetime.now().year
+    years = range(current_year - 5, current_year + 1)
+
     context = {
         # Para la pestaña "Ver Asignaciones"
         'horarios_con_conteo': horarios_con_conteo,
@@ -33,6 +82,10 @@ def horarios_admin(request):
         # Para la pestaña "Crear Horario"
         'preset_form': HorarioPresetForm(),
         'custom_form': HorarioForm(),
+
+        # Para la pestaña "Historial"
+        'years': years,
+
         'page_title': 'Horarios',
     }
     return render(request, 'horarios.html', context)

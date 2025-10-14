@@ -13,6 +13,7 @@ urlpatterns = [
     
     # Endpoint para la UI dinámica de asignación
     path('api/get-empleados/<int:horario_id>/', views.get_empleados_por_horario, name='get_empleados_por_horario'),
+    path('api/historial/', views.historial_api_view, name='historial_api'),
 
     # Vistas para los empleados
     path('mis-horarios/', views.mis_horarios_empleado, name='mis_horarios_empleado'),
