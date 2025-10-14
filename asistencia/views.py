@@ -141,9 +141,11 @@ def ver_asistencias_empleado(request, empleado_id):
 def asistencia_admin(request):
     empleados_registrados_ids = Rostro.objects.values_list('id_empl_id', flat=True)
     empleados_sin_rostro = Empleado.objects.exclude(id__in=empleados_registrados_ids)
+    empleados_con_rostro = Empleado.objects.filter(id__in=empleados_registrados_ids)
     
     context = {
         'empleados_sin_rostro': empleados_sin_rostro,
+        'empleados_con_rostro': empleados_con_rostro,
         'page_title': 'Asistencias'
     }
     return render(request, 'asistencia.html', context)
