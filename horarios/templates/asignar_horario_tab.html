@@ -1,4 +1,6 @@
-<h3 class="text-lg font-semibold mb-4">Asignar Empleados a un Horario</h3>
+<form action="{% url 'asignar_horario' %}" method="post">
+    {% csrf_token %}
+    <h3 class="text-lg font-semibold mb-4">Asignar Empleados a un Horario</h3>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="md:col-span-1">
         <label for="schedule-select-for-assignment" class="block text-sm font-medium mb-1">1. Seleccionar Horario</label>
@@ -31,3 +33,4 @@
 
 <!-- Hidden inputs will be managed by JS to submit the final list -->
 <div id="assigned-employee-inputs"></div>
+</form>
