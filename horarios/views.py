@@ -6,6 +6,7 @@ from empleados.views import es_admin
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.http import JsonResponse
 from django.db.models import Count, Q
+import datetime
 
 @user_passes_test(es_admin)
 def historial_api_view(request):
@@ -65,6 +66,10 @@ def horarios_admin(request):
         personal_asignado=Count('asignaciones')
     )
 
+    # Para el filtro de historial
+    current_year = datetime.datetime.now().year
+    years = range(current_year - 5, current_year + 1)
+
     context = {
         # Para la pestaña "Ver Asignaciones"
         'horarios_con_conteo': horarios_con_conteo,
@@ -77,6 +82,10 @@ def horarios_admin(request):
         # Para la pestaña "Crear Horario"
         'preset_form': HorarioPresetForm(),
         'custom_form': HorarioForm(),
+
+        # Para la pestaña "Historial"
+        'years': years,
+
         'page_title': 'Horarios',
     }
     return render(request, 'horarios.html', context)
