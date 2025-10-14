@@ -28,6 +28,7 @@
                 <div>
                     <label for="mes" class="text-sm font-medium text-gray-700 dark:text-gray-300">Mes</label>
                     <select name="mes" id="mes" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        <option value="">Todos</option>
                         <option value="1">Enero</option>
                         <option value="2">Febrero</option>
                         <option value="3">Marzo</option>
@@ -97,6 +98,42 @@
         </form>
     </div>
 </div>
+
+<!-- Modal: Editar Recibo -->
+<div id="edit-payslip-modal" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 m-4" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold">Editar Recibo</h2>
+            <button onclick="closeModal('edit-payslip-modal')" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x"></i></button>
+        </div>
+        <form id="edit-payslip-form" method="post" enctype="multipart/form-data" class="mt-6 space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="id_empl" id="edit-id_empl">
+            <div>
+                <label for="edit-fecha_emision" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de emisión</label>
+                <input type="date" name="fecha_emision" id="edit-fecha_emision" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+            </div>
+            <div>
+                <label for="edit-periodo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Período</label>
+                <input type="text" name="periodo" id="edit-periodo" placeholder="YYYY-MM" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+            </div>
+            <div>
+                <label for="edit-ruta_pdf" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Archivo PDF</label>
+                <input type="file" name="ruta_pdf" id="edit-ruta_pdf" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                <div id="current-pdf-file" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></div>
+            </div>
+            <div>
+                <label for="edit-ruta_imagen" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Archivo de Imagen</label>
+                <input type="file" name="ruta_imagen" id="edit-ruta_imagen" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                <div id="current-image-file" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></div>
+            </div>
+            <div class="pt-4 flex justify-end gap-3">
+                <button type="button" onclick="closeModal('edit-payslip-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block page_scripts %}
@@ -142,17 +179,19 @@
             return;
         }
 
-        let p_list = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha de Emisión</th><th class="p-4">Período</th><th class="p-4">Archivos</th></tr></thead><tbody>';
+        let p_list = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha de Emisión</th><th class="p-4">Período</th><th class="p-4">Archivos</th><th class="p-4">Acciones</th></tr></thead><tbody>';
         recibos.forEach(recibo => {
             const fecha = new Date(recibo.fecha_emision);
-            p_list += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString()}</td><td class="p-4">${recibo.periodo}</td><td class="p-4"><div class="flex items-center gap-2">`;
+            p_list += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString('es-AR', { timeZone: 'UTC' })}</td><td class="p-4">${recibo.periodo}</td><td class="p-4"><div class="flex items-center gap-2">`;
             if (recibo.ruta_pdf) {
                 p_list += `<a href="/media/${recibo.ruta_pdf}" target="_blank" class="flex items-center gap-1 text-sm text-red-600 hover:underline"><i data-lucide="file-text" class="w-4 h-4"></i>PDF</a>`;
             }
             if (recibo.ruta_imagen) {
                 p_list += `<a href="/media/${recibo.ruta_imagen}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline"><i data-lucide="image" class="w-4 h-4"></i>Imagen</a>`;
             }
-            p_list += `</div></td></tr>`;
+            p_list += `</div></td><td class="p-4">
+                <button data-recibo-id="${recibo.id}" class="edit-payslip-btn text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 flex items-center gap-1"><i data-lucide="edit" class="w-4 h-4"></i>Editar</button>
+            </td></tr>`;
         });
         p_list += '</tbody></table>';
         listContainer.innerHTML = p_list;
@@ -160,12 +199,53 @@
         if (window.lucide) {
             window.lucide.createIcons();
         }
+
+        // Add event listeners for the new edit buttons
+        document.querySelectorAll('.edit-payslip-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const reciboId = e.currentTarget.dataset.reciboId;
+                fetch(`/recibos/api/get-details/${reciboId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const recibo = data.recibo;
+                            const form = document.getElementById('edit-payslip-form');
+                            form.action = `/recibos/editar/${recibo.id}/`;
+                            document.getElementById('edit-id_empl').value = recibo.id_empl_id;
+                            document.getElementById('edit-fecha_emision').value = recibo.fecha_emision;
+                            document.getElementById('edit-periodo').value = recibo.periodo;
+                            // Clear file inputs as they cannot be pre-filled
+                            document.getElementById('edit-ruta_pdf').value = '';
+                            document.getElementById('edit-ruta_imagen').value = '';
+
+                            // Display current files
+                            const pdfContainer = document.getElementById('current-pdf-file');
+                            if (recibo.ruta_pdf_url) {
+                                pdfContainer.innerHTML = `Archivo actual: <a href="${recibo.ruta_pdf_url}" target="_blank" class="text-red-600 hover:underline">${recibo.ruta_pdf_url.split('/').pop()}</a>`;
+                            } else {
+                                pdfContainer.innerHTML = 'No hay archivo PDF cargado.';
+                            }
+
+                            const imageContainer = document.getElementById('current-image-file');
+                            if (recibo.ruta_imagen_url) {
+                                imageContainer.innerHTML = `Archivo actual: <a href="${recibo.ruta_imagen_url}" target="_blank" class="text-blue-600 hover:underline">${recibo.ruta_imagen_url.split('/').pop()}</a>`;
+                            } else {
+                                imageContainer.innerHTML = 'No hay imagen cargada.';
+                            }
+
+                            openModal('edit-payslip-modal');
+                        } else {
+                            alert('Error al obtener los detalles del recibo.');
+                        }
+                    });
+            });
+        });
     }
 
     function fetchRecibos(dni, mes, anio) {
         let url = `/recibos/api/ver-recibos/${dni}/`;
         const params = new URLSearchParams();
-        if (mes) params.append('mes', mes);
+        if (mes && mes !== "") params.append('mes', mes);
         if (anio) params.append('anio', anio);
         
         const queryString = params.toString();

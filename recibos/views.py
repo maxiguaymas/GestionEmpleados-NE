@@ -40,6 +40,21 @@ def recibos_admin(request):
     form = ReciboSueldoForm()
     return render(request, 'recibos.html', {'form': form, 'page_title': 'Recibos'})
 
+@user_passes_test(es_admin)
+def editar_recibo(request, recibo_id):
+    recibo = get_object_or_404(Recibo, id=recibo_id)
+    if request.method == 'POST':
+        # We pass instance=recibo to tell the form we are editing an existing object.
+        form = ReciboSueldoForm(request.POST, request.FILES, instance=recibo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Recibo actualizado correctamente.")
+            return redirect('recibos_admin')
+        else:
+            messages.error(request, "Error al actualizar el recibo. Por favor, revise los datos.")
+    # This part is not really used since the modal is populated via API, but good practice.
+    return redirect('recibos_admin')
+
 def mis_recibos(request):
     try:
         empleado = request.user.empleado
@@ -51,8 +66,10 @@ def mis_recibos(request):
         
         years = Recibo.objects.filter(id_empl=empleado).dates('fecha_emision', 'year').distinct()
         
-        if mes and anio:
-            recibos = recibos.filter(fecha_emision__month=mes, fecha_emision__year=anio)
+        if anio:
+            recibos = recibos.filter(fecha_emision__year=anio)
+        if mes:
+            recibos = recibos.filter(fecha_emision__month=mes)
 
     except AttributeError:
         recibos = Recibo.objects.none()
@@ -111,7 +128,7 @@ def api_ver_recibos_empleado(request, dni):
                 'nombre': empleado.nombre,
                 'apellido': empleado.apellido,
             },
-            'recibos': list(recibos.values('fecha_emision', 'periodo', 'ruta_pdf', 'ruta_imagen')),
+            'recibos': list(recibos.values('id', 'fecha_emision', 'periodo', 'ruta_pdf', 'ruta_imagen')),
             'years': [year.year for year in years]
         }
         return JsonResponse(data)
@@ -128,3 +145,21 @@ def ajax_buscar_empleado(request):
             'text': f"{emp.dni} - {emp.nombre} {emp.apellido}"
         })
     return JsonResponse({'results': results})
+
+def api_get_recibo_details(request, recibo_id):
+    try:
+        recibo = Recibo.objects.get(id=recibo_id)
+        data = {
+            'status': 'success',
+            'recibo': {
+                'id': recibo.id, 
+                'id_empl_id': recibo.id_empl.id, 
+                'fecha_emision': recibo.fecha_emision, 
+                'periodo': recibo.periodo,
+                'ruta_pdf_url': recibo.ruta_pdf.url if recibo.ruta_pdf else None,
+                'ruta_imagen_url': recibo.ruta_imagen.url if recibo.ruta_imagen else None,
+            }
+        }
+        return JsonResponse(data)
+    except Recibo.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Recibo no encontrado.'}, status=404)
