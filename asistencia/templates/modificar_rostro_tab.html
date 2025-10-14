@@ -1,0 +1,30 @@
+<div class="container">
+    <h2 class="text-2xl font-bold mb-4">Modificar Rostro de Empleado</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+            <p class="text-gray-600 dark:text-gray-400">Seleccione un empleado para volver a capturar su rostro. El registro anterior será reemplazado.</p>
+            <div class="my-4">
+                <label for="empleadoSelect-modify" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Empleado con Rostro Registrado</label>
+                <select id="empleadoSelect-modify" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                    <option value="">Seleccione un empleado...</option>
+                    {% for empleado in empleados_con_rostro %}
+                        <option value="{{ empleado.id }}">{{ empleado.nombre }} {{ empleado.apellido }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="camera-container border rounded bg-gray-900">
+                <video id="video-modify" width="100%" height="auto" autoplay></video>
+            </div>
+            <button id="captureBtn-modify" class="mt-4 w-full bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700">
+                <i data-lucide="camera"></i>
+                <span>Capturar y Modificar Rostro</span>
+            </button>
+        </div>
+        <div class="flex flex-col items-center justify-center h-full">
+            <canvas id="canvas-modify" style="display:none;"></canvas>
+            <div id="result-modify" class="text-center">
+                <p class="text-gray-500">La vista previa de la captura aparecera aqui.</p>
+            </div>
+        </div>
+    </div>
+</div>
