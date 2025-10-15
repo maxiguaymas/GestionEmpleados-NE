@@ -1,14 +1,40 @@
-<div class="text-center">
-    <h2 class="text-2xl font-bold mb-4">Ver Asistencias</h2>
-    <div class="flex justify-center mb-6">
-        <div class="relative w-full sm:max-w-xs">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-            <input id="asistencia-dni-input" type="text" placeholder="Buscar por DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
-            <button id="asistencia-search-btn" class="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><i data-lucide="search" class="w-5 h-5"></i></button>
+<div>
+    <h2 class="text-2xl font-bold mb-6">Ver Asistencias por Empleado</h2>
+
+    <!-- DNI Search Form -->
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6 border dark:border-gray-700">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+                <label for="asistencia-dni-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">DNI Empleado</label>
+                <input id="asistencia-dni-input" type="text" placeholder="Buscar por DNI..." class="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div class="flex items-end">
+                <button id="asistencia-search-btn" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Buscar</button>
+            </div>
         </div>
     </div>
+
+    <!-- Results Container (initially hidden) -->
     <div id="asistencia-results-container" class="hidden">
-        <h3 class="text-xl font-bold mb-4">Resultados para <span id="asistencia-employee-name"></span></h3>
+        <h3 class="text-xl font-bold">Resultados para <span id="asistencia-employee-name"></span></h3>
+        
+        <!-- Period Filter Form (appears with results) -->
+        <form id="asistencia-period-filter-form" class="my-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Periodo</label>
+                    <div class="flex items-center gap-2">
+                        {{ filter_form.month }}
+                        {{ filter_form.year }}
+                    </div>
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Filtrar</button>
+                    <button type="button" id="asistencia-clear-btn" class="w-full text-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Limpiar</button>
+                </div>
+            </div>
+        </form>
+
         <div id="asistencia-list" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"></div>
     </div>
     <div id="asistencia-no-search-message" class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">

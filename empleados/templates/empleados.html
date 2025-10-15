@@ -24,50 +24,89 @@
 
 {% block page_scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-input');
-    const employeeList = document.getElementById('employee-list');
+    document.addEventListener('DOMContentLoaded', function() {
+        const { computePosition, flip, shift, offset, autoUpdate } = FloatingUIDOM;
+        let activeCleanup = null;
 
-    searchInput.addEventListener('keyup', function() {
-        const query = searchInput.value;
-        fetch(`{% url 'buscar_empleados' %}?q=${query}`)
-            .then(response => response.text())
-            .then(html => {
-                employeeList.innerHTML = html;
-            });
-    });
-});
-
-document.addEventListener('click', function(e) {
-    // Cerrar todos los menús si se hace clic afuera
-    if (!e.target.closest('[data-menu-container]')) {
-        document.querySelectorAll('[data-menu]').forEach(menu => menu.classList.add('hidden'));
-    }
-});
-
-document.querySelectorAll('[data-action="toggle-menu"]').forEach(button => {
-    button.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const menu = this.nextElementSibling;
-        // Ocultar otros menús abiertos
-        document.querySelectorAll('[data-menu]').forEach(m => {
-            if (m !== menu) m.classList.add('hidden');
+        // --- Búsqueda de Empleados (AJAX) ---
+        const searchInput = document.getElementById('search-input');
+        const employeeListContainer = document.getElementById('employee-list');
+        searchInput.addEventListener('keyup', function() {
+            const query = searchInput.value;
+            fetch(`{% url 'buscar_empleados' %}?q=${query}`)
+                .then(response => response.text())
+                .then(html => {
+                    employeeListContainer.innerHTML = html;
+                    if (window.lucide) {
+                        window.lucide.createIcons();
+                    }
+                });
         });
-        // Mostrar/ocultar el menú actual
-        menu.classList.toggle('hidden');
-    });
-});
 
-document.querySelectorAll('[data-action="delete-employee"]').forEach(button => {
-    button.addEventListener('click', function(e) {
-        e.preventDefault();
-        const url = this.href;
-        // Usando la función de notificación del app.js para consistencia
-        showNotification('warning', '¿Estás seguro?', 
-            `Esta acción no se puede deshacer. <br><br> <a href="${url}" class="font-bold text-red-600 hover:underline">Sí, eliminar</a>`,
-            10000 // Duración más larga para dar tiempo a hacer clic
-        );
+        // --- Lógica de Menús y Notificaciones (Event Delegation) ---
+        document.body.addEventListener('click', function(e) {
+            const toggleButton = e.target.closest('[data-action="toggle-menu"]');
+            const deleteButton = e.target.closest('[data-action="delete-employee"]');
+
+            // --- Manejo de Menús Desplegables ---
+            if (toggleButton) {
+                e.preventDefault();
+                const menu = toggleButton.nextElementSibling;
+
+                // Si se hace clic en el botón de un menú que ya está activo, lo cerramos.
+                if (activeCleanup && activeCleanup.menu === menu) {
+                    activeCleanup(); // Llama a la función de limpieza completa
+                    activeCleanup = null; // Limpia la referencia
+                    return; // Salimos para evitar que se vuelva a abrir.
+                }
+
+                // Si hay otro menú activo, lo cerramos primero.
+                if (activeCleanup) {
+                    activeCleanup();
+                    activeCleanup = null;
+                }
+
+                // Abrimos el nuevo menú.
+                menu.classList.remove('hidden');
+                const cleanup = autoUpdate(toggleButton, menu, () => {
+                    computePosition(toggleButton, menu, {
+                        placement: 'bottom-end',
+                        middleware: [
+                            offset(8),
+                            flip(),
+                            shift({ padding: 8 })
+                        ]
+                    }).then(({ x, y }) => {
+                        Object.assign(menu.style, {
+                            left: `${x}px`,
+                            top: `${y}px`,
+                        });
+                    });
+                });
+
+                // Guardamos la referencia al menú y su función de limpieza.
+                activeCleanup = () => {
+                    cleanup();
+                    menu.classList.add('hidden');
+                };
+                activeCleanup.menu = menu; // Adjuntamos el elemento del menú para poder compararlo.
+
+            } else if (deleteButton) {
+                // --- Manejo de Notificación de Eliminación ---
+                e.preventDefault();
+                const url = deleteButton.href;
+                showNotification('warning', '¿Estás seguro?',
+                    `Esta acción no se puede deshacer. <br><br> <a href="${url}" class="font-bold text-red-600 hover:underline">Sí, eliminar</a>`,
+                    10000
+                );
+            } else if (!e.target.closest('[data-menu]')) {
+                // --- Cerrar menú si se hace clic afuera ---
+                if (activeCleanup) {
+                    activeCleanup();
+                    activeCleanup = null;
+                }
+            }
+        });
     });
-});
 </script>
 {% endblock page_scripts %}
