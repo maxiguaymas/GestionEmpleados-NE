@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Incidente #{{ incidente.id }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            @frame header_frame {
+                -pdf-frame-content: header_content;
+                left: 50pt; right: 50pt; top: 30pt; height: 50pt;
+            }
+            @frame content_frame {
+                left: 50pt; right: 50pt; top: 90pt; bottom: 50pt;
+            }
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 50pt; right: 50pt; bottom: 30pt; height: 20pt;
+            }
+        }
+        body {
+            font-family: "Helvetica", "Arial", sans-serif;
+            font-size: 11pt;
+            color: #333;
+        }
+        h1 {
+            font-size: 24pt;
+            color: #D9232D; /* Color principal */
+            margin: 0;
+        }
+        h2 {
+            font-size: 16pt;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            margin: 0;
+            font-size: 9pt;
+            color: #555;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 10pt;
+            color: #555;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .section-content {
+            font-size: 11pt;
+            line-height: 1.4;
+        }
+        .employee-list {
+            list-style: none;
+            padding: 0;
+        }
+        .employee-list li {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .descargo {
+            border-left: 3px solid #ccc;
+            padding-left: 15px;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div id="header_content" class="header">
+        <h1>Reporte de Incidente</h1>
+        <p>Nuevas Energías S.A. | Fecha de Emisión: {% now "d/m/Y" %}</p>
+    </div>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+    <h2>Detalles del Incidente #{{ incidente.id }}</h2>
+    <div class="section">
+        <p><span class="section-title">Tipo:</span> {{ incidente.tipo_incid }}</p>
+        <p><span class="section-title">Fecha de Ocurrencia:</span> {{ fecha_incidente|date:"d/m/Y" }}</p>
+    </div>
+    <div class="section">
+        <p class="section-title">Descripción</p>
+        <p class="section-content">{{ incidente.descripcion_incid }}</p>
+    </div>
+
+    <h2>Empleados Involucrados</h2>
+    <ul class="employee-list">
+        {% for involucrado in involucrados %}
+            <li>{{ involucrado.id_empl.nombre }} {{ involucrado.id_empl.apellido }} (DNI: {{ involucrado.id_empl.dni }})</li>
+        {% endfor %}
+    </ul>
+
+    {% if descargos %}
+        <h2>Descargos Recibidos</h2>
+        {% for item in descargos %}
+            <div class="section">
+                <p class="section-title">Descargo de {{ item.empleado.nombre }} {{ item.empleado.apellido }} ({{ item.descargo.fecha_descargo|date:"d/m/Y" }})</p>
+                <div class="descargo">"{{ item.descargo.contenido_descargo }}"</div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if resolucion %}
+        <h2>Resolución Final</h2>
+        <div class="section">
+            <p><span class="section-title">Fecha:</span> {{ resolucion.fecha_resolucion|date:"d/m/Y" }}</p>
+            <p><span class="section-title">Responsable:</span> {{ resolucion.responsable }}</p>
+            <p class="section-content">{{ resolucion.descripcion }}</p>
+        </div>
+    {% endif %}
+</body>
+</html>

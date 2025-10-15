@@ -8,6 +8,9 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 
 @login_required
 def sanciones_empleado(request, empleado_id):
@@ -262,3 +265,30 @@ def mis_sanciones(request):
         'year_options': [d.year for d in years]
     }
     return render(request, 'mis_sanciones.html', context)
+
+# Copia esta función de ayuda para generar PDFs
+def render_to_pdf(template_src, context_dict={}):
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    # Para descargar directamente, cambia 'inline' por 'attachment'
+    response['Content-Disposition'] = f'inline; filename="sancion_{context_dict.get("sancion_id", "0")}.pdf"'
+
+    pisa_status = pisa.CreatePDF(
+        html, dest=response
+    )
+    if pisa_status.err:
+        return HttpResponse('Tuvimos algunos errores <pre>' + html + '</pre>')
+    return response
+
+# Esta es la nueva vista para generar el PDF de la sanción
+@login_required
+def generar_sancion_pdf(request, sancion_id):
+    sancion_empleado = get_object_or_404(SancionEmpleado.objects.select_related('id_empl', 'id_sancion'), id=sancion_id)
+
+    context = {
+        'sancion_empleado': sancion_empleado,
+        'sancion_id': sancion_id,
+    }
+
+    return render_to_pdf('sancion_pdf.html', context)

@@ -14,7 +14,14 @@
     {% endif %}
 
     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-        <h2 class="text-2xl font-bold mb-2">Detalle de la Sanción</h2>
+        <div class="flex justify-between items-start">
+            <h2 class="text-2xl font-bold mb-2">Detalle de la Sanción</h2>
+            <div class="flex items-center gap-2">
+                <a href="{% url 'generar_sancion_pdf' sancion_empleado.id %}" target="_blank" class="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Imprimir
+                </a>
+            </div>
+        </div>
 
         {% if sancion_empleado.incidente_asociado %}
             <div class="mb-4">
@@ -34,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div><h4 class="text-sm font-semibold text-gray-500">Tipo de Sanción</h4><p>{{ sancion.nombre }}</p></div>
+            <div><h4 class="text-sm font-semibold text-gray-500">Tipo de Sanción</h4><p>{{ sancion_empleado.id_sancion.nombre }}</p></div>
             <div><h4 class="text-sm font-semibold text-gray-500">Período</h4><p>{{ sancion_empleado.fecha_inicio|date:"d/m/Y" }} {% if sancion_empleado.fecha_fin %}al {{ sancion_empleado.fecha_fin|date:"d/m/Y" }}{% endif %}</p></div>
             <div><h4 class="text-sm font-semibold text-gray-500">Motivo</h4><p class="text-gray-600 dark:text-gray-300">{{ sancion_empleado.motivo }}</p></div>
         </div>
