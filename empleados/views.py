@@ -1,18 +1,25 @@
 from django.shortcuts import render
 from asistencia.models import Asistencia
 from .models import SancionEmpleado
-from datetime import date
+from datetime import date, timedelta
 from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .forms import EmpleadoForm
-from .models import Empleado, Notificacion
+from .models import Empleado, Notificacion, IncidenteEmpleado
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Q
+from django.db.models import Q, Count
 from empleados.models import Legajo, Documento, RequisitoDocumento
+import pandas as pd
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.http import HttpResponse
+import json
+import calendar
+from django.utils.translation import gettext as _
 
 def es_admin(user):
     return user.groups.filter(name='Administrador').exists() or user.is_superuser
@@ -242,17 +249,53 @@ def grafico_empleados_pdf(request):
 def dashboard(request):
     if not es_admin(request.user):
         return redirect('ver_perfil')
-    total_empleados = Empleado.objects.filter(estado='Activo').count()
-    asistencia_hoy = Asistencia.objects.filter(fecha_hora__date=date.today()).count()
-    
+
     today = date.today()
+
+    # Card data
+    total_empleados = Empleado.objects.filter(estado='Activo').count()
+    asistencia_hoy = Asistencia.objects.filter(fecha_hora__date=today).count()
     sanciones_mes = SancionEmpleado.objects.filter(fecha_inicio__month=today.month, fecha_inicio__year=today.year).count()
+    contrataciones_mes = Empleado.objects.filter(fecha_ingreso__month=today.month, fecha_ingreso__year=today.year).count()
+
+    # Hires chart (last 6 months)
+    hires_labels = []
+    hires_data = []
+    for i in range(5, -1, -1):
+        year = today.year
+        month = today.month - i
+        if month <= 0:
+            month += 12
+            year -= 1
+        
+        hires_labels.append(_(calendar.month_name[month]))
+        
+        count = Empleado.objects.filter(fecha_ingreso__year=year, fecha_ingreso__month=month).count()
+        hires_data.append(count)
+
+    # Status chart
+    status_data = Empleado.objects.values('estado').annotate(count=Count('id'))
+    status_labels = [item['estado'] for item in status_data]
+    status_values = [item['count'] for item in status_data]
+
+    # Recent incidents
+    ultimos_incidentes = IncidenteEmpleado.objects.select_related('id_empl', 'id_incidente').order_by('-fecha_ocurrencia')[:5]
+
+    # Recent activity (notifications)
+    actividad_reciente = Notificacion.objects.order_by('-fecha_creacion')[:5]
 
     context = {
         'total_empleados': total_empleados,
         'asistencia_hoy': asistencia_hoy,
         'sanciones_mes': sanciones_mes,
+        'contrataciones_mes': contrataciones_mes,
         'page_title': 'Inicio',
+        'hires_labels': json.dumps(hires_labels),
+        'hires_data': json.dumps(hires_data),
+        'status_labels': json.dumps(status_labels),
+        'status_data': json.dumps(status_values),
+        'ultimos_incidentes': ultimos_incidentes,
+        'actividad_reciente': actividad_reciente,
     }
     return render(request, 'dashboard.html', context)
 
