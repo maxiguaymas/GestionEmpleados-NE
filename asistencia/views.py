@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import face_recognition
 from datetime import date
+from django.utils import translation
 
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
@@ -11,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 
 from empleados.models import Empleado
 from .models import Rostro, Asistencia
+from .forms import AsistenciaFilterForm
 
 
 @login_required
@@ -128,25 +130,43 @@ def ver_asistencias_empleado(request, empleado_id):
     ordenadas de la mÃ¡s reciente a la mÃ¡s antigua.
     """
     empleado = get_object_or_404(Empleado, id=empleado_id)
-    asistencias = Asistencia.objects.filter(id_empl=empleado).order_by('-fecha_hora')
     
-    context = {
-        'empleado': empleado,
-        'asistencias': asistencias,
-        'page_title': 'Asistencias'
-    }
-    return render(request, 'ver_asistencias.html', context)
+    # Usamos un context manager para asegurar que el idioma se aplique durante el renderizado
+    with translation.override('es'):
+        asistencias_query = Asistencia.objects.filter(id_empl=empleado).order_by('-fecha_hora')
+
+        # Inicializa el formulario con los datos de la petición GET
+        filter_form = AsistenciaFilterForm(request.GET)
+        
+        # Aplica los filtros si el formulario es válido
+        if filter_form.is_valid():
+            month = filter_form.cleaned_data.get('month')
+            year = filter_form.cleaned_data.get('year')
+            if month:
+                asistencias_query = asistencias_query.filter(fecha_hora__month=month)
+            if year:
+                asistencias_query = asistencias_query.filter(fecha_hora__year=year)
+        
+        context = {
+            'empleado': empleado,
+            'asistencias': asistencias_query,
+            'filter_form': filter_form,
+            'page_title': 'Asistencias'
+        }
+        return render(request, 'ver_asistencias.html', context)
 
 @login_required
 def asistencia_admin(request):
     empleados_registrados_ids = Rostro.objects.values_list('id_empl_id', flat=True)
     empleados_sin_rostro = Empleado.objects.exclude(id__in=empleados_registrados_ids)
     empleados_con_rostro = Empleado.objects.filter(id__in=empleados_registrados_ids)
+    filter_form = AsistenciaFilterForm()
     
     context = {
         'empleados_sin_rostro': empleados_sin_rostro,
         'empleados_con_rostro': empleados_con_rostro,
-        'page_title': 'Asistencias'
+        'page_title': 'Asistencias',
+        'filter_form': filter_form,
     }
     return render(request, 'asistencia.html', context)
 
@@ -154,14 +174,24 @@ def asistencia_admin(request):
 def api_ver_asistencias_empleado(request, dni):
     try:
         empleado = Empleado.objects.get(dni=dni)
-        asistencias = Asistencia.objects.filter(id_empl=empleado).order_by('-fecha_hora')
+        asistencias_query = Asistencia.objects.filter(id_empl=empleado).order_by('-fecha_hora')
+
+        # Get filter parameters from the request
+        month = request.GET.get('mes')
+        year = request.GET.get('anio')
+
+        if month:
+            asistencias_query = asistencias_query.filter(fecha_hora__month=month)
+        if year:
+            asistencias_query = asistencias_query.filter(fecha_hora__year=year)
+
         data = {
             'status': 'success',
             'empleado': {
                 'nombre': empleado.nombre,
                 'apellido': empleado.apellido,
             },
-            'asistencias': list(asistencias.values('fecha_hora'))
+            'asistencias': list(asistencias_query.values('fecha_hora'))
         }
         return JsonResponse(data)
     except Empleado.DoesNotExist:
@@ -169,14 +199,27 @@ def api_ver_asistencias_empleado(request, dni):
 
 @login_required
 def mis_asistencias(request):
-    try:
-        empleado = request.user.empleado
-        asistencias = Asistencia.objects.filter(id_empl=empleado).order_by('-fecha_hora')
-    except Empleado.DoesNotExist:
-        asistencias = Asistencia.objects.none()
-    
-    context = {
-        'asistencias': asistencias,
-        'page_title': 'Asistencias'
-    }
-    return render(request, 'mis_asistencias.html', context)
+    with translation.override('es'):
+        try:
+            empleado = request.user.empleado
+            asistencias_query = Asistencia.objects.filter(id_empl=empleado).order_by('-fecha_hora')
+        except Empleado.DoesNotExist:
+            empleado = None
+            asistencias_query = Asistencia.objects.none()
+
+        filter_form = AsistenciaFilterForm(request.GET)
+        if filter_form.is_valid():
+            month = filter_form.cleaned_data.get('month')
+            year = filter_form.cleaned_data.get('year')
+            if month:
+                asistencias_query = asistencias_query.filter(fecha_hora__month=month)
+            if year:
+                asistencias_query = asistencias_query.filter(fecha_hora__year=year)
+
+        context = {
+            'empleado': empleado,
+            'asistencias': asistencias_query,
+            'filter_form': filter_form,
+            'page_title': 'Mis Asistencias'
+        }
+        return render(request, 'mis_asistencias.html', context)

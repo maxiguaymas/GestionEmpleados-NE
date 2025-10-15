@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load l10n %}
 
 {% block title %}Mis Asistencias{% endblock %}
 
@@ -7,36 +7,50 @@
 
 {% block content %}
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-    {% if asistencias %}
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h3 class="text-lg font-semibold">Mis Registros de Asistencia</h3>
-        <!-- Month filter can be added later -->
-    </div>
-    <div class="overflow-hidden">
+    <!-- Filter Form -->
+    <form method="get" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6 -m-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="sm:col-span-2">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Periodo</label>
+                <div class="flex items-center gap-2">
+                    {{ filter_form.month }}
+                    {{ filter_form.year }}
+                </div>
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Filtrar</button>
+                <a href="{% url 'mis_asistencias' %}" class="w-full text-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Limpiar</a>
+            </div>
+        </div>
+    </form>
 
+    {% if asistencias %}
+    <div class="overflow-hidden mt-6">
         <table class="w-full">
             <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
                 <tr>
                     <th class="p-4">Fecha</th>
-                    <th class="p-4">Hora</th>
+                    <th class="p-4">Día</th>
+                    <th class="p-4">Hora de Ingreso</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 {% for asistencia in asistencias %}
                 <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td class="p-4 text-gray-600 dark:text-gray-300">{{ asistencia.fecha_hora|date:"d/m/Y" }}</td>
-                    <td class="p-4 font-semibold">{{ asistencia.fecha_hora|time:"H:i:s" }}</td>
+                    <td class="p-4 text-gray-600 dark:text-gray-300">{{ asistencia.fecha_hora|date:"l"|capfirst }}</td>
+                    <td class="p-4 font-semibold text-gray-800 dark:text-gray-100">{{ asistencia.fecha_hora|time:"H:i:s" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        {% else %}
-        <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-            <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes asistencias registradas</h3>
-            <p class="mt-1 text-sm text-gray-500">Aun no tienes asistencias registradas.</p>
-        </div>
-        {% endif %}
     </div>
+    {% else %}
+    <div class="text-center py-10">
+        <i data-lucide="calendar-off" class="mx-auto h-12 w-12 text-gray-400"></i>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Sin Resultados</h3>
+        <p class="mt-1 text-sm text-gray-500">No se encontraron asistencias para los filtros seleccionados.</p>
+    </div>
+    {% endif %}
 </div>
 {% endblock content %}

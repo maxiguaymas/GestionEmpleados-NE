@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load l10n %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
@@ -10,23 +11,49 @@
         <h1 class="text-2xl font-bold">Asistencias de {{ empleado.nombre }} {{ empleado.apellido }}</h1>
     </div>
 
-    {% if asistencias %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {% for asistencia in asistencias %}
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 text-center">
-                    <div class="mb-2">
-                        <span class="text-3xl font-bold text-gray-800 dark:text-white">{{ asistencia.fecha_hora|date:"d" }}</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ asistencia.fecha_hora|date:"M Y" }}</span>
-                    </div>
-                    <div class="text-lg font-medium text-gray-700 dark:text-gray-300">{{ asistencia.fecha_hora|time:"H:i:s" }}</div>
+    <!-- Filter Form -->
+    <form method="get" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="sm:col-span-2">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Periodo</label>
+                <div class="flex items-center gap-2">
+                    {{ filter_form.month }}
+                    {{ filter_form.year }}
                 </div>
-            {% endfor %}
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Filtrar</button>
+                <a href="{% url 'ver_asistencias_empleado' empleado.id %}" class="w-full text-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    {% if asistencias %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                    <tr>
+                        <th class="p-4">Fecha</th>
+                        <th class="p-4">Día</th>
+                        <th class="p-4">Hora de Ingreso</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for asistencia in asistencias %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="p-4 text-gray-600 dark:text-gray-300">{{ asistencia.fecha_hora|date:"d/m/Y" }}</td>
+                        <td class="p-4 text-gray-600 dark:text-gray-300">{{ asistencia.fecha_hora|date:"l"|capfirst }}</td>
+                        <td class="p-4 font-semibold text-gray-800 dark:text-gray-100">{{ asistencia.fecha_hora|time:"H:i:s" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
         <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <i data-lucide="calendar-off" class="mx-auto h-12 w-12 text-gray-400"></i>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Sin Asistencias</h3>
-            <p class="mt-1 text-sm text-gray-500">Este empleado no tiene asistencias registradas.</p>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Sin Resultados</h3>
+            <p class="mt-1 text-sm text-gray-500">No se encontraron asistencias para los filtros seleccionados.</p>
         </div>
     {% endif %}
 </div>

@@ -33,11 +33,9 @@
         </div>
 
         <div class="flex justify-end items-center border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-             <div class="relative" data-menu-container>
-                <button data-action="toggle-menu" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i data-lucide="more-horizontal" class="text-gray-500 dark:text-gray-400"></i>
-                </button>
-                <div class="hidden absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-20 border dark:border-gray-700 py-1" data-menu>
+            <div data-menu-container>
+                <button data-action="toggle-menu" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="more-horizontal" class="text-gray-500 dark:text-gray-400"></i></button>
+                <div data-menu class="hidden absolute top-0 left-0 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-50 border dark:border-gray-700 py-1">
                     <a href="{% url 'ver_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="eye" class="w-4 h-4"></i>Ver Perfil</a>
                     <a href="{% url 'editar_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="edit-2" class="w-4 h-4"></i>Editar</a>
                     <a href="{% url 'eliminar_empleado' empleado.id %}" data-action="delete-employee" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"><i data-lucide="trash-2" class="w-4 h-4"></i>Eliminar</a>
@@ -87,11 +85,9 @@
                     </span>
                 </td>
                 <td class="p-4">
-                    <div class="relative" data-menu-container>
-                        <button data-action="toggle-menu" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i data-lucide="more-horizontal" class="text-gray-500 dark:text-gray-400"></i>
-                        </button>
-                        <div class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-10 border dark:border-gray-700 py-1" data-menu>
+                    <div data-menu-container>
+                        <button data-action="toggle-menu" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="more-horizontal" class="text-gray-500 dark:text-gray-400"></i></button>
+                        <div data-menu class="hidden absolute top-0 left-0 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-50 border dark:border-gray-700 py-1">
                             <a href="{% url 'ver_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="eye" class="w-4 h-4"></i>Ver Perfil</a>
                             <a href="{% url 'editar_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="edit-2" class="w-4 h-4"></i>Editar</a>
                             <a href="{% url 'eliminar_empleado' empleado.id %}" data-action="delete-employee" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"><i data-lucide="trash-2" class="w-4 h-4"></i>Eliminar</a>

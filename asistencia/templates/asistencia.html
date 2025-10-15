@@ -292,32 +292,76 @@
     const employeeNameSpan = document.getElementById('asistencia-employee-name');
     const listContainer = document.getElementById('asistencia-list');
     const noSearchMessage = document.getElementById('asistencia-no-search-message');
+    const periodFilterForm = document.getElementById('asistencia-period-filter-form');
+    const clearBtn = document.getElementById('asistencia-clear-btn');
 
     if (searchBtn) {
-        searchBtn.addEventListener('click', () => {
-            const dni = dniInput.value;
+        const fetchAndRenderAsistencias = (dni, month, year) => {
             if (!dni) {
+                showNotification('warning', 'DNI Requerido', 'Por favor, ingrese un DNI para buscar.');
                 return;
             }
 
-            fetch(`/asistencia/api/ver-asistencias/${dni}/`)
+            let url = `/asistencia/api/ver-asistencias/${dni}/`;
+            const params = new URLSearchParams();
+            if (month) params.append('mes', month);
+            if (year) params.append('anio', year);
+            
+            const queryString = params.toString();
+            if (queryString) {
+                url += `?${queryString}`;
+            }
+
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
+                    const locale = 'es-ES';
+
                     if (data.status === 'success') {
                         employeeNameSpan.textContent = `${data.empleado.nombre} ${data.empleado.apellido}`;
-                        let a_list = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha</th><th class="p-4">Hora</th></tr></thead><tbody>';
-                        data.asistencias.forEach(asistencia => {
+                        let tableHtml = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha</th><th class="p-4">Día</th><th class="p-4">Hora</th></tr></thead><tbody>';
+                        
+                        if (data.asistencias.length > 0) {
+                            data.asistencias.forEach(asistencia => {
                             const fecha = new Date(asistencia.fecha_hora);
-                            a_list += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString()}</td><td class="p-4">${fecha.toLocaleTimeString()}</td></tr>`;
+                            const diaSemana = fecha.toLocaleDateString(locale, { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase());
+                            tableHtml += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString(locale, {timeZone: 'UTC'})}</td><td class="p-4">${diaSemana}</td><td class="p-4">${fecha.toLocaleTimeString(locale, {timeZone: 'UTC'})}</td></tr>`;
                         });
-                        a_list += '</tbody></table>';
-                        listContainer.innerHTML = a_list;
+                        } else {
+                            tableHtml += `<tr><td colspan="3" class="p-6 text-center text-gray-500">No se encontraron asistencias para los filtros seleccionados.</td></tr>`;
+                        }
+                        tableHtml += '</tbody></table>';
+                        listContainer.innerHTML = tableHtml;
+
                         resultsContainer.classList.remove('hidden');
                         noSearchMessage.classList.add('hidden');
+                        lucide.createIcons();
                     } else {
-                        // Handle error
+                        showNotification('error', 'Error', data.message);
+                        resultsContainer.classList.add('hidden');
+                        noSearchMessage.classList.remove('hidden');
                     }
                 });
+        };
+
+        searchBtn.addEventListener('click', () => fetchAndRenderAsistencias(dniInput.value, null, null));
+        dniInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                fetchAndRenderAsistencias(dniInput.value, null, null);
+            }
+        });
+
+        periodFilterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const month = e.target.elements.month.value;
+            const year = e.target.elements.year.value;
+            fetchAndRenderAsistencias(dniInput.value, month, year);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            periodFilterForm.reset();
+            // Vuelve a buscar solo con el DNI, sin filtros de fecha
+            fetchAndRenderAsistencias(dniInput.value, null, null);
         });
     }
 </script>
