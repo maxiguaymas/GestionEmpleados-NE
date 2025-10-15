@@ -12,6 +12,10 @@ from sanciones.forms import SancionMasivaForm
 from django.utils import timezone
 import re
 from django.db.models import Q
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+
 
 @login_required
 @user_passes_test(es_admin)
@@ -317,10 +321,55 @@ def resolver_incidente(request, incidente_id):
             resolucion.fecha_resolucion = timezone.now().date()
             resolucion.save()
 
-            IncidenteEmpleado.objects.filter(id_incidente=incidente).update(id_resolucion=resolucion)
+            IncidenteEmpleado.objects.filter(id_incidente=incidente).update(
+                id_resolucion=resolucion,
+                estado='CERRADO'
+            )
             messages.success(request, 'El incidente ha sido marcado como resuelto.')
             return redirect('detalle_incidente', incidente_id=incidente.id)
     
     messages.error(request, 'Hubo un error al procesar la resolución. Por favor, inténtalo de nuevo.')
     return redirect('detalle_incidente', incidente_id=incidente.id)
 
+
+def render_to_pdf(template_src, context_dict={}):
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    # Para descargar directamente, cambia 'inline' por 'attachment'
+    response['Content-Disposition'] = f'inline; filename="incidente_{context_dict.get("incidente_id", "0")}.pdf"'
+
+    pisa_status = pisa.CreatePDF(
+        html, dest=response
+    )
+    if pisa_status.err:
+        return HttpResponse('Tuvimos algunos errores <pre>' + html + '</pre>')
+    return response
+
+@login_required
+def generar_incidente_pdf(request, incidente_id):
+    # Reutilizamos la lógica para obtener los datos del incidente
+    incidente = get_object_or_404(Incidente, id=incidente_id)
+    involucrados_qs = IncidenteEmpleado.objects.filter(id_incidente=incidente).select_related('id_empl', 'id_descargo', 'id_resolucion')
+
+    involucrados = []
+    descargos = []
+    for inv in involucrados_qs:
+        involucrados.append(inv)
+        if inv.id_descargo:
+            descargos.append({'empleado': inv.id_empl, 'descargo': inv.id_descargo})
+
+    resolucion = involucrados_qs.first().id_resolucion if involucrados_qs.exists() and involucrados_qs.first().id_resolucion else None
+    fecha_incidente = involucrados_qs.first().fecha_ocurrencia if involucrados_qs.exists() else None
+
+    context = {
+        'incidente': incidente,
+        'involucrados': involucrados,
+        'fecha_incidente': fecha_incidente,
+        'descargos': descargos,
+        'resolucion': resolucion,
+        'incidente_id': incidente_id,
+    }
+
+    # Renderizamos el PDF
+    return render_to_pdf('incidente_pdf.html', context)

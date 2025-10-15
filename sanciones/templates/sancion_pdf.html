@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Sanción #{{ sancion_empleado.id }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            @frame header_frame {
+                -pdf-frame-content: header_content;
+                left: 50pt; right: 50pt; top: 30pt; height: 50pt;
+            }
+            @frame content_frame {
+                left: 50pt; right: 50pt; top: 90pt; bottom: 50pt;
+            }
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 50pt; right: 50pt; bottom: 30pt; height: 20pt;
+            }
+        }
+        body {
+            font-family: "Helvetica", "Arial", sans-serif;
+            font-size: 11pt;
+            color: #333;
+        }
+        h1 {
+            font-size: 24pt;
+            color: #D9232D; /* Color principal */
+            margin: 0;
+        }
+        h2 {
+            font-size: 16pt;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .header p { margin: 0; font-size: 9pt; color: #555; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-weight: bold; font-size: 10pt; color: #555; text-transform: uppercase; margin-bottom: 5px; }
+        .section-content { font-size: 11pt; line-height: 1.4; }
+        .employee-box { background-color: #f9f9f9; border: 1px solid #eee; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div id="header_content" class="header">
+        <h1>Reporte de Sanción</h1>
+        <p>Nuevas Energías S.A. | Fecha de Emisión: {% now "d/m/Y" %}</p>
+    </div>
+
+    <div id="footer_content">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+    <h2>Detalles de la Sanción #{{ sancion_empleado.id }}</h2>
+    <div class="section employee-box">
+        <p class="section-title">Empleado Sancionado</p>
+        <p>{{ sancion_empleado.id_empl.nombre }} {{ sancion_empleado.id_empl.apellido }}</p>
+        <p>DNI: {{ sancion_empleado.id_empl.dni }}</p>
+    </div>
+
+    <div class="section">
+        <p><span class="section-title">Tipo de Sanción:</span> {{ sancion_empleado.id_sancion.nombre }}</p>
+        <p><span class="section-title">Fecha de Inicio:</span> {{ sancion_empleado.fecha_inicio|date:"d/m/Y" }}</p>
+        {% if sancion_empleado.fecha_fin %}
+            <p><span class="section-title">Fecha de Fin:</span> {{ sancion_empleado.fecha_fin|date:"d/m/Y" }}</p>
+        {% endif %}
+        <p><span class="section-title">Responsable:</span> {{ sancion_empleado.responsable }}</p>
+    </div>
+
+    <div class="section">
+        <p class="section-title">Motivo de la Sanción</p>
+        <p class="section-content">{{ sancion_empleado.motivo }}</p>
+    </div>
+</body>
+</html>
