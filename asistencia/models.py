@@ -1,5 +1,6 @@
 from django.db import models
 from empleados.models import Empleado # Asegúrate que la importación sea correcta
+from django.utils import timezone
 import json
 
 class Rostro(models.Model):
@@ -17,7 +18,7 @@ class Rostro(models.Model):
 
 class Asistencia(models.Model):
     id_empl = models.ForeignKey(Empleado, on_delete=models.CASCADE)
-    fecha_hora = models.DateTimeField(auto_now_add=True)
+    fecha_hora = models.DateTimeField(default=timezone.now)
     minutos_retraso= models.IntegerField(default=0)
     # Podrías agregar un campo 'tipo' si quieres diferenciar entre 'Entrada' y 'Salida'
 
