@@ -1,6 +1,6 @@
 <!-- Card View for Mobile -->
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
-    {% for empleado in empleados %}
+    {% for empleado in page_obj|default:empleados %}
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex flex-col justify-between">
         <div>
             <div class="flex items-center gap-4 mb-4">
@@ -50,6 +50,40 @@
     {% endfor %}
 </div>
 
+<!-- Paginación (estilo asistencia) -->
+<div id="employee-pagination" class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6 mt-4">
+    <div class="flex-1 flex justify-between sm:hidden">
+        {% if page_obj and page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> Anterior </a>
+        {% endif %}
+        {% if page_obj and page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> Siguiente </a>
+        {% endif %}
+    </div>
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+                {% if page_obj %}
+                    Mostrando <span class="font-medium">{{ page_obj.start_index }}</span> a <span class="font-medium">{{ page_obj.end_index }}</span> de <span class="font-medium">{{ page_obj.paginator.count }}</span> resultados
+                {% else %}
+                    Mostrando <span class="font-medium">{{ empleados|length }}</span> resultados
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                {% if page_obj and page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Anterior</span> <i data-lucide="chevron-left" class="h-5 w-5"></i> </a>
+                {% endif %}
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300"> {% if page_obj %}Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}{% else %}Página 1{% endif %} </span>
+                {% if page_obj and page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Siguiente</span> <i data-lucide="chevron-right" class="h-5 w-5"></i> </a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</div>
+
 <!-- Table View for Desktop -->
 <div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-x-auto">
     <table class="w-full">
@@ -64,7 +98,7 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            {% for empleado in empleados %}
+            {% for empleado in page_obj|default:empleados %}
             <tr>
                 <td class="p-4">
                     {% if empleado.ruta_foto %}

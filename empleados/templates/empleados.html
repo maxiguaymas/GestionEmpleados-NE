@@ -20,6 +20,8 @@
 <div id="employee-list">
     {% include 'lista_empleados.html' %}
 </div>
+<!-- Contenedor donde colocaremos la paginación al final de la página -->
+<div id="page-bottom-pagination" class="mt-6 px-4 sm:px-6"></div>
 {% endblock content %}
 
 {% block page_scripts %}
@@ -31,17 +33,31 @@
         // --- Búsqueda de Empleados (AJAX) ---
         const searchInput = document.getElementById('search-input');
         const employeeListContainer = document.getElementById('employee-list');
-        searchInput.addEventListener('keyup', function() {
-            const query = searchInput.value;
-            fetch(`{% url 'buscar_empleados' %}?q=${query}`)
-                .then(response => response.text())
-                .then(html => {
-                    employeeListContainer.innerHTML = html;
-                    if (window.lucide) {
-                        window.lucide.createIcons();
-                    }
-                });
-        });
+            const bottomPagination = document.getElementById('page-bottom-pagination');
+
+            // Al cargar, mover la paginación inicial (si existe) al fondo
+            const initialPagination = employeeListContainer.querySelector('#employee-pagination');
+            if (initialPagination && bottomPagination) {
+                bottomPagination.innerHTML = '';
+                bottomPagination.appendChild(initialPagination);
+            }
+
+            searchInput.addEventListener('keyup', function() {
+                const query = searchInput.value;
+                fetch(`{% url 'buscar_empleados' %}?q=${query}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        employeeListContainer.innerHTML = html;
+                        // extraer paginación del HTML recibido y moverla al fondo
+                        const temp = document.createElement('div');
+                        temp.innerHTML = html;
+                        const pagination = temp.querySelector('#employee-pagination');
+                        if (pagination && bottomPagination) {
+                            bottomPagination.innerHTML = '';
+                            bottomPagination.appendChild(pagination);
+                        }
+                    });
+            });
 
         // --- Lógica de Menús y Notificaciones (Event Delegation) ---
         document.body.addEventListener('click', function(e) {
