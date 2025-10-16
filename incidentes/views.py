@@ -6,7 +6,7 @@ from empleados.views import es_admin
 from django.core.exceptions import PermissionDenied
 from empleados.models import Incidente, IncidenteEmpleado, Empleado, SancionEmpleado, Resolucion, Notificacion
 from django.urls import reverse
-from .forms import IncidenteForm, IncidenteEmpleadoFilterForm
+from .forms import IncidenteForm, IncidenteEmpleadoFilterForm, DescargoForm
 from sanciones.forms import ResolucionForm
 from sanciones.forms import SancionMasivaForm
 from django.utils import timezone
@@ -189,10 +189,41 @@ def corregir_incidente(request, incidente_id):
 
 
 @login_required
-@user_passes_test(es_admin)
 def detalle_incidente(request, incidente_id):
     incidente = get_object_or_404(Incidente, id=incidente_id)
+
+    # Handle Descargo Form Submission
+    if request.method == 'POST':
+        # Ensure the user is an employee and involved in the incident
+        if not hasattr(request.user, 'empleado'):
+            raise PermissionDenied("No tienes permiso para realizar esta acción.")
+        
+        try:
+            incidente_empleado = IncidenteEmpleado.objects.get(id_incidente=incidente, id_empl=request.user.empleado)
+        except IncidenteEmpleado.DoesNotExist:
+            raise PermissionDenied("No estás involucrado en este incidente.")
+
+        if incidente_empleado.id_descargo:
+            messages.error(request, "Ya has presentado un descargo para este incidente.")
+            return redirect('detalle_incidente', incidente_id=incidente.id)
+
+        descargo_form = DescargoForm(request.POST, request.FILES)
+        if descargo_form.is_valid():
+            descargo = descargo_form.save(commit=False)
+            descargo.fecha_descargo = timezone.now().date()
+            descargo.save()
+
+            incidente_empleado.id_descargo = descargo
+            incidente_empleado.save()
+
+            messages.success(request, "Tu descargo ha sido registrado exitosamente.")
+            return redirect('detalle_incidente', incidente_id=incidente.id)
+        else:
+            # If form is invalid, we fall through to the GET logic below,
+            # which will re-render the page with the form and its errors.
+            pass
     
+    # GET request logic
     corrected_incident_id = None
     if incidente.descripcion_incid:
         match = re.search(r'\(Corrección del incidente #(\d+)\)', incidente.descripcion_incid)
@@ -223,6 +254,16 @@ def detalle_incidente(request, incidente_id):
     sancion_form = SancionMasivaForm(initial={'motivo': motivo_inicial})
     
     resolucion_form = ResolucionForm()
+
+    # Add descargo_form and current_incidente_empleado to context
+    descargo_form = DescargoForm() # Always provide the form instance
+    current_incidente_empleado = None
+    if hasattr(request.user, 'empleado'):
+        try:
+            current_incidente_empleado = involucrados_qs.get(id_empl=request.user.empleado)
+        except IncidenteEmpleado.DoesNotExist:
+            pass
+
     context = {
         'incidente': incidente,
         'involucrados': involucrados,
@@ -232,6 +273,8 @@ def detalle_incidente(request, incidente_id):
         'resolucion': resolucion,
         'resolucion_form': resolucion_form,
         'corrected_incident_id': corrected_incident_id,
+        'descargo_form': descargo_form,
+        'current_incidente_empleado': current_incidente_empleado,
         'page_title': 'Detalle de Incidente',
     }
     return render(request, 'detalle_incidente.html', context)
@@ -373,3 +416,4 @@ def generar_incidente_pdf(request, incidente_id):
 
     # Renderizamos el PDF
     return render_to_pdf('incidente_pdf.html', context)
+
