@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q, Count
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from empleados.models import Legajo, Documento, RequisitoDocumento
 import pandas as pd
 from django.template.loader import get_template
@@ -139,8 +140,18 @@ def eliminar_empleado(request, id):
 @login_required
 @user_passes_test(es_admin)
 def ver_empleados(request):
-    empleados = Empleado.objects.filter(fecha_egreso__isnull=True)
-    return render(request, 'empleados.html', {'empleados': empleados, 'page_title': 'Empleados'})
+    empleados = Empleado.objects.filter(fecha_egreso__isnull=True).order_by('-fecha_ingreso', '-id')
+    # Paginación por defecto: 10 por página
+    page = request.GET.get('page', 1)
+    paginator = Paginator(empleados, 10)
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    return render(request, 'empleados.html', {'empleados': page_obj.object_list, 'page_obj': page_obj, 'paginator': paginator, 'page_title': 'Empleados'})
 
 @login_required
 @user_passes_test(es_admin)
@@ -152,11 +163,21 @@ def buscar_empleados(request):
             Q(apellido__icontains=query) |
             Q(dni__icontains=query),
             fecha_egreso__isnull=True
-        )
+        ).order_by('-fecha_ingreso', '-id')
     else:
-        empleados = Empleado.objects.filter(fecha_egreso__isnull=True)
-    
-    return render(request, 'lista_empleados.html', {'empleados': empleados})
+        empleados = Empleado.objects.filter(fecha_egreso__isnull=True).order_by('-fecha_ingreso', '-id')
+
+    # Paginación: 10 por página
+    page = request.GET.get('page', 1)
+    paginator = Paginator(empleados, 10)
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    return render(request, 'lista_empleados.html', {'empleados': page_obj.object_list, 'page_obj': page_obj, 'paginator': paginator})
 
 @login_required
 def ver_empleado(request, id):
