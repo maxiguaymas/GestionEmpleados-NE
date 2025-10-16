@@ -199,6 +199,7 @@ def api_ver_asistencias_empleado(request, dni):
 
 @login_required
 def mis_asistencias(request):
+    from django.core.paginator import Paginator
     with translation.override('es'):
         try:
             empleado = request.user.empleado
@@ -216,10 +217,17 @@ def mis_asistencias(request):
             if year:
                 asistencias_query = asistencias_query.filter(fecha_hora__year=year)
 
+        # Lógica de paginación
+        registros_por_pagina = request.GET.get('por_pagina', 10)
+        paginator = Paginator(asistencias_query, registros_por_pagina)
+        page_number = request.GET.get('page')
+        asistencias_paginadas = paginator.get_page(page_number)
+
         context = {
             'empleado': empleado,
-            'asistencias': asistencias_query,
+            'asistencias': asistencias_paginadas,
             'filter_form': filter_form,
-            'page_title': 'Mis Asistencias'
+            'page_title': 'Mis Asistencias',
+            'por_pagina': registros_por_pagina,
         }
         return render(request, 'mis_asistencias.html', context)
