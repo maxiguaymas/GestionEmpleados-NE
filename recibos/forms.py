@@ -13,7 +13,7 @@ class ReciboSueldoForm(forms.ModelForm):
         fields = ['id_empl', 'fecha_emision', 'periodo', 'ruta_pdf', 'ruta_imagen']
         widgets = {
             'fecha_emision': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'periodo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM'}),
+            'periodo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM', 'oninput': "this.value = this.value.replace(/[^0-9-]/g, '')"}),
             'ruta_pdf': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'ruta_imagen': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
