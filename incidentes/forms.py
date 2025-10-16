@@ -1,5 +1,5 @@
 from django import forms
-from empleados.models import Incidente, Empleado, Resolucion, IncidenteEmpleado
+from empleados.models import Incidente, Empleado, Resolucion, IncidenteEmpleado, Descargo
 from django.utils import timezone
 
 class IncidenteEmpleadoFilterForm(forms.Form):
@@ -63,4 +63,21 @@ class IncidenteForm(forms.ModelForm):
         labels = {
             'descripcion_incid': 'Descripción',
         }
+
+class DescargoForm(forms.ModelForm):
+    class Meta:
+        model = Descargo
+        fields = ['contenido_descargo', 'ruta_archivo_descargo']
+        widgets = {
+            'contenido_descargo': forms.Textarea(attrs={'rows': 4}),
+        }
+        labels = {
+            'contenido_descargo': 'Contenido del Descargo',
+            'ruta_archivo_descargo': 'Adjuntar Archivo (Opcional)',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['ruta_archivo_descargo'].required = False
+        self.fields['ruta_archivo_descargo'].widget.attrs.update({'class': 'mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm'})
 

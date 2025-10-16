@@ -115,7 +115,7 @@ class Incidente(models.Model):
 class Descargo(models.Model):
     fecha_descargo = models.DateField()
     contenido_descargo = models.CharField(max_length=255)
-    ruta_archivo_descargo = models.CharField(max_length=255)
+    ruta_archivo_descargo = models.FileField(upload_to='descargos/', blank=True, null=True)
     estado_descargo = models.BooleanField(default=True)
 
     def __str__(self):
