@@ -292,20 +292,23 @@
     const employeeNameSpan = document.getElementById('asistencia-employee-name');
     const listContainer = document.getElementById('asistencia-list');
     const noSearchMessage = document.getElementById('asistencia-no-search-message');
+    const paginationContainer = document.getElementById('asistencia-pagination-container');
     const periodFilterForm = document.getElementById('asistencia-period-filter-form');
     const clearBtn = document.getElementById('asistencia-clear-btn');
+    const porPaginaSelect = document.getElementById('por_pagina_tab');
 
     if (searchBtn) {
-        const fetchAndRenderAsistencias = (dni, month, year) => {
+        const fetchAndRenderAsistencias = (dni, params = {}) => {
             if (!dni) {
                 showNotification('warning', 'DNI Requerido', 'Por favor, ingrese un DNI para buscar.');
                 return;
             }
 
             let url = `/asistencia/api/ver-asistencias/${dni}/`;
-            const params = new URLSearchParams();
-            if (month) params.append('mes', month);
-            if (year) params.append('anio', year);
+            const urlParams = new URLSearchParams(params);
+            
+            // Asegurarse de que los parámetros del formulario de filtro se incluyan
+            urlParams.set('por_pagina', porPaginaSelect.value);
             
             const queryString = params.toString();
             if (queryString) {
@@ -319,16 +322,16 @@
 
                     if (data.status === 'success') {
                         employeeNameSpan.textContent = `${data.empleado.nombre} ${data.empleado.apellido}`;
-                        let tableHtml = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha</th><th class="p-4">Día</th><th class="p-4">Hora</th></tr></thead><tbody>';
+                        let tableHtml = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha</th><th class="p-4">Día</th><th class="p-4">Hora de Ingreso</th></tr></thead><tbody>';
                         
                         if (data.asistencias.length > 0) {
                             data.asistencias.forEach(asistencia => {
                             const fecha = new Date(asistencia.fecha_hora);
                             const diaSemana = fecha.toLocaleDateString(locale, { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase());
-                            tableHtml += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString(locale, {timeZone: 'UTC'})}</td><td class="p-4">${diaSemana}</td><td class="p-4">${fecha.toLocaleTimeString(locale, {timeZone: 'UTC'})}</td></tr>`;
+                            tableHtml += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString(locale, {timeZone: 'UTC'})}</td><td class="p-4">${diaSemana}</td><td class="p-4 font-semibold">${fecha.toLocaleTimeString(locale, {timeZone: 'UTC'})}</td></tr>`;
                         });
                         } else {
-                            tableHtml += `<tr><td colspan="3" class="p-6 text-center text-gray-500">No se encontraron asistencias para los filtros seleccionados.</td></tr>`;
+                            tableHtml += `<tr><td colspan="3" class="p-6 text-center text-gray-500">No se encontraron asistencias para este periodo.</td></tr>`;
                         }
                         tableHtml += '</tbody></table>';
                         listContainer.innerHTML = tableHtml;
@@ -336,6 +339,8 @@
                         resultsContainer.classList.remove('hidden');
                         noSearchMessage.classList.add('hidden');
                         lucide.createIcons();
+
+                        renderPagination(data.pagination, urlParams);
                     } else {
                         showNotification('error', 'Error', data.message);
                         resultsContainer.classList.add('hidden');
@@ -344,24 +349,72 @@
                 });
         };
 
-        searchBtn.addEventListener('click', () => fetchAndRenderAsistencias(dniInput.value, null, null));
+        const renderPagination = (pagination, currentParams) => {
+            if (pagination.num_pages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            let paginationHtml = `
+                <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6">
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Mostrando <span class="font-medium">${pagination.start_index}</span> a <span class="font-medium">${pagination.end_index}</span> de <span class="font-medium">${pagination.total_results}</span> resultados
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">`;
+
+            if (pagination.has_previous) {
+                currentParams.set('page', pagination.previous_page_number);
+                paginationHtml += `<a href="#" data-params='${JSON.stringify(Object.fromEntries(currentParams))}' class="pagination-link relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Anterior</span> <i data-lucide="chevron-left" class="h-5 w-5"></i> </a>`;
+            }
+
+            paginationHtml += `<span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300"> Página ${pagination.number} de ${pagination.num_pages} </span>`;
+
+            if (pagination.has_next) {
+                currentParams.set('page', pagination.next_page_number);
+                paginationHtml += `<a href="#" data-params='${JSON.stringify(Object.fromEntries(currentParams))}' class="pagination-link relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Siguiente</span> <i data-lucide="chevron-right" class="h-5 w-5"></i> </a>`;
+            }
+
+            paginationHtml += `</nav></div></div></div>`;
+            paginationContainer.innerHTML = paginationHtml;
+            lucide.createIcons();
+        };
+
+        searchBtn.addEventListener('click', () => {
+            periodFilterForm.reset();
+            fetchAndRenderAsistencias(dniInput.value);
+        });
+
         dniInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                fetchAndRenderAsistencias(dniInput.value, null, null);
+                periodFilterForm.reset();
+                fetchAndRenderAsistencias(dniInput.value);
             }
         });
 
         periodFilterForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const month = e.target.elements.month.value;
-            const year = e.target.elements.year.value;
-            fetchAndRenderAsistencias(dniInput.value, month, year);
+            const formData = new FormData(periodFilterForm);
+            const params = Object.fromEntries(formData.entries());
+            fetchAndRenderAsistencias(dniInput.value, params);
         });
 
         clearBtn.addEventListener('click', () => {
             periodFilterForm.reset();
-            // Vuelve a buscar solo con el DNI, sin filtros de fecha
-            fetchAndRenderAsistencias(dniInput.value, null, null);
+            fetchAndRenderAsistencias(dniInput.value);
+        });
+
+        // Event listener para los links de paginación
+        resultsContainer.addEventListener('click', function(e) {
+            const link = e.target.closest('.pagination-link');
+            if (link) {
+                e.preventDefault();
+                const params = JSON.parse(link.dataset.params);
+                fetchAndRenderAsistencias(dniInput.value, params);
+            }
         });
     }
 </script>

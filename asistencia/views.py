@@ -129,6 +129,7 @@ def ver_asistencias_empleado(request, empleado_id):
     Muestra una lista de todas las asistencias para un empleado especÃ­fico,
     ordenadas de la mÃ¡s reciente a la mÃ¡s antigua.
     """
+    from django.core.paginator import Paginator
     empleado = get_object_or_404(Empleado, id=empleado_id)
     
     # Usamos un context manager para asegurar que el idioma se aplique durante el renderizado
@@ -146,12 +147,19 @@ def ver_asistencias_empleado(request, empleado_id):
                 asistencias_query = asistencias_query.filter(fecha_hora__month=month)
             if year:
                 asistencias_query = asistencias_query.filter(fecha_hora__year=year)
+
+        # Lógica de paginación
+        registros_por_pagina = request.GET.get('por_pagina', 10)
+        paginator = Paginator(asistencias_query, registros_por_pagina)
+        page_number = request.GET.get('page')
+        asistencias_paginadas = paginator.get_page(page_number)
         
         context = {
             'empleado': empleado,
-            'asistencias': asistencias_query,
+            'asistencias': asistencias_paginadas,
             'filter_form': filter_form,
-            'page_title': 'Asistencias'
+            'page_title': 'Asistencias',
+            'por_pagina': registros_por_pagina,
         }
         return render(request, 'ver_asistencias.html', context)
 
@@ -172,18 +180,30 @@ def asistencia_admin(request):
 
 @login_required
 def api_ver_asistencias_empleado(request, dni):
+    from django.core.paginator import Paginator
+    from django.forms.models import model_to_dict
+
     try:
         empleado = Empleado.objects.get(dni=dni)
         asistencias_query = Asistencia.objects.filter(id_empl=empleado).order_by('-fecha_hora')
 
         # Get filter parameters from the request
-        month = request.GET.get('mes')
-        year = request.GET.get('anio')
+        month = request.GET.get('month')
+        year = request.GET.get('year')
 
         if month:
             asistencias_query = asistencias_query.filter(fecha_hora__month=month)
         if year:
             asistencias_query = asistencias_query.filter(fecha_hora__year=year)
+
+        # Lógica de paginación
+        registros_por_pagina = request.GET.get('por_pagina', 10)
+        paginator = Paginator(asistencias_query, registros_por_pagina)
+        page_number = request.GET.get('page')
+        asistencias_paginadas = paginator.get_page(page_number)
+
+        # Convertir objetos a diccionarios para la respuesta JSON
+        asistencias_list = [model_to_dict(asistencia) for asistencia in asistencias_paginadas]
 
         data = {
             'status': 'success',
@@ -191,7 +211,18 @@ def api_ver_asistencias_empleado(request, dni):
                 'nombre': empleado.nombre,
                 'apellido': empleado.apellido,
             },
-            'asistencias': list(asistencias_query.values('fecha_hora'))
+            'asistencias': asistencias_list,
+            'pagination': {
+                'has_previous': asistencias_paginadas.has_previous(),
+                'previous_page_number': asistencias_paginadas.previous_page_number() if asistencias_paginadas.has_previous() else None,
+                'number': asistencias_paginadas.number,
+                'num_pages': asistencias_paginadas.paginator.num_pages,
+                'has_next': asistencias_paginadas.has_next(),
+                'next_page_number': asistencias_paginadas.next_page_number() if asistencias_paginadas.has_next() else None,
+                'start_index': asistencias_paginadas.start_index(),
+                'end_index': asistencias_paginadas.end_index(),
+                'total_results': asistencias_paginadas.paginator.count,
+            }
         }
         return JsonResponse(data)
     except Empleado.DoesNotExist:

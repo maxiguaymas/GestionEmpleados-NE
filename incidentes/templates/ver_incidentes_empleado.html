@@ -12,28 +12,36 @@
 
     <!-- Filter Form -->
     <form method="get" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="sm:col-span-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <div class="md:col-span-2">
                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Periodo</label>
                 <div class="flex items-center gap-2">
                     {{ filter_form.month }}
                     {{ filter_form.year }}
                 </div>
             </div>
-            <div>
+            <div class="">
                 <label for="{{ filter_form.status.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Estado</label>
                 {{ filter_form.status }}
             </div>
-            <div class="flex items-end gap-2">
+            <div>
+                <label for="por_pagina" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Registros</label>
+                <select name="por_pagina" id="por_pagina" onchange="this.form.submit()" class="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-red-500 focus:border-red-500">
+                    <option value="9" {% if por_pagina == '9' %}selected{% endif %}>9</option>
+                    <option value="12" {% if por_pagina == '12' %}selected{% endif %}>12</option>
+                    <option value="18" {% if por_pagina == '18' %}selected{% endif %}>18</option>
+                </select>
+            </div>
+            <div class="flex items-end gap-2 ">
                 <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Filtrar</button>
-                <a href="{% url 'ver_incidentes_empleado' empleado.id %}" class="w-full text-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Limpiar</a>
+                <a href="{% url 'incidentes_empleado' empleado.id %}" class="w-full text-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Limpiar</a>
             </div>
         </div>
     </form>
 
-    {% if incidentes_empleado %}
+    {% if incidentes_paginados %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for incidente_empleado in incidentes_empleado %}
+            {% for incidente_empleado in incidentes_paginados %}
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col">
                     <div class="flex-1">
                         <div class="flex justify-between items-start">
@@ -48,6 +56,37 @@
                 </div>
             {% endfor %}
         </div>
+
+        <!-- Paginación -->
+        <div class="mt-8 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                {% if incidentes_paginados.has_previous %}
+                    <a href="?page={{ incidentes_paginados.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> Anterior </a>
+                {% endif %}
+                {% if incidentes_paginados.has_next %}
+                    <a href="?page={{ incidentes_paginados.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> Siguiente </a>
+                {% endif %}
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                        Mostrando <span class="font-medium">{{ incidentes_paginados.start_index }}</span> a <span class="font-medium">{{ incidentes_paginados.end_index }}</span> de <span class="font-medium">{{ incidentes_paginados.paginator.count }}</span> resultados
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        {% if incidentes_paginados.has_previous %}
+                            <a href="?page={{ incidentes_paginados.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Anterior</span> <i data-lucide="chevron-left" class="h-5 w-5"></i> </a>
+                        {% endif %}
+                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300"> Página {{ incidentes_paginados.number }} de {{ incidentes_paginados.paginator.num_pages }} </span>
+                        {% if incidentes_paginados.has_next %}
+                            <a href="?page={{ incidentes_paginados.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Siguiente</span> <i data-lucide="chevron-right" class="h-5 w-5"></i> </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </div>
+
     {% else %}
         <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <i data-lucide="shield-check" class="mx-auto h-12 w-12 text-gray-400"></i>
