@@ -14,6 +14,7 @@ import re
 from django.db.models import Q
 from django.http import HttpResponse
 from django.template.loader import get_template
+from django.core.paginator import Paginator
 from xhtml2pdf import pisa
 
 
@@ -51,6 +52,12 @@ def ver_incidentes(request):
     # Get unique incidents
     incidentes = incidentes_query.distinct()
 
+    # Paginación
+    registros_por_pagina = request.GET.get('por_pagina', 9) # Múltiplo de 3 para la grilla
+    paginator = Paginator(incidentes, registros_por_pagina)
+    page_number = request.GET.get('page')
+    incidentes_paginados = paginator.get_page(page_number)
+
     # Build the list for the template
     incidentes_list = []
     for incidente in incidentes:
@@ -67,9 +74,10 @@ def ver_incidentes(request):
     years = IncidenteEmpleado.objects.dates('fecha_ocurrencia', 'year').reverse()
 
     context = {
-        'incidentes_list': incidentes_list,
+        'incidentes_paginados': incidentes_paginados,
         'filter_values': request.GET,
-        'year_options': [d.year for d in years]
+        'year_options': [d.year for d in years],
+        'por_pagina': registros_por_pagina,
     }
     return render(request, 'ver_incidentes.html', context)
 
@@ -282,6 +290,7 @@ def detalle_incidente(request, incidente_id):
 @login_required
 def ver_incidentes_empleado(request, empleado_id):
     empleado = get_object_or_404(Empleado, id=empleado_id)
+    
     es_propietario = hasattr(request.user, 'empleado') and request.user.empleado.id == empleado.id
     if not (es_admin(request.user) or es_propietario):
         raise PermissionDenied
@@ -304,11 +313,18 @@ def ver_incidentes_empleado(request, empleado_id):
         if status:
             incidentes_empleado_qs = incidentes_empleado_qs.filter(estado__iexact=status)
 
+    # Paginación
+    registros_por_pagina = request.GET.get('por_pagina', 9) # Múltiplo de 3 para la grilla
+    paginator = Paginator(incidentes_empleado_qs, registros_por_pagina)
+    page_number = request.GET.get('page')
+    incidentes_paginados = paginator.get_page(page_number)
+
     context = {
         'empleado': empleado,
-        'incidentes_empleado': incidentes_empleado_qs,
+        'incidentes_paginados': incidentes_paginados,
         'filter_form': filter_form,
         'page_title': 'Incidentes del Empleado',
+        'por_pagina': registros_por_pagina,
     }
 
     return render(request, 'ver_incidentes_empleado.html', context)
@@ -333,11 +349,18 @@ def mis_incidentes(request):
             incidentes_qs = incidentes_qs.filter(fecha_ocurrencia__year=year)
         if status:
             incidentes_qs = incidentes_qs.filter(estado__iexact=status)
-    
+
+    # Paginación
+    registros_por_pagina = request.GET.get('por_pagina', 9)
+    paginator = Paginator(incidentes_qs, registros_por_pagina)
+    page_number = request.GET.get('page')
+    incidentes_paginados = paginator.get_page(page_number)
+
     context = {
-        'incidentes_empleado': incidentes_qs,
+        'incidentes_paginados': incidentes_paginados,
         'filter_form': filter_form,
         'page_title': 'Mis Incidentes',
+        'por_pagina': registros_por_pagina,
     }
     return render(request, 'mis_incidentes.html', context)
 
@@ -416,4 +439,3 @@ def generar_incidente_pdf(request, incidente_id):
 
     # Renderizamos el PDF
     return render_to_pdf('incidente_pdf.html', context)
-

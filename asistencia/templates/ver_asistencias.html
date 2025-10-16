@@ -13,15 +13,24 @@
 
     <!-- Filter Form -->
     <form method="get" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="sm:col-span-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <div class="md:col-span-2">
                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Periodo</label>
                 <div class="flex items-center gap-2">
                     {{ filter_form.month }}
                     {{ filter_form.year }}
                 </div>
             </div>
-            <div class="flex items-end gap-2">
+            <div>
+                <label for="por_pagina" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Registros</label>
+                <select name="por_pagina" id="por_pagina" onchange="this.form.submit()" class="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-red-500 focus:border-red-500">
+                    <option value="10" {% if por_pagina == '10' %}selected{% endif %}>10</option>
+                    <option value="20" {% if por_pagina == '20' %}selected{% endif %}>20</option>
+                    <option value="30" {% if por_pagina == '30' %}selected{% endif %}>30</option>
+                    <option value="50" {% if por_pagina == '50' %}selected{% endif %}>50</option>
+                </select>
+            </div>
+            <div class="flex gap-2 md:col-span-2">
                 <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Filtrar</button>
                 <a href="{% url 'ver_asistencias_empleado' empleado.id %}" class="w-full text-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Limpiar</a>
             </div>
@@ -29,7 +38,7 @@
     </form>
 
     {% if asistencias %}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
                     <tr>
@@ -48,6 +57,36 @@
                     {% endfor %}
                 </tbody>
             </table>
+
+            <!-- Paginación -->
+            <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    {% if asistencias.has_previous %}
+                        <a href="?page={{ asistencias.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> Anterior </a>
+                    {% endif %}
+                    {% if asistencias.has_next %}
+                        <a href="?page={{ asistencias.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> Siguiente </a>
+                    {% endif %}
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                            Mostrando <span class="font-medium">{{ asistencias.start_index }}</span> a <span class="font-medium">{{ asistencias.end_index }}</span> de <span class="font-medium">{{ asistencias.paginator.count }}</span> resultados
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            {% if asistencias.has_previous %}
+                                <a href="?page={{ asistencias.previous_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Anterior</span> <i data-lucide="chevron-left" class="h-5 w-5"></i> </a>
+                            {% endif %}
+                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300"> Página {{ asistencias.number }} de {{ asistencias.paginator.num_pages }} </span>
+                            {% if asistencias.has_next %}
+                                <a href="?page={{ asistencias.next_page_number }}&{{ request.GET.urlencode|cut:'page=' }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Siguiente</span> <i data-lucide="chevron-right" class="h-5 w-5"></i> </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </div>
         </div>
     {% else %}
         <div class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
