@@ -18,7 +18,9 @@ import pandas as pd
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.http import HttpResponse
+from django.conf import settings
 import json
+import os
 import calendar
 from django.utils.translation import gettext as _
 
@@ -231,6 +233,56 @@ def ver_perfil(request):
     }
     return render(request, 'perfil.html', context)
 
+def link_callback(uri, rel):
+    """
+    Convierte URIs de HTML a rutas absolutas del sistema para que xhtml2pdf
+    pueda acceder a los recursos (imágenes, etc.).
+    """
+    # Usa rutas de STATICFILES_DIRS si están definidas
+    static_dirs = getattr(settings, 'STATICFILES_DIRS', [])
+    static_url = settings.STATIC_URL
+    media_url = settings.MEDIA_URL
+    media_root = settings.MEDIA_ROOT
+
+    if uri.startswith(media_url):
+        path = os.path.join(media_root, uri.replace(media_url, ""))
+    elif uri.startswith(static_url):
+        # Busca en los directorios estáticos definidos
+        path = uri.replace(static_url, "")
+        for static_dir in static_dirs:
+            candidate_path = os.path.join(static_dir, path)
+            if os.path.exists(candidate_path):
+                return candidate_path
+        # Fallback a STATIC_ROOT (para entornos de producción)
+        path = os.path.join(settings.STATIC_ROOT, path)
+    else:
+        return uri
+    return path
+
+def render_to_pdf(template_src, context_dict={}):
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    # Para descargar directamente, cambia 'inline' por 'attachment'
+    response['Content-Disposition'] = f'inline; filename="perfil_{context_dict.get("empleado_id", "0")}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
+    if pisa_status.err:
+        return HttpResponse('Tuvimos algunos errores <pre>' + html + '</pre>')
+    return response
+
+@login_required
+def generar_perfil_pdf(request, empleado_id):
+    empleado = get_object_or_404(Empleado, id=empleado_id)
+    # Reutilizamos la lógica de la vista de perfil para obtener el estado de los documentos
+    legajo = getattr(empleado, 'legajo', None)
+    documentos_entregados_ids = Documento.objects.filter(id_leg=legajo, estado_doc=True).values_list('id_requisito_id', flat=True) if legajo else []
+    documentos_status = [{
+        'nombre': req.nombre_doc,
+        'entregado': req.id in documentos_entregados_ids
+    } for req in RequisitoDocumento.objects.all()]
+    context = {'empleado': empleado, 'documentos_status': documentos_status, 'empleado_id': empleado_id}
+    return render_to_pdf('perfil_pdf.html', context)
 # --- Gráfico de barras empleados activos/inactivos ---
 @login_required
 @user_passes_test(es_admin)

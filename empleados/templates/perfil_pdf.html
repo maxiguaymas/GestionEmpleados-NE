@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil de Empleado - {{ empleado.nombre }} {{ empleado.apellido }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            @frame content_frame {
+                left: 40pt; right: 40pt; top: 40pt; bottom: 50pt;
+            }
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 40pt; right: 40pt; bottom: 20pt; height: 30pt;
+            }
+        }
+
+        body {
+            font-family: "Helvetica", "Arial", sans-serif;
+            font-size: 10pt;
+            color: #333;
+        }
+
+        h2 {
+            font-size: 16pt;
+            color: #333;
+            border-bottom: 2px solid #D9232D;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .header .logo {
+            width: 110px;
+        }
+
+        .header .title-container {
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .header .title {
+            font-size: 22pt;
+            color: #D9232D;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 9pt;
+            color: #777;
+        }
+
+        .profile-container {
+            margin-top: 20px;
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #eee;
+            float: left;
+            margin-right: 20px;
+        }
+
+        .profile-data {
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-size: 20pt;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .profile-dni {
+            font-size: 12pt;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .data-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-grid td {
+            padding: 9px 5px;
+            vertical-align: top;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-grid .label {
+            font-weight: bold;
+            width: 140px;
+            color: #555;
+        }
+
+        .doc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .doc-list li {
+            padding: 9px 5px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .doc-list .status-entregado {
+            color: #16A34A; /* green-600 */
+        }
+
+        .doc-list .status-pendiente {
+            color: #DC2626; /* red-600 */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <table width="100%" style="border-collapse: collapse;">
+            <tr>
+                <td style="width: 30%;">
+                    <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" class="logo">
+                </td>
+                <td style="width: 70%;" class="title-container">
+                    <span class="title">Perfil de Empleado</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="footer_content" class="footer">
+        Nuevas Energías - Página <pdf:pagenumber /> de <pdf:pagecount />
+    </div>
+
+    <div class="profile-container">
+        {% if empleado.ruta_foto %}
+            <img src="{{ empleado.ruta_foto.path }}" class="profile-photo">
+        {% endif %}
+        <div class="profile-data">
+            <h1 class="profile-name">{{ empleado.nombre }} {{ empleado.apellido }}</h1>
+            <p class="profile-dni">DNI: {{ empleado.dni }}</p>
+        </div>
+    </div>
+
+    <h2>Datos Personales</h2>
+    <table class="data-grid">
+        <tr><td class="label">Email:</td><td>{{ empleado.email }}</td></tr>
+        <tr><td class="label">Teléfono:</td><td>{{ empleado.telefono|default:'-' }}</td></tr>
+        <tr><td class="label">Fecha de Nacimiento:</td><td>{{ empleado.fecha_nacimiento|date:"d/m/Y" }}</td></tr>
+        <tr><td class="label">Género:</td><td>{{ empleado.get_genero_display }}</td></tr>
+        <tr><td class="label">Estado Civil:</td><td>{{ empleado.get_estado_civil_display }}</td></tr>
+    </table>
+
+    <h2>Datos Laborales</h2>
+    <table class="data-grid">
+        <tr><td class="label">Fecha de Ingreso:</td><td>{{ empleado.fecha_ingreso|date:"d/m/Y" }}</td></tr>
+        <tr><td class="label">Estado:</td><td>{{ empleado.estado }}</td></tr>
+    </table>
+
+    <h2>Documentación</h2>
+    <ul class="doc-list">
+        {% for doc in documentos_status %}
+            <li>{{ doc.nombre }}: <strong class="{% if doc.entregado %}status-entregado{% else %}status-pendiente{% endif %}">{% if doc.entregado %}Entregado{% else %}Pendiente{% endif %}</strong></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

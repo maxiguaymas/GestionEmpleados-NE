@@ -12,6 +12,7 @@ urlpatterns = [
     path('ver/<int:id>/', views.ver_empleado, name='ver_empleado'),
     path('buscar/', views.buscar_empleados, name='buscar_empleados'),
     path('perfil/', views.ver_perfil, name='ver_perfil'),
+    path('perfil/pdf/<int:empleado_id>/', views.generar_perfil_pdf, name='generar_perfil_pdf'),
     path('grafico-empleados/', views.grafico_empleados_activos_inactivos, name='grafico_empleados'),
     path('grafico-empleados/pdf/', views.grafico_empleados_pdf, name='grafico_empleados_pdf'),
     path('switch-to-employee/', views.switch_to_employee_view, name='switch_to_employee_view'),
