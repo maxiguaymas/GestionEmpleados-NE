@@ -1,32 +1,143 @@
 {% extends "base.html" %}
 
-{% block title %}Seleccionar Reporte{% endblock %}
+{% block title %}Dashboard de Reportes Dinámico{% endblock %}
 
-{% block page_title %}Reportes{% endblock %}
+{% block page_title %}Dashboard de Reportes Dinámico{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 sm:px-8">
-    <div class="py-8">
-        <div>
-            <h2 class="text-2xl font-semibold leading-tight">Seleccionar Reporte</h2>
-        </div>
-        <div class="my-2 flex sm:flex-row flex-col">
-            <div class="flex flex-row mb-1 sm:mb-0">
-                </div>
+<div class="container mx-auto px-4 sm:px-8 py-8">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Columna del Gráfico -->
+        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 id="chartTitle" class="text-xl font-semibold mb-4 text-gray-200 text-center"></h2>
+            <div class="h-96 w-full flex items-center justify-center">
+                <canvas id="dynamicChart"></canvas>
             </div>
-        <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-            <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
-                <div class="p-5">
-                    <a href="{% url 'reporte_estado_empleados' %}" class="text-blue-500 hover:text-blue-800">Reporte de Estado de Empleados</a>
+        </div>
+
+        <!-- Columna de Controles -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 text-gray-200">Seleccionar Reporte</h2>
+            <div id="report-cards" class="space-y-4">
+                
+                <!-- Card: Reporte de Estado de Empleados -->
+                <div class="report-card cursor-pointer flex items-center p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-300" 
+                     data-url="{% url 'reporte_estado_empleados_data' %}" 
+                     data-title="Distribución de Empleados por Estado">
+                    <div class="mr-4">
+                        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-300">Estado de Empleados</p>
+                    </div>
                 </div>
-                <div class="p-5">
-                    <a href="{% url 'reporte_sanciones_por_tipo' %}" class="text-blue-500 hover:text-blue-800">Reporte de Sanciones por Tipo</a>
+
+                <!-- Card: Reporte de Sanciones -->
+                <div class="report-card cursor-pointer flex items-center p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-300"
+                     data-url="{% url 'reporte_sanciones_data' %}"
+                     data-title="Distribución de Sanciones por Tipo">
+                    <div class="mr-4">
+                        <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-300">Sanciones por Tipo</p>
+                    </div>
                 </div>
-                <div class="p-5">
-                    <a href="{% url 'reporte_incidentes_por_tipo' %}" class="text-blue-500 hover:text-blue-800">Reporte de Incidentes por Tipo</a>
+
+                <!-- Card: Reporte de Incidentes -->
+                <div class="report-card cursor-pointer flex items-center p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-300"
+                     data-url="{% url 'reporte_incidentes_data' %}"
+                     data-title="Distribución de Incidentes por Tipo">
+                    <div class="mr-4">
+                        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-300">Incidentes por Tipo</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('dynamicChart').getContext('2d');
+    const chartTitleEl = document.getElementById('chartTitle');
+    let dynamicChart;
+
+    const chartColors = [
+        'rgba(59, 130, 246, 0.7)', 'rgba(251, 191, 36, 0.7)', 'rgba(239, 68, 68, 0.7)', 
+        'rgba(16, 185, 129, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(249, 115, 22, 0.7)'
+    ];
+    const chartBorderColors = [
+        'rgba(59, 130, 246, 1)', 'rgba(251, 191, 36, 1)', 'rgba(239, 68, 68, 1)',
+        'rgba(16, 185, 129, 1)', 'rgba(139, 92, 246, 1)', 'rgba(249, 115, 22, 1)'
+    ];
+
+    function initializeChart() {
+        dynamicChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Total',
+                    data: [],
+                    backgroundColor: chartColors,
+                    borderColor: chartBorderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        position: 'top',
+                        labels: {
+                            color: '#D1D5DB' // Color del texto de la leyenda (gris claro)
+                        }
+                    },
+                }
+            }
+        });
+    }
+
+    async function updateChart(url, title) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const chartData = await response.json();
+            
+            chartTitleEl.textContent = title;
+            dynamicChart.data.labels = chartData.labels;
+            dynamicChart.data.datasets[0].data = chartData.data;
+            dynamicChart.update();
+
+        } catch (error) {
+            console.error("Failed to fetch or update chart:", error);
+            chartTitleEl.textContent = "Error al cargar los datos";
+        }
+    }
+
+    const reportCards = document.querySelectorAll('.report-card');
+    reportCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const url = card.dataset.url;
+            const title = card.dataset.title;
+            updateChart(url, title);
+        });
+    });
+
+    initializeChart();
+    if (reportCards.length > 0) {
+        reportCards[0].click();
+    }
+});
+</script>
 {% endblock %}
