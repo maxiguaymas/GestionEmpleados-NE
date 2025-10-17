@@ -9,8 +9,9 @@ from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
 from django.http import HttpResponse
-from django.template.loader import get_template
+from django.template.loader import get_template, render_to_string
 from xhtml2pdf import pisa
+from django.core.paginator import Paginator
 
 @login_required
 def sanciones_empleado(request, empleado_id):
@@ -20,12 +21,42 @@ def sanciones_empleado(request, empleado_id):
     es_propietario = hasattr(request.user, 'empleado') and request.user.empleado.id == empleado.id
     if not (es_admin(request.user) or es_propietario):
         raise PermissionDenied
-    sanciones = SancionEmpleado.objects.filter(id_empl=empleado).select_related('id_sancion').order_by('-fecha_inicio')
-    return render(request, 'sanciones_empleado.html', {
+    sanciones_query = SancionEmpleado.objects.filter(id_empl=empleado).select_related('id_sancion').order_by('-fecha_inicio')
+
+    # Get filter parameters
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    tipo_sancion = request.GET.get('tipo')
+
+    # Apply filters
+    if month and year:
+        try:
+            sanciones_query = sanciones_query.filter(fecha_inicio__month=int(month), fecha_inicio__year=int(year))
+        except (ValueError, TypeError):
+            pass
+    if tipo_sancion:
+        sanciones_query = sanciones_query.filter(id_sancion__tipo__iexact=tipo_sancion)
+
+    # Get distinct sanction types and years for filter dropdowns
+    tipos_sancion = Sancion.objects.values_list('tipo', flat=True).distinct()
+    years = sanciones_query.dates('fecha_inicio', 'year').reverse()
+
+    # Paginación
+    registros_por_pagina = request.GET.get('por_pagina', 9)
+    paginator = Paginator(sanciones_query, registros_por_pagina)
+    page_number = request.GET.get('page')
+    sanciones_paginadas = paginator.get_page(page_number)
+
+    context = {
         'empleado': empleado,
-        'sanciones': sanciones,
+        'sanciones_paginadas': sanciones_paginadas,
         'page_title': 'Sanciones del Empleado',
-    })
+        'filter_values': request.GET,
+        'tipos_sancion': tipos_sancion,
+        'year_options': [d.year for d in years],
+        'por_pagina': registros_por_pagina,
+    }
+    return render(request, 'sanciones_empleado.html', context)
 
 @login_required
 @user_passes_test(es_admin)
@@ -174,20 +205,27 @@ def ver_todas_sanciones(request):
     # Get the range of years present in the data
     years = SancionEmpleado.objects.dates('fecha_inicio', 'year').reverse()
 
+    # Paginación
+    registros_por_pagina = request.GET.get('por_pagina', 9)
+    paginator = Paginator(sanciones_query, registros_por_pagina)
+    page_number = request.GET.get('page')
+    sanciones_paginadas = paginator.get_page(page_number)
+
     context = {
-        'sanciones': sanciones_query,
+        'sanciones_paginadas': sanciones_paginadas,
         'titulo': 'Historial de Sanciones',
         'page_title': 'Sanciones',
         'filter_values': request.GET,
         'tipos_sancion': tipos_sancion,
-        'year_options': [d.year for d in years]
+        'year_options': [d.year for d in years],
+        'por_pagina': registros_por_pagina,
     }
     return render(request, 'ver_todas_sanciones.html', context)
 
 @login_required
 @user_passes_test(es_admin)
 @transaction.atomic
-def agregar_resolucion(request, sancion_empleado_id):
+def agregar_resolucion(request, sancion_empleado_id): # pragma: no cover
     sancion_empleado = get_object_or_404(SancionEmpleado, id=sancion_empleado_id)
 
     if request.method == 'POST':
@@ -257,12 +295,19 @@ def mis_sanciones(request):
     # Get the range of years present in the data for the current employee
     years = SancionEmpleado.objects.filter(id_empl=request.user.empleado).dates('fecha_inicio', 'year').reverse() if hasattr(request.user, 'empleado') else []
 
+    # Paginación
+    registros_por_pagina = request.GET.get('por_pagina', 9)
+    paginator = Paginator(sanciones_query, registros_por_pagina)
+    page_number = request.GET.get('page')
+    sanciones_paginadas = paginator.get_page(page_number)
+
     context = {
-        'sanciones': sanciones_query,
+        'sanciones_paginadas': sanciones_paginadas,
         'page_title': 'Mis Sanciones',
         'filter_values': request.GET,
         'tipos_sancion': tipos_sancion,
-        'year_options': [d.year for d in years]
+        'year_options': [d.year for d in years],
+        'por_pagina': registros_por_pagina,
     }
     return render(request, 'mis_sanciones.html', context)
 

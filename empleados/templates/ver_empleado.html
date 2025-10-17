@@ -2,12 +2,19 @@
 {% load static %}
 
 {% block content %}
-<div>
-    <a href="{% url 'empleados' %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
-        <i data-lucide="arrow-left"></i> Volver a Empleados
-    </a>
+<div class="max-w-7xl mx-auto">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <a href="{% url 'empleados' %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500">
+            <i data-lucide="arrow-left"></i> Volver a Empleados
+        </a>
+        <a href="{% url 'generar_perfil_pdf' empleado.id %}" target="_blank" class="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm">
+            <i data-lucide="printer" class="w-4 h-4"></i> Imprimir Perfil
+        </a>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-1 space-y-8">
+
             <!-- Profile Card -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm text-center">
                 {% if empleado.ruta_foto %}
