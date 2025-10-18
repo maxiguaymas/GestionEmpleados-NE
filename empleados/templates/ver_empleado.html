@@ -7,7 +7,7 @@
         <a href="{% url 'empleados' %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500">
             <i data-lucide="arrow-left"></i> Volver a Empleados
         </a>
-        <a href="{% url 'generar_perfil_pdf' empleado.id %}" target="_blank" class="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm">
+        <a href="{% url 'generar_perfil_pdf' empleado.id %}" target="_blank" class="bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm" >
             <i data-lucide="printer" class="w-4 h-4"></i> Imprimir Perfil
         </a>
     </div>

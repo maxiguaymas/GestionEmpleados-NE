@@ -283,6 +283,15 @@ def generar_perfil_pdf(request, empleado_id):
     } for req in RequisitoDocumento.objects.all()]
     context = {'empleado': empleado, 'documentos_status': documentos_status, 'empleado_id': empleado_id}
     return render_to_pdf('perfil_pdf.html', context)
+
+@login_required
+@user_passes_test(es_admin)
+def generar_lista_empleados_pdf(request):
+    # Por ahora, imprime todos los empleados activos. Se podría extender para usar filtros.
+    empleados = Empleado.objects.filter(estado='Activo').order_by('apellido', 'nombre')
+    context = {'empleados': empleados}
+    return render_to_pdf('lista_empleados_pdf.html', context)
+
 # --- Gráfico de barras empleados activos/inactivos ---
 @login_required
 @user_passes_test(es_admin)
