@@ -14,6 +14,10 @@ def validar_mayor_18(value):
 
 # MODELS EMPLEADOS
 class Empleado(models.Model):
+    GRUPOS = (
+        ('TECNICO', 'Técnico'),
+        ('OBRERO', 'Obrero'),
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='empleado')
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
@@ -24,6 +28,7 @@ class Empleado(models.Model):
     estado_civil = models.CharField(max_length=20, choices=[('Soltero', 'Soltero'), ('Casado', 'Casado'), ('Divorciado', 'Divorciado'), ('Viudo', 'Viudo')], default='Soltero')
     fecha_nacimiento = models.DateField(validators=[validar_mayor_18])
     estado = models.CharField(max_length=20, choices=[('Activo', 'Activo'), ('Inactivo', 'Inactivo'), ('Suspendido', 'Suspendido'), ('Licencia', 'Licencia')], default='Activo')
+    grupo = models.CharField(max_length=50, choices=GRUPOS, verbose_name="Grupo", blank=True, null=True)
     ruta_foto = models.ImageField(upload_to='empleados/fotos/', blank=True, null=True)
     fecha_ingreso = models.DateField(auto_now_add=True)
     fecha_egreso = models.DateField(blank=True, null=True)
