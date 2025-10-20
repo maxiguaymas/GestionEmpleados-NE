@@ -50,7 +50,9 @@ def crear_empleado(request):
             # 2. Crear usuario, empleado, legajo y documentos
             empleado = form.save(commit=False)
             dni = form.cleaned_data['dni']
+            grupo = form.cleaned_data['grupo']
             user = User.objects.create_user(username=str(dni), password=str(dni))
+            user.groups.add(grupo)
             user.save()
             empleado.user = user
             empleado.save()
@@ -140,22 +142,7 @@ def eliminar_empleado(request, id):
 @login_required
 @user_passes_test(es_admin)
 def ver_empleados(request):
-    query = request.GET.get('q')
-    grupo_filter = request.GET.get('grupo')
-    empleados = Empleado.objects.filter(fecha_egreso__isnull=True)
-
-    if query:
-        empleados = empleados.filter(
-            Q(nombre__icontains=query) |
-            Q(apellido__icontains=query) |
-            Q(dni__icontains=query)
-        )
-    
-    if grupo_filter:
-        empleados = empleados.filter(grupo=grupo_filter)
-
-    empleados = empleados.order_by('-fecha_ingreso', '-id')
-
+    empleados = Empleado.objects.filter(fecha_egreso__isnull=True).order_by('-fecha_ingreso', '-id')
     # Paginación por defecto: 10 por página
     page = request.GET.get('page', 1)
     paginator = Paginator(empleados, 10)
@@ -166,34 +153,21 @@ def ver_empleados(request):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
 
-    return render(request, 'empleados.html', {
-        'empleados': page_obj.object_list, 
-        'page_obj': page_obj, 
-        'paginator': paginator, 
-        'page_title': 'Empleados',
-        'grupos': Empleado.GRUPOS,
-        'query': query,
-        'grupo_filter': grupo_filter
-    })
+    return render(request, 'empleados.html', {'empleados': page_obj.object_list, 'page_obj': page_obj, 'paginator': paginator, 'page_title': 'Empleados'})
 
 @login_required
 @user_passes_test(es_admin)
 def buscar_empleados(request):
     query = request.GET.get('q')
-    grupo_filter = request.GET.get('grupo')
-    empleados = Empleado.objects.filter(fecha_egreso__isnull=True)
-
     if query:
-        empleados = empleados.filter(
+        empleados = Empleado.objects.filter(
             Q(nombre__icontains=query) |
             Q(apellido__icontains=query) |
-            Q(dni__icontains=query)
-        )
-    
-    if grupo_filter:
-        empleados = empleados.filter(grupo=grupo_filter)
-
-    empleados = empleados.order_by('-fecha_ingreso', '-id')
+            Q(dni__icontains=query),
+            fecha_egreso__isnull=True
+        ).order_by('-fecha_ingreso', '-id')
+    else:
+        empleados = Empleado.objects.filter(fecha_egreso__isnull=True).order_by('-fecha_ingreso', '-id')
 
     # Paginación: 10 por página
     page = request.GET.get('page', 1)
@@ -205,14 +179,7 @@ def buscar_empleados(request):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
 
-    return render(request, 'lista_empleados.html', {
-        'empleados': page_obj.object_list, 
-        'page_obj': page_obj, 
-        'paginator': paginator,
-        'grupos': Empleado.GRUPOS,
-        'query': query,
-        'grupo_filter': grupo_filter
-    })
+    return render(request, 'lista_empleados.html', {'empleados': page_obj.object_list, 'page_obj': page_obj, 'paginator': paginator})
 
 @login_required
 def ver_empleado(request, id):

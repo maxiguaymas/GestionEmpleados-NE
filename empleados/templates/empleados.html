@@ -7,20 +7,9 @@
 
 {% block content %}
 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-    <div class="flex gap-4">
-        <div class="relative w-full sm:max-w-xs">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-            <input type="text" id="search-input" placeholder="Buscar por nombre o DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600" value="{{ query|default:'' }}">
-        </div>
-        <div class="relative w-full sm:max-w-xs">
-            <i data-lucide="users" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-            <select id="group-filter" class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
-                <option value="">Todos los grupos</option>
-                {% for key, value in grupos %}
-                    <option value="{{ key }}" {% if key == grupo_filter %}selected{% endif %}>{{ value }}</option>
-                {% endfor %}
-            </select>
-        </div>
+    <div class="relative w-full sm:max-w-xs">
+        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+        <input type="text" id="search-input" placeholder="Buscar por nombre o DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
     </div>
     <div class="flex items-center gap-2">
         <a href="{% url 'generar_lista_empleados_pdf' %}" target="_blank" class="w-full sm:w-auto flex-shrink-0 bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm">
@@ -47,39 +36,32 @@
 
         // --- Búsqueda de Empleados (AJAX) ---
         const searchInput = document.getElementById('search-input');
-        const groupFilter = document.getElementById('group-filter');
         const employeeListContainer = document.getElementById('employee-list');
-        const bottomPagination = document.getElementById('page-bottom-pagination');
+            const bottomPagination = document.getElementById('page-bottom-pagination');
 
-        // Al cargar, mover la paginación inicial (si existe) al fondo
-        const initialPagination = employeeListContainer.querySelector('#employee-pagination');
-        if (initialPagination && bottomPagination) {
-            bottomPagination.innerHTML = '';
-            bottomPagination.appendChild(initialPagination);
-        }
+            // Al cargar, mover la paginación inicial (si existe) al fondo
+            const initialPagination = employeeListContainer.querySelector('#employee-pagination');
+            if (initialPagination && bottomPagination) {
+                bottomPagination.innerHTML = '';
+                bottomPagination.appendChild(initialPagination);
+            }
 
-        function updateEmployeeList() {
-            const query = searchInput.value;
-            const grupo = groupFilter.value;
-            const url = `{% url 'buscar_empleados' %}?q=${encodeURIComponent(query)}&grupo=${encodeURIComponent(grupo)}`;
-            
-            fetch(url)
-                .then(response => response.text())
-                .then(html => {
-                    employeeListContainer.innerHTML = html;
-                    // extraer paginación del HTML recibido y moverla al fondo
-                    const temp = document.createElement('div');
-                    temp.innerHTML = html;
-                    const pagination = temp.querySelector('#employee-pagination');
-                    if (pagination && bottomPagination) {
-                        bottomPagination.innerHTML = '';
-                        bottomPagination.appendChild(pagination);
-                    }
-                });
-        }
-
-        searchInput.addEventListener('keyup', updateEmployeeList);
-        groupFilter.addEventListener('change', updateEmployeeList);
+            searchInput.addEventListener('keyup', function() {
+                const query = searchInput.value;
+                fetch(`{% url 'buscar_empleados' %}?q=${query}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        employeeListContainer.innerHTML = html;
+                        // extraer paginación del HTML recibido y moverla al fondo
+                        const temp = document.createElement('div');
+                        temp.innerHTML = html;
+                        const pagination = temp.querySelector('#employee-pagination');
+                        if (pagination && bottomPagination) {
+                            bottomPagination.innerHTML = '';
+                            bottomPagination.appendChild(pagination);
+                        }
+                    });
+            });
 
         // --- Lógica de Menús y Notificaciones (Event Delegation) ---
         document.body.addEventListener('click', function(e) {
