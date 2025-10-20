@@ -1,14 +1,7 @@
 from django import forms
 from .models import Empleado
-from django.contrib.auth.models import Group
 
 class EmpleadoForm(forms.ModelForm):
-    grupo = forms.ModelChoiceField(
-        queryset=Group.objects.all(),
-        required=True,
-        label="Grupo",
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
     class Meta:
         model = Empleado
         exclude = ['user']
@@ -20,11 +13,6 @@ class EmpleadoForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Si estamos editando, selecciona el grupo actual del usuario
-        if self.instance and self.instance.pk and self.instance.user:
-            grupos = self.instance.user.groups.all()
-            if grupos.exists():
-                self.fields['grupo'].initial = grupos.first()
         if self.instance and self.instance.pk:
             # Si es edición, deshabilita fecha_egreso
             self.fields['fecha_egreso'].widget.attrs['disabled'] = True
