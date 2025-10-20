@@ -20,6 +20,8 @@ from xhtml2pdf import pisa
 from django.http import HttpResponse
 from django.conf import settings
 import json
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 import os
 import calendar
 from django.utils.translation import gettext as _
@@ -61,8 +63,38 @@ def crear_empleado(request):
             Notificacion.objects.create(
                 id_user=user,
                 mensaje=f"¡Bienvenido/a, {empleado.nombre}! Tu perfil ha sido creado exitosamente.",
-                enlace=reverse('ver_empleado', args=[empleado.id])
+                enlace=reverse('ver_perfil')
             )
+
+            # Enviar correo de bienvenida
+            try:
+                print(f"Intentando enviar correo de bienvenida a: {empleado.email}")
+                login_url = request.build_absolute_uri(reverse('login'))
+                asunto = "¡Bienvenido/a a Nuevas Energías! - Tu cuenta ha sido creada"
+                
+                # Mensaje en texto plano como alternativa
+                cuerpo_mensaje_plain = (
+                    f"Hola {empleado.nombre},\n\n"
+                    f"¡Te damos la bienvenida a Nuevas Energías! Hemos creado tu cuenta en nuestro portal de empleados.\n\n"
+                    f"Tus datos de acceso son:\n"
+                    f"- Usuario: {dni}\n"
+                    f"- Contraseña temporal: {dni}\n\n"
+                    f"Puedes acceder al portal aquí: {login_url}\n\n"
+                    "Por tu seguridad, te recomendamos cambiar tu contraseña después de iniciar sesión por primera vez.\n\n"
+                    "Saludos,\nEl equipo de Administración"
+                )
+
+                # Renderizar el template HTML
+                cuerpo_mensaje_html = render_to_string('email/bienvenida_empleado.html', {
+                    'empleado_nombre': empleado.nombre,
+                    'username': dni,
+                    'password': dni, # La contraseña es el DNI
+                    'login_url': login_url,
+                })
+                send_mail(asunto, cuerpo_mensaje_plain, settings.DEFAULT_FROM_EMAIL, [empleado.email], html_message=cuerpo_mensaje_html)
+                print(f"Correo de bienvenida enviado exitosamente a {empleado.email}")
+            except Exception as e:
+                print(f"ERROR al enviar correo de bienvenida: {e}")
 
             nro_leg = Legajo.objects.count() + 1
             legajo = Legajo.objects.create(

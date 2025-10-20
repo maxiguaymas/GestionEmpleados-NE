@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.http import HttpResponse
 from django.template.loader import get_template, render_to_string
+from django.core.mail import send_mail
 from xhtml2pdf import pisa
 from django.core.paginator import Paginator
 
@@ -89,6 +90,31 @@ def agregar_sancion_empleado(request):
                 enlace=reverse('detalle_sancion', args=[sancion_empleado.id])
             )
 
+            # Enviar correo electrónico de notificación
+            try:
+                print(f"Intentando enviar correo de sanción a: {empleado.email}")
+                detalle_url = request.build_absolute_uri(reverse('detalle_sancion', args=[sancion_empleado.id]))
+                asunto = f"Notificación de Nueva Sanción: {sancion_empleado.id_sancion.nombre}"
+
+                # Mensaje en texto plano como alternativa
+                cuerpo_mensaje_plain = (
+                    f"Hola {empleado.nombre},\n\n"
+                    f"Se te ha registrado una nueva sanción: {sancion_empleado.id_sancion.nombre}.\n"
+                    f"Motivo: {sancion_empleado.motivo}\n"
+                    f"Fecha de inicio: {sancion_empleado.fecha_inicio.strftime('%d/%m/%Y')}\n\n"
+                    f"Puedes ver los detalles en el portal: {detalle_url}\n\n"
+                    "Saludos,\nEl equipo de RRHH"
+                )
+
+                cuerpo_mensaje_html = render_to_string('email/notificacion_sancion.html', {
+                    'empleado_nombre': empleado.nombre,
+                    'sancion_empleado': sancion_empleado,
+                    'detalle_url': detalle_url,
+                })
+                send_mail(asunto, cuerpo_mensaje_plain, None, [empleado.email], html_message=cuerpo_mensaje_html)
+            except Exception as e:
+                print(f"ERROR al enviar correo de sanción: {e}")
+
             messages.success(request, f"Sanción agregada exitosamente a {empleado.nombre} {empleado.apellido}.")
             return redirect('detalle_sancion', sancion_empleado.id)
     # Si se encontró un empleado (por GET), mostrar el formulario para llenarlo
@@ -139,6 +165,30 @@ def aplicar_sancion_masiva(request, incidente_id):
                         mensaje=f"Se le ha registrado una nueva sanción: {sancion.id_sancion.nombre}",
                         enlace=reverse('detalle_sancion', args=[sancion.id])
                     )
+
+                    # Enviar correo electrónico de notificación
+                    try:
+                        print(f"Intentando enviar correo de sanción a: {sancion.id_empl.email}")
+                        detalle_url = request.build_absolute_uri(reverse('detalle_sancion', args=[sancion.id]))
+                        asunto = f"Notificación de Nueva Sanción: {sancion.id_sancion.nombre}"
+
+                        cuerpo_mensaje_plain = (
+                            f"Hola {sancion.id_empl.nombre},\n\n"
+                            f"Se te ha registrado una nueva sanción: {sancion.id_sancion.nombre}.\n"
+                            f"Motivo: {sancion.motivo}\n"
+                            f"Fecha de inicio: {sancion.fecha_inicio.strftime('%d/%m/%Y')}\n\n"
+                            f"Puedes ver los detalles en el portal: {detalle_url}\n\n"
+                            "Saludos,\nEl equipo de RRHH"
+                        )
+
+                        cuerpo_mensaje_html = render_to_string('email/notificacion_sancion.html', {
+                            'empleado_nombre': sancion.id_empl.nombre,
+                            'sancion_empleado': sancion,
+                            'detalle_url': detalle_url,
+                        })
+                        send_mail(asunto, cuerpo_mensaje_plain, None, [sancion.id_empl.email], html_message=cuerpo_mensaje_html)
+                    except Exception as e:
+                        print(f"ERROR al enviar correo de sanción masiva: {e}")
 
                     sanciones_creadas = True
             
