@@ -4,8 +4,11 @@ from django.contrib import messages
 from empleados.models import Recibo_Sueldos as Recibo, Empleado, Notificacion
 from .forms import ReciboSueldoForm
 from empleados.views import es_admin
+from django.conf import settings
+from django.core.mail import send_mail
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
+from django.template.loader import render_to_string
 import datetime
 
 @user_passes_test(es_admin)
@@ -28,6 +31,41 @@ def cargar_recibo(request):
                 mensaje=mensaje,
                 enlace=link
             )
+
+            # Enviar correo electrónico
+            try:
+                # Imprimimos el email del destinatario para verificarlo
+                print(f"Intentando enviar correo de notificación a: {empleado.email}")
+                
+                # Construir la URL absoluta para el logo y el portal
+                logo_url = request.build_absolute_uri(settings.STATIC_URL + 'images/logo-nuevas-energias-v2.png')
+                portal_url = request.build_absolute_uri(reverse('mis_recibos'))
+
+                asunto = f"Nuevo recibo de sueldo disponible: Período {recibo.periodo}"
+                
+                # Mensaje en texto plano como alternativa
+                cuerpo_mensaje_plain = (
+                    f"Hola {empleado.nombre},\n\n"
+                    f"Te informamos que tu recibo de sueldo para el período {recibo.periodo} ya está disponible en el portal de empleados.\n\n"
+                    f"Puedes verlo ingresando a la sección 'Mis Recibos' en la siguiente dirección: {portal_url}\n\n"
+                    "Saludos,\n"
+                    "Equipo de RRHH"
+                )
+
+                # Renderizar el template HTML
+                cuerpo_mensaje_html = render_to_string('email/notificacion_recibo.html', {
+                    'empleado_nombre': empleado.nombre,
+                    'periodo': recibo.periodo,
+                    'logo_url': logo_url,
+                    'portal_url': portal_url,
+                })
+                send_mail(asunto, cuerpo_mensaje_plain, settings.DEFAULT_FROM_EMAIL, [empleado.email], html_message=cuerpo_mensaje_html)
+                # Mensaje de éxito en la consola
+                print(f"Correo de notificación enviado exitosamente a {empleado.email}")
+            except Exception as e:
+                # Imprime el error en la consola para depuración
+                print(f"ERROR al enviar correo: {e}")
+                messages.warning(request, f"El recibo se guardó, pero hubo un error al enviar el correo de notificación: {e}")
 
             messages.success(request, "Recibo cargado correctamente.")
             return redirect('recibos_admin')
