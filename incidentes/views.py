@@ -14,6 +14,8 @@ import re
 from django.db.models import Q
 from django.http import HttpResponse
 from django.template.loader import get_template
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from xhtml2pdf import pisa
 
@@ -116,6 +118,32 @@ def registrar_incidente(request):
                     mensaje=mensaje,
                     enlace=link
                 )
+
+                # Enviar correo electrónico
+                try:
+                    print(f"Intentando enviar correo de incidente a: {empleado.email}")
+                    detalle_url = request.build_absolute_uri(link)
+                    asunto = f"Notificación de Incidente: {incidente.tipo_incid}"
+
+                    # Mensaje en texto plano como alternativa
+                    cuerpo_mensaje_plain = (
+                        f"Hola {empleado.nombre},\n\n"
+                        f"Has sido involucrado/a en un incidente de tipo '{incidente.tipo_incid}' con fecha {fecha_incidente.strftime('%d/%m/%Y')}.\n\n"
+                        f"Puedes ver los detalles en el portal: {detalle_url}\n\n"
+                        "Saludos,\nEl equipo de RRHH"
+                    )
+
+                    # Renderizar el template HTML
+                    cuerpo_mensaje_html = render_to_string('email/notificacion_incidente.html', {
+                        'empleado_nombre': empleado.nombre,
+                        'incidente_tipo': incidente.tipo_incid,
+                        'fecha_ocurrencia': fecha_incidente.strftime('%d/%m/%Y'),
+                        'observaciones': observaciones,
+                        'detalle_url': detalle_url,
+                    })
+                    send_mail(asunto, cuerpo_mensaje_plain, None, [empleado.email], html_message=cuerpo_mensaje_html)
+                except Exception as e:
+                    print(f"ERROR al enviar correo de incidente a {empleado.email}: {e}")
             
             messages.success(request, 'El incidente ha sido registrado exitosamente.')
             return redirect('ver_incidentes')

@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.http import JsonResponse
 from django.db.models import Count, Q
 import datetime
+from django.conf import settings
 
 @user_passes_test(es_admin)
 def historial_api_view(request):
@@ -129,6 +130,8 @@ from empleados.views import es_admin
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.http import JsonResponse
 from django.db.models import Count
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 from django.urls import reverse
 
 @user_passes_test(es_admin)
@@ -173,12 +176,48 @@ def asignar_horario(request):
             # Create notifications for newly assigned employees
             link = reverse('mis_horarios_empleado')
             for empleado in empleados_a_asignar:
+                # Notificación en el portal
                 mensaje = f"Se te ha asignado un nuevo horario: {horario.nombre}."
                 Notificacion.objects.create(
                     id_user=empleado.user,
                     mensaje=mensaje,
                     enlace=link
                 )
+                
+                # Envío de correo electrónico
+                try:
+                    print(f"Intentando enviar correo de horario a: {empleado.email}")
+                    portal_url = request.build_absolute_uri(link)
+                    asunto = f"Asignación de nuevo horario: {horario.nombre}"
+                    
+                    dias = []
+                    if horario.lunes: dias.append('Lunes')
+                    if horario.martes: dias.append('Martes')
+                    if horario.miercoles: dias.append('Miércoles')
+                    if horario.jueves: dias.append('Jueves')
+                    if horario.viernes: dias.append('Viernes')
+                    if horario.sabado: dias.append('Sábado')
+                    if horario.domingo: dias.append('Domingo')
+                    dias_laborables = ", ".join(dias)
+
+                    # Mensaje en texto plano como alternativa
+                    cuerpo_mensaje_plain = (
+                        f"Hola {empleado.nombre},\n\n"
+                        f"Se te ha asignado el horario '{horario.nombre}' (de {horario.hora_entrada} a {horario.hora_salida}) los días: {dias_laborables}.\n\n"
+                        f"Puedes ver tus horarios en el portal: {portal_url}\n\n"
+                        "Saludos,\nEl equipo de RRHH"
+                    )
+
+                    # Renderizar el template HTML
+                    cuerpo_mensaje_html = render_to_string('email/notificacion_horario.html', {
+                        'empleado_nombre': empleado.nombre,
+                        'horario': horario,
+                        'dias_laborables': dias_laborables,
+                        'portal_url': portal_url,
+                    })
+                    send_mail(asunto, cuerpo_mensaje_plain, settings.DEFAULT_FROM_EMAIL, [empleado.email], html_message=cuerpo_mensaje_html)
+                except Exception as e:
+                    print(f"ERROR al enviar correo de horario a {empleado.email}: {e}")
 
         messages.success(request, f'Se actualizaron las asignaciones para el horario "{horario.nombre}".')
         return redirect('horarios_admin')
