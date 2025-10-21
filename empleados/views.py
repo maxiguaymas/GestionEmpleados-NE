@@ -53,7 +53,10 @@ def crear_empleado(request):
             empleado = form.save(commit=False)
             dni = form.cleaned_data['dni']
             grupo = form.cleaned_data['grupo']
-            user = User.objects.create_user(username=str(dni), password=str(dni))
+            email = form.cleaned_data['email'] # Obtenemos el email del formulario
+
+            # Creamos el usuario y le asignamos el email
+            user = User.objects.create_user(username=str(dni), password=str(dni), email=email)
             user.groups.add(grupo)
             user.save()
             empleado.user = user
