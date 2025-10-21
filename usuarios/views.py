@@ -6,7 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 # Create your views here.
-def login(request):
+def login_view(request):
     # if request.user.is_authenticated:
     #     return redirect('index')
     if 'login_attempts' not in request.session:
@@ -61,11 +61,11 @@ def login(request):
     auth_login(request, form.get_user())
     return redirect('home')
     
-def logout(request):
+def logout_view(request):
     auth_logout(request)
     return redirect('login')
 
-def register(request):
+def register_view(request):
     if request.user.is_authenticated:
         return redirect('index')
     if request.method == 'GET':

@@ -89,13 +89,23 @@
                 {% endif %}
             </form>
 
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    ¿No tienes cuenta?
-                    <a href="{% url 'register' %}" class="font-medium text-red-600 hover:text-red-500">
-                        Regístrate aquí
-                    </a>
-                </p>
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                            Opciones
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center text-sm">
+                     <a href="{% url 'password_reset' %}" class="font-medium text-red-600 hover:text-red-500">
+                        ¿Olvidaste tu contraseña?
+                     </a>
+                </div>
             </div>
         </div>
     </div>
