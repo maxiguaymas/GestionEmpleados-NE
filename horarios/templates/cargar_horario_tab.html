@@ -67,3 +67,33 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const nombre = document.getElementById("{{ custom_form.nombre.id_for_label }}");
+    if (!nombre) return;
+
+    nombre.setAttribute('pattern', '[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+');
+    nombre.setAttribute('title', 'Sólo letras y espacios');
+    nombre.setAttribute('inputmode', 'text');
+
+    nombre.addEventListener('input', function () {
+        try {
+            const selStart = this.selectionStart;
+            const newVal = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/g, '');
+            if (this.value !== newVal) {
+                this.value = newVal;
+                const pos = Math.max(0, selStart - 1);
+                this.setSelectionRange(pos, pos);
+            }
+        } catch (err) { }
+    });
+
+    nombre.addEventListener('keypress', function (e) {
+        const char = String.fromCharCode(e.which || e.keyCode);
+        if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]$/.test(char)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>

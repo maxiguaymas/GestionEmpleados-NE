@@ -79,5 +79,5 @@ class DescargoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['ruta_archivo_descargo'].required = False
-        self.fields['ruta_archivo_descargo'].widget.attrs.update({'class': 'mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm'})
+        self.fields['ruta_archivo_descargo'].widget.attrs.update({'class': 'text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 dark:file:bg-red-900/50 dark:file:text-red-300 dark:hover:file:bg-red-900'})
 
