@@ -9,18 +9,10 @@
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <!-- Columna del Gráfico -->
-        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h2 id="chartTitle" class="text-xl font-semibold mb-4 text-gray-200 text-center"></h2>
-            <div class="h-96 w-full flex items-center justify-center">
-                <canvas id="dynamicChart"></canvas>
-            </div>
-        </div>
-
         <!-- Columna de Controles -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg lg:order-2">
             <h2 class="text-xl font-semibold mb-4 text-gray-200">Seleccionar Reporte</h2>
-            <div id="report-cards" class="space-y-4">
+            <div id="report-cards" class="space-y-4 max-h-[60vh] overflow-y-auto lg:max-h-none">
                 
                 <!-- Card: Reporte de Estado de Empleados -->
                 <div class="report-card cursor-pointer flex items-center p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-300" 
@@ -57,6 +49,14 @@
                         <p class="font-semibold text-gray-300">Incidentes por Tipo</p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Columna del Gráfico -->
+        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg lg:order-1">
+            <h2 id="chartTitle" class="text-xl font-semibold mb-4 text-gray-200 text-center"></h2>
+            <div class="h-96 w-full flex items-center justify-center">
+                <canvas id="dynamicChart"></canvas>
             </div>
         </div>
     </div>
