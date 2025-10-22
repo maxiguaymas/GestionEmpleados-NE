@@ -6,9 +6,9 @@
 {% endcomment %}
 <aside id="desktop-sidebar"
     class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden lg:flex flex-col">
-    <div class="h-16 flex items-center justify-center px-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="h-24 flex items-center justify-center px-4 pt-4">
         <div class="flex items-center gap-2">
-            <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Nuevas Energias" style="width: 100px; height: 50px;">
+            <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Nuevas Energias" style="width: 150px; height: auto;">
         </div>
     </div>
     <nav class="flex-1 px-4 py-6 space-y-2">
@@ -82,11 +82,12 @@
 
 <aside id="mobile-sidebar"
     class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 z-30 flex flex-col sidebar-mobile-closed lg:hidden">
-    <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center gap-2">
-            <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Nuevas Energias" style="width: 100px; height: 50px;">
+    <div class="h-24 grid grid-cols-[1fr,auto,1fr] items-center px-4 pt-4">
+        <div></div> <!-- Espaciador izquierdo -->
+        <div class="flex justify-center">
+            <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Nuevas Energias" style="width: 160px; height: 100px;">
         </div>
-        <button id="close-mobile-menu" class="p-1"><i data-lucide="x"></i></button>
+        <button id="close-mobile-menu" class="p-1 justify-self-end"><i data-lucide="x"></i></button> <!-- Botón de cerrar a la derecha -->
     </div>
     <nav class="flex-1 px-4 py-6 space-y-2">
         {% if view_as_employee or not user|has_group:'Administrador' %}
