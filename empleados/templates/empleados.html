@@ -11,8 +11,8 @@
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
         <input type="text" id="search-input" placeholder="Buscar por nombre o DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
     </div>
-    <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-2">
-        <a href="{% url 'generar_lista_empleados_pdf' %}" target="_blank" class="w-full sm:w-auto flex-shrink-0 bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm">
+    <div class="flex items-center gap-2">
+        <a href="{% url 'generar_lista_empleados_pdf' %}" data-action="print-list" class="w-full sm:w-auto flex-shrink-0 bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm">
             <i data-lucide="printer" class="w-4 h-4"></i> Imprimir Lista
         </a>
         <a href="{% url 'crear_empleado' %}" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
@@ -67,6 +67,7 @@
         document.body.addEventListener('click', function(e) {
             const toggleButton = e.target.closest('[data-action="toggle-menu"]');
             const deleteButton = e.target.closest('[data-action="delete-employee"]');
+            const printButton = e.target.closest('[data-action="print-list"]');
 
             // --- Manejo de Menús Desplegables ---
             if (toggleButton) {
@@ -117,6 +118,14 @@
                 const url = deleteButton.href;
                 showNotification('warning', '¿Estás seguro?',
                     `Esta acción no se puede deshacer. <br><br> <a href="${url}" class="font-bold text-red-600 hover:underline">Sí, eliminar</a>`,
+                    10000
+                );
+            } else if (printButton) {
+                // --- Manejo de Notificación de Impresión ---
+                e.preventDefault();
+                const url = printButton.href;
+                showNotification('info', '¿Confirmar impresión?',
+                    `Se abrirá una nueva pestaña para generar el PDF con la lista de empleados. <br><br> <button onclick="window.open('${url}', '_blank'); hideNotification(this);" class="font-bold text-blue-600 hover:underline">Aceptar</button>`,
                     10000
                 );
             } else if (!e.target.closest('[data-menu]')) {
