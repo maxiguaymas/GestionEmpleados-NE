@@ -7,7 +7,10 @@ from django.db.models import Count
 def reportes_home(request):
     # Esta vista ahora solo renderiza la página principal del dashboard.
     # El gráfico inicial se cargará vía fetch para ser consistente con los demás.
-    return render(request, 'reportes/reportes_home.html')
+    context = {
+        'page_title': 'Reportes'
+    }
+    return render(request, 'reportes/reportes_home.html', context)
 
 def reporte_estado_empleados(request):
     conteo_estados = Empleado.objects.values('estado').annotate(total=Count('estado')).order_by('estado')
