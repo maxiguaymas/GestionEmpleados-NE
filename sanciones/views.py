@@ -237,14 +237,13 @@ def ver_todas_sanciones(request):
             Q(id_empl__dni__icontains=search_query)
         )
 
-    if month and year:
-        try:
-            sanciones_query = sanciones_query.filter(
-                fecha_inicio__month=int(month),
-                fecha_inicio__year=int(year)
-            )
-        except (ValueError, TypeError):
-            pass
+    try:
+        if month:
+            sanciones_query = sanciones_query.filter(fecha_inicio__month=int(month))
+        if year:
+            sanciones_query = sanciones_query.filter(fecha_inicio__year=int(year))
+    except (ValueError, TypeError):
+        pass
 
     if tipo_sancion:
         sanciones_query = sanciones_query.filter(id_sancion__tipo__iexact=tipo_sancion)
@@ -327,14 +326,13 @@ def mis_sanciones(request):
     tipo_sancion = request.GET.get('tipo')
 
     # Apply filters
-    if month and year:
-        try:
-            sanciones_query = sanciones_query.filter(
-                fecha_inicio__month=int(month),
-                fecha_inicio__year=int(year)
-            )
-        except (ValueError, TypeError):
-            pass
+    try:
+        if month:
+            sanciones_query = sanciones_query.filter(fecha_inicio__month=int(month))
+        if year:
+            sanciones_query = sanciones_query.filter(fecha_inicio__year=int(year))
+    except (ValueError, TypeError):
+        pass
 
     if tipo_sancion:
         sanciones_query = sanciones_query.filter(id_sancion__tipo__iexact=tipo_sancion)
