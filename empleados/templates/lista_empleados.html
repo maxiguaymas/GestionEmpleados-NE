@@ -1,3 +1,5 @@
+{% load empleados_extras %}
+
 <!-- Card View for Mobile -->
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
     {% for empleado in page_obj|default:empleados %}
@@ -22,12 +24,18 @@
                     <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>
                     <span class="truncate" title="{{ empleado.email }}">{{ empleado.email }}</span>
                 </p>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                     <i data-lucide="shield" class="w-4 h-4 flex-shrink-0 {% if empleado.estado == 'Activo' %}text-green-500{% else %}text-yellow-500{% endif %}"></i>
                     <span class="px-2 py-1 text-xs font-semibold rounded-full 
                         {% if empleado.estado == 'Activo' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">
                         {{ empleado.estado }}
                     </span>
+                    {% if empleado.user.groups.first %}
+                    {% get_group_color_classes empleado.user.groups.first.name as color_classes %}
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full {{ color_classes }}">
+                        {{ empleado.user.groups.first.name }}
+                    </span>                    
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -93,6 +101,7 @@
                 <th class="p-4">Nombre</th>
                 <th class="p-4">DNI</th>
                 <th class="p-4">Email</th>
+                <th class="p-4">Cargo</th>
                 <th class="p-4">Estado</th>
                 <th class="p-4">Acciones</th>
             </tr>
@@ -112,6 +121,12 @@
                 <td class="p-4 font-medium text-gray-800 dark:text-gray-100">{{ empleado.nombre }} {{ empleado.apellido }}</td>
                 <td class="p-4 text-gray-600 dark:text-gray-300">{{ empleado.dni }}</td>
                 <td class="p-4 text-gray-600 dark:text-gray-300">{{ empleado.email }}</td>
+                <td class="p-4 text-gray-600 dark:text-gray-300">
+                    {% if empleado.user.groups.first %}
+                        {% get_group_color_classes empleado.user.groups.first.name as color_classes %}
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ color_classes }}">{{ empleado.user.groups.first.name }}</span>
+                    {% else %}-{% endif %}
+                </td>
                 <td class="p-4">
                     <span class="px-2 py-1 text-xs font-semibold rounded-full 
                         {% if empleado.estado == 'Activo' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">

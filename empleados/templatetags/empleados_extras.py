@@ -27,3 +27,19 @@ def break_long_words(value, max_len=25):
     broken_value = long_word_regex.sub(insert_breaks, value)
 
     return mark_safe(broken_value)
+
+@register.simple_tag
+def get_group_color_classes(group_name):
+    """
+    Devuelve las clases de Tailwind CSS correspondientes a un nombre de grupo.
+    """
+    color_map = {
+        'Administrador': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+        'Empleado': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        'RRHH': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+        'Tecnico': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+        # Puedes añadir más grupos y colores aquí
+    }
+    # Color por defecto si el grupo no está en el mapa
+    default_classes = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+    return color_map.get(group_name, default_classes)

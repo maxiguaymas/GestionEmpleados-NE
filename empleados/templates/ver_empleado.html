@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load empleados_extras %}
 {% load static %}
 
 {% block content %}
@@ -23,8 +24,13 @@
                     <img src="{% static 'images/default-user.jpg' %}" alt="Sin foto" class="h-32 w-32 rounded-full mx-auto mb-4 object-cover">
                 {% endif %}
                 <h2 class="text-2xl font-bold">{{ empleado.nombre }} {{ empleado.apellido }}</h2>
-                {# <p class="text-gray-500 dark:text-gray-400">{{ empleado.position }}</p> #}
-                <span class="mt-4 inline-block px-3 py-1 text-sm font-semibold rounded-full {% if empleado.estado == 'Activo' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">{{ empleado.estado }}</span>
+                {% if empleado.user.groups.first %}
+                    {% get_group_color_classes empleado.user.groups.first.name as color_classes %}
+                    <span class="mt-2 inline-block px-3 py-1 text-sm font-semibold rounded-full {{ color_classes }}">
+                        {{ empleado.user.groups.first.name }}
+                    </span>
+                {% endif %}
+                <span class="mt-2 inline-block px-3 py-1 text-sm font-semibold rounded-full {% if empleado.estado == 'Activo' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">{{ empleado.estado }}</span>
             </div>
 
             <!-- Actions Panel -->
