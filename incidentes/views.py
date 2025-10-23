@@ -256,7 +256,7 @@ def detalle_incidente(request, incidente_id):
             incidente_empleado.save()
 
             messages.success(request, "Tu descargo ha sido registrado exitosamente.")
-            return redirect('detalle_incidente', incidente_id=incidente.id)
+            return redirect('mis_incidentes')
         else:
             # If form is invalid, we fall through to the GET logic below,
             # which will re-render the page with the form and its errors.
