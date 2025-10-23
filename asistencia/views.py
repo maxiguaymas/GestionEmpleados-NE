@@ -154,6 +154,10 @@ def ver_asistencias_empleado(request, empleado_id):
         page_number = request.GET.get('page')
         asistencias_paginadas = paginator.get_page(page_number)
         
+        # Calcular minutos de retraso para cada asistencia
+        for asistencia in asistencias_paginadas:
+            asistencia.minutos_retraso = asistencia.calcular_retraso()
+
         context = {
             'empleado': empleado,
             'asistencias': asistencias_paginadas,
@@ -202,8 +206,13 @@ def api_ver_asistencias_empleado(request, dni):
         page_number = request.GET.get('page')
         asistencias_paginadas = paginator.get_page(page_number)
 
-        # Convertir objetos a diccionarios para la respuesta JSON
-        asistencias_list = [model_to_dict(asistencia) for asistencia in asistencias_paginadas]
+        # Construir la lista de asistencias con el cálculo de retraso
+        asistencias_list = []
+        for asistencia in asistencias_paginadas:
+            asistencias_list.append({
+                'fecha_hora': asistencia.fecha_hora.isoformat(),
+                'minutos_retraso': asistencia.calcular_retraso()
+            })
 
         data = {
             'status': 'success',
@@ -253,6 +262,10 @@ def mis_asistencias(request):
         paginator = Paginator(asistencias_query, registros_por_pagina)
         page_number = request.GET.get('page')
         asistencias_paginadas = paginator.get_page(page_number)
+
+        # Calcular minutos de retraso para cada asistencia
+        for asistencia in asistencias_paginadas:
+            asistencia.minutos_retraso = asistencia.calcular_retraso()
 
         context = {
             'empleado': empleado,
