@@ -133,7 +133,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    statusDivMark.innerHTML = `<span class="badge bg-success">Â¡Asistencia registrada para ${data.nombre}!</span>`;
+                    statusDivMark.innerHTML = `<span class="badge bg-success">Asistencia registrada para ${data.nombre}!</span>`;
                 } else if (data.status === 'already_marked') {
                     statusDivMark.innerHTML = `<span class="badge bg-warning"> ${data.nombre}, ya has marcado asistencia hoy.</span>`;
                 }
@@ -322,13 +322,26 @@
 
                     if (data.status === 'success') {
                         employeeNameSpan.textContent = `${data.empleado.nombre} ${data.empleado.apellido}`;
-                        let tableHtml = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha</th><th class="p-4">Día</th><th class="p-4">Hora de Ingreso</th></tr></thead><tbody>';
+                        let tableHtml = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha</th><th class="p-4">Día</th><th class="p-4">Hora de Ingreso</th><th class="p-4">Minutos de Retraso</th></tr></thead><tbody>';
                         
                         if (data.asistencias.length > 0) {
                             data.asistencias.forEach(asistencia => {
                             const fecha = new Date(asistencia.fecha_hora);
                             const diaSemana = fecha.toLocaleDateString(locale, { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase());
-                            tableHtml += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString(locale, {timeZone: 'UTC'})}</td><td class="p-4">${diaSemana}</td><td class="p-4 font-semibold">${fecha.toLocaleTimeString(locale, {timeZone: 'UTC'})}</td></tr>`;
+                            
+                            let retrasoBadge = '';
+                            if (asistencia.minutos_retraso > 5) {
+                                retrasoBadge = `<span class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full dark:bg-red-900 dark:text-red-300">${asistencia.minutos_retraso} min - Tarde</span>`;
+                            } else {
+                                retrasoBadge = `<span class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-300">${asistencia.minutos_retraso} min - Correcto</span>`;
+                            }
+
+                            tableHtml += `<tr class="border-t dark:border-gray-700">
+                                            <td class="p-4 text-gray-600 dark:text-gray-300">${fecha.toLocaleDateString(locale, {timeZone: 'UTC'})}</td>
+                                            <td class="p-4 text-gray-600 dark:text-gray-300">${diaSemana}</td>
+                                            <td class="p-4 font-semibold text-gray-800 dark:text-gray-100">${fecha.toLocaleTimeString(locale, {timeZone: 'UTC'})}</td>
+                                            <td class="p-4 font-semibold">${retrasoBadge}</td>
+                                         </tr>`;
                         });
                         } else {
                             tableHtml += `<tr><td colspan="3" class="p-6 text-center text-gray-500">No se encontraron asistencias para este periodo.</td></tr>`;
