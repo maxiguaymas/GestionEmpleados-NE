@@ -39,14 +39,17 @@ def ver_incidentes(request):
             Q(incidenteempleado__id_empl__dni__icontains=search_query)
         )
 
-    if month and year:
+    if month:
         try:
-            incidentes_query = incidentes_query.filter(
-                incidenteempleado__fecha_ocurrencia__month=int(month),
-                incidenteempleado__fecha_ocurrencia__year=int(year)
-            )
+            incidentes_query = incidentes_query.filter(incidenteempleado__fecha_ocurrencia__month=int(month))
         except (ValueError, TypeError):
-            pass # Or add a message
+            pass  # Or add a message
+
+    if year:
+        try:
+            incidentes_query = incidentes_query.filter(incidenteempleado__fecha_ocurrencia__year=int(year))
+        except (ValueError, TypeError):
+            pass  # Or add a message
 
     if status:
         incidentes_query = incidentes_query.filter(incidenteempleado__estado__iexact=status)
