@@ -45,14 +45,26 @@
                         <th class="p-4">Fecha</th>
                         <th class="p-4">Día</th>
                         <th class="p-4">Hora de Ingreso</th>
+                        <th class="p-4">Minutos de Retraso</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     {% for asistencia in asistencias %}
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td class="p-4 text-gray-600 dark:text-gray-300">{{ asistencia.fecha_hora|date:"d/m/Y" }}</td>
                         <td class="p-4 text-gray-600 dark:text-gray-300">{{ asistencia.fecha_hora|date:"l"|capfirst }}</td>
                         <td class="p-4 font-semibold text-gray-800 dark:text-gray-100">{{ asistencia.fecha_hora|time:"H:i:s" }}</td>
+                        <td class="p-4 font-semibold">
+                            {% if asistencia.minutos_retraso > 5 %}
+                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full dark:bg-red-900 dark:text-red-300">
+                                    {{ asistencia.minutos_retraso }} min - Tarde
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-300">
+                                    {{ asistencia.minutos_retraso }} min - Correcto
+                                </span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
