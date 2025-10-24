@@ -124,13 +124,84 @@
 
 {% block page_scripts %}
 <script>
-let currentFormStep = 1;
 document.addEventListener('DOMContentLoaded', function() {
     let currentFormStep = 1;
     const nextBtn = document.getElementById('form-next-btn');
     const prevBtn = document.getElementById('form-prev-btn');
     const submitBtn = document.getElementById('form-submit-btn');
     const form = document.querySelector('form');
+
+    // Manejo especial para el campo de fecha
+    const fechaNacimientoInput = document.getElementById('id_fecha_nacimiento');
+    if (fechaNacimientoInput) {
+        // Convertir a campo de texto
+        fechaNacimientoInput.type = 'text';
+        fechaNacimientoInput.placeholder = 'dd/mm/aaaa';
+        
+        // Conservar el valor original en formato dd/mm/yyyy si existe
+        const valorOriginal = fechaNacimientoInput.value;
+        if (valorOriginal) {
+            // Asegurarse de que el valor esté en formato dd/mm/yyyy
+            if (valorOriginal.includes('-')) {
+                const [año, mes, dia] = valorOriginal.split('-');
+                fechaNacimientoInput.value = `${dia}/${mes}/${año}`;
+            } else if (valorOriginal.includes('/')) {
+                fechaNacimientoInput.value = valorOriginal;
+            }
+        }
+
+        // Manejar la entrada de fecha
+        fechaNacimientoInput.addEventListener('input', function(e) {
+            let valor = e.target.value.replace(/\D/g, '');
+            
+            // Formatear automáticamente mientras se escribe
+            if (valor.length > 0) {
+                if (valor.length <= 2) {
+                    e.target.value = valor;
+                } else if (valor.length <= 4) {
+                    e.target.value = `${valor.slice(0,2)}/${valor.slice(2)}`;
+                } else {
+                    e.target.value = `${valor.slice(0,2)}/${valor.slice(2,4)}/${valor.slice(4,8)}`;
+                }
+            }
+            validarPasoActual();
+        });
+    }
+
+    function validarPasoActual() {
+        let pasoValido = true;
+        const camposRequeridosPorPaso = {
+            1: ['nombre', 'apellido', 'dni', 'fecha_nacimiento', 'genero', 'estado_civil', 'grupo'],
+            2: ['email']
+        };
+
+        const camposRequeridos = camposRequeridosPorPaso[currentFormStep];
+        if (camposRequeridos) {
+            pasoValido = camposRequeridos.every(nombreCampo => {
+                const campo = document.getElementById(`id_${nombreCampo}`);
+                if (!campo) return true;
+                
+                const valor = campo.value.trim();
+                
+                if (nombreCampo === 'fecha_nacimiento') {
+                    if (!valor) return false;
+                    const partes = valor.split('/');
+                    if (partes.length !== 3) return false;
+                    const [dia, mes, año] = partes;
+                    if (año.length !== 4) return false;
+                    return true;
+                }
+                
+                return valor !== '';
+            });
+        }
+
+        if (currentFormStep === 3 || currentFormStep === 4) {
+            pasoValido = true;
+        }
+
+        nextBtn.disabled = !pasoValido;
+    }
 
     function updateFormStepUI() {
         document.querySelectorAll('.form-step').forEach(step => step.classList.add('hidden'));
@@ -155,31 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.classList.add('hidden');
         }
         validarPasoActual();
-    }
-
-    function validarPasoActual() {
-        let pasoValido = true;
-        const camposRequeridosPorPaso = {
-            1: ['nombre', 'apellido', 'dni', 'fecha_nacimiento', 'genero', 'estado_civil', 'grupo'],
-            2: ['email']
-        };
-
-        const camposRequeridos = camposRequeridosPorPaso[currentFormStep];
-        if (camposRequeridos) {
-            for (const nombreCampo of camposRequeridos) {
-                const campo = document.getElementById(`id_${nombreCampo}`);
-                if (campo && !campo.value) {
-                    pasoValido = false;
-                    break;
-                }
-            }
-        }
-
-        if (currentFormStep === 3 || currentFormStep === 4) {
-            pasoValido = true;
-        }
-
-        nextBtn.disabled = !pasoValido;
     }
 
     nextBtn.addEventListener('click', () => {

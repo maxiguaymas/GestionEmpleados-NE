@@ -131,7 +131,15 @@ def editar_empleado(request, id):
     error = None
 
     if request.method == 'POST':
-        form = EmpleadoForm(request.POST, request.FILES, instance=empleado)
+        # Convertir la fecha del formato dd/mm/yyyy a yyyy-mm-dd
+        data = request.POST.copy()
+        if 'fecha_nacimiento' in data and data['fecha_nacimiento']:
+            try:
+                dia, mes, año = data['fecha_nacimiento'].split('/')
+                data['fecha_nacimiento'] = f"{año}-{mes}-{dia}"
+            except ValueError:
+                pass
+        form = EmpleadoForm(data, request.FILES, instance=empleado)
         archivos = request.FILES
         if form.is_valid():
             form.save()
@@ -156,6 +164,9 @@ def editar_empleado(request, id):
 
     else:
         form = EmpleadoForm(instance=empleado)
+        # Formatear la fecha de nacimiento al formato dd/mm/yyyy
+        if empleado.fecha_nacimiento:
+            form.initial['fecha_nacimiento'] = empleado.fecha_nacimiento.strftime('%d/%m/%Y')
 
     return render(request, 'editar_empleado.html', {
         'form': form,
