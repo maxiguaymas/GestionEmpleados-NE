@@ -174,10 +174,17 @@ def eliminar_empleado(request, id):
     empleado.save()
     return redirect('empleados')
 
+from django.contrib.auth.models import Group
+
 @login_required
 @user_passes_test(es_admin)
 def ver_empleados(request):
     empleados = Empleado.objects.filter(fecha_egreso__isnull=True).order_by('-fecha_ingreso', '-id')
+    
+    # Obtener datos para los filtros
+    estado_choices = Empleado._meta.get_field('estado').choices
+    cargos = Group.objects.all()
+
     # Paginación por defecto: 10 por página
     page = request.GET.get('page', 1)
     paginator = Paginator(empleados, 10)
@@ -188,21 +195,36 @@ def ver_empleados(request):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
 
-    return render(request, 'empleados.html', {'empleados': page_obj.object_list, 'page_obj': page_obj, 'paginator': paginator, 'page_title': 'Empleados'})
+    return render(request, 'empleados.html', {
+        'empleados': page_obj.object_list, 
+        'page_obj': page_obj, 
+        'paginator': paginator, 
+        'page_title': 'Empleados',
+        'estado_choices': estado_choices,
+        'cargos': cargos
+    })
 
 @login_required
 @user_passes_test(es_admin)
 def buscar_empleados(request):
     query = request.GET.get('q')
+    estado = request.GET.get('estado')
+    cargo_id = request.GET.get('cargo')
+
+    filters = Q(fecha_egreso__isnull=True)
+    
     if query:
-        empleados = Empleado.objects.filter(
-            Q(nombre__icontains=query) |
-            Q(apellido__icontains=query) |
-            Q(dni__icontains=query),
-            fecha_egreso__isnull=True
-        ).order_by('-fecha_ingreso', '-id')
-    else:
-        empleados = Empleado.objects.filter(fecha_egreso__isnull=True).order_by('-fecha_ingreso', '-id')
+        filters &= (Q(nombre__icontains=query) |
+                    Q(apellido__icontains=query) |
+                    Q(dni__icontains=query))
+    
+    if estado:
+        filters &= Q(estado=estado)
+
+    if cargo_id:
+        filters &= Q(user__groups__id=cargo_id)
+
+    empleados = Empleado.objects.filter(filters).order_by('-fecha_ingreso', '-id').distinct()
 
     # Paginación: 10 por página
     page = request.GET.get('page', 1)
