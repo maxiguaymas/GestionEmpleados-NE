@@ -7,7 +7,7 @@
 
 {% block content %}
 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-    <div class="flex flex-col sm:flex-row items-center gap-2 w-full">
+    <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto flex-grow">
         <div class="relative w-full sm:max-w-xs">
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
             <input type="text" id="search-input" placeholder="Buscar por nombre o DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
@@ -27,7 +27,7 @@
             {% endfor %}
         </select>
     </div>
-    <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-2">
+    <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
         <a href="{% url 'generar_lista_empleados_pdf' %}" target="_blank" class="w-full sm:w-auto flex-shrink-0 bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm">
             <i data-lucide="printer" class="w-4 h-4"></i> Imprimir Lista
         </a>
