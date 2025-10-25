@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }]
             },
             options: {
+                indexAxis: type === 'bar' ? 'y' : 'x',
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
@@ -133,8 +134,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                 },
                 scales: type === 'bar' ? {
-                    y: { beginAtZero: true, grid: { color: theme.gridColor }, ticks: { color: theme.textColor, stepSize: 1 } },
-                    x: { grid: { display: false }, ticks: { color: theme.textColor } }
+                    x: { beginAtZero: true, grid: { color: theme.gridColor }, ticks: { color: theme.textColor, stepSize: 1 } },
+                    y: { grid: { display: false }, ticks: { color: theme.textColor } }
                 } : {}
             }
         });
