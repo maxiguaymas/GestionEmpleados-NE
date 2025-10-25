@@ -7,31 +7,49 @@
 
 {% block content %}
 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-    <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto flex-grow">
-        <div class="relative w-full sm:max-w-xs">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-            <input type="text" id="search-input" placeholder="Buscar por nombre o DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto flex-grow">
+        <div class="relative w-full sm:max-w-xs group">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors group-hover:text-red-500"></i>
+            <input type="text" id="search-input" 
+                placeholder="Buscar por nombre o DNI..." 
+                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 
+                       bg-white dark:bg-gray-700 focus:ring-2 focus:ring-red-500/20 focus:border-red-500
+                       transition-all duration-200">
         </div>
         
-        <select id="estado-filter" class="w-full sm:w-auto py-2 px-4 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
-            <option value="">Todos los Estados</option>
-            {% for value, display in estado_choices %}
-            <option value="{{ value }}">{{ display }}</option>
-            {% endfor %}
-        </select>
+        <div class="flex gap-2 w-full sm:w-auto">
+            <select id="estado-filter" 
+                class="py-2.5 px-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700
+                       focus:ring-2 focus:ring-red-500/20 focus:border-red-500 cursor-pointer transition-all duration-200
+                       hover:border-red-500/50">
+                <option value="">Todos los Estados</option>
+                {% for value, display in estado_choices %}
+                <option value="{{ value }}">{{ display }}</option>
+                {% endfor %}
+            </select>
 
-        <select id="cargo-filter" class="w-full sm:w-auto py-2 px-4 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
-            <option value="">Todos los Cargos</option>
-            {% for cargo in cargos %}
-            <option value="{{ cargo.id }}">{{ cargo.name }}</option>
-            {% endfor %}
-        </select>
+            <select id="cargo-filter" 
+                class="py-2.5 px-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700
+                       focus:ring-2 focus:ring-red-500/20 focus:border-red-500 cursor-pointer transition-all duration-200
+                       hover:border-red-500/50">
+                <option value="">Todos los Cargos</option>
+                {% for cargo in cargos %}
+                <option value="{{ cargo.id }}">{{ cargo.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
-    <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-2">
-        <a href="{% url 'generar_lista_empleados_pdf' %}" target="_blank" class="w-full sm:w-auto flex-shrink-0 bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 text-sm">
+    <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+        <a href="{% url 'generar_lista_empleados_pdf' %}" target="_blank" 
+           class="w-full sm:w-auto flex-shrink-0 bg-gray-600 text-white px-5 py-2.5 rounded-lg 
+                  flex items-center justify-center gap-2 hover:bg-gray-700 text-sm font-medium
+                  transition-all duration-200 hover:shadow-lg hover:scale-105">
             <i data-lucide="printer" class="w-4 h-4"></i> Imprimir Lista
         </a>
-        <a href="{% url 'crear_empleado' %}" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
+        <a href="{% url 'crear_empleado' %}" 
+           class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-5 py-2.5 rounded-lg 
+                  flex items-center justify-center gap-2 hover:bg-red-700 font-medium
+                  transition-all duration-200 hover:shadow-lg hover:scale-105">
             <i data-lucide="plus"></i><span>Registrar Empleado</span>
         </a>
     </div>

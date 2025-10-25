@@ -8,13 +8,26 @@
 {% block content %}
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
     <div class="border-b border-gray-200 dark:border-gray-700">
-            <div class="overflow-x-auto">
-        <nav class="-mb-px flex space-x-6 px-4 sm:px-6" aria-label="Tabs">
-             <a href="#create-schedule" data-tab="create-schedule" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Crear Horario</a>
-            <a href="#assign-schedules" data-tab="assign-schedules" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Asignar Horarios</a>
-            <a href="#view-assignments" data-tab="view-assignments" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Ver Asignaciones</a>
-            <a href="#history" data-tab="history" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Historial</a>
-        </nav>
+        <div class="overflow-x-auto">
+            <nav class="-mb-px flex space-x-6 px-4 sm:px-6" aria-label="Tabs">
+                <a href="#view-assignments" data-tab="view-assignments" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm inline-flex items-center gap-2">
+                    <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                    <span>Ver Asignaciones</span>
+                </a>
+                <a href="#assign-schedules" data-tab="assign-schedules" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm inline-flex items-center gap-2">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    <span>Asignar Horarios</span>
+                </a>
+                <a href="#create-schedule" data-tab="create-schedule" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm inline-flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Crear Horario</span>
+                </a>
+                <a href="#history" data-tab="history" class="schedule-tab tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm inline-flex items-center gap-2">
+                    <i data-lucide="history" class="w-4 h-4"></i>
+                    <span>Historial</span>
+                </a>
+            </nav>
+        </div>
     </div>
     <div class="p-6">
         <div id="view-assignments-tab" class="schedule-tab-content">

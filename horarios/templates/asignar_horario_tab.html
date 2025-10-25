@@ -1,36 +1,51 @@
 <form action="{% url 'asignar_horario' %}" method="post">
     {% csrf_token %}
-    <h3 class="text-lg font-semibold mb-4">Asignar Empleados a un Horario</h3>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="md:col-span-1">
-        <label for="schedule-select-for-assignment" class="block text-sm font-medium mb-1">1. Seleccionar Horario</label>
-        <select id="schedule-select-for-assignment" name="horario_id" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-red-500 focus:ring-red-500">
-            <option value="">Seleccionar...</option>
-            {% for horario in horarios_todos %}
-                <option value="{{ horario.id }}">{{ horario.nombre }}</option>
-            {% endfor %}
-        </select>
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">Asignar Empleados a un Horario</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Selecciona un horario y arrastra los empleados para asignarlos.</p>
     </div>
-    <div id="assignment-ui" class="md:col-span-2 hidden">
-        <label class="block text-sm font-medium mb-1">2. Asignar Empleados</label>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-                <h4 class="text-sm font-semibold mb-2">Empleados Disponibles</h4>
-                <div id="available-employees" class="p-2 border rounded-lg max-h-60 overflow-y-auto min-h-[15rem] dark:border-gray-600">
-                    <!-- JS will populate this -->
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-1">
+            <label class="block text-sm font-medium mb-2">1. Seleccionar Horario</label>
+            <select id="schedule-select-for-assignment" name="horario_id" 
+                class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm
+                       focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                <option value="">Seleccionar...</option>
+                {% for horario in horarios_todos %}
+                    <option value="{{ horario.id }}" class="py-2">
+                        {{ horario.nombre }} ({{ horario.hora_entrada|time:"H:i" }} - {{ horario.hora_salida|time:"H:i" }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="assignment-ui" class="md:col-span-2 hidden">
+            <label class="block text-sm font-medium mb-2">2. Asignar Empleados</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-semibold">Empleados Disponibles</h4>
+                        <span id="available-count" class="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded-full"></span>
+                    </div>
+                    <div id="available-employees" class="bg-white dark:bg-gray-800 rounded-lg p-2 min-h-[20rem] max-h-[20rem] overflow-y-auto border dark:border-gray-600"></div>
+                </div>
+                
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-semibold">Empleados Asignados</h4>
+                        <span id="assigned-count" class="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded-full"></span>
+                    </div>
+                    <div id="assigned-employees" class="bg-white dark:bg-gray-800 rounded-lg p-2 min-h-[20rem] max-h-[20rem] overflow-y-auto border dark:border-gray-600"></div>
                 </div>
             </div>
-            <div>
-                <h4 class="text-sm font-semibold mb-2">Empleados Asignados</h4>
-                <div id="assigned-employees" class="p-2 border rounded-lg max-h-60 overflow-y-auto min-h-[15rem] dark:border-gray-600">
-                    <!-- JS will populate this -->
-                </div>
+            <div class="mt-4 flex justify-end">
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Guardar Asignación</span>
+                </button>
             </div>
         </div>
-        <button type="submit" class="mt-4 w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Guardar Asignación</button>
     </div>
-</div>
-
-<!-- Hidden inputs will be managed by JS to submit the final list -->
-<div id="assigned-employee-inputs"></div>
+    <div id="assigned-employee-inputs"></div>
 </form>

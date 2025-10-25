@@ -4,77 +4,93 @@
 {% comment %}
 <!-- Barra lateral (visible en desktop) -->
 {% endcomment %}
-<aside id="desktop-sidebar"
-    class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden lg:flex flex-col">
+<aside id="desktop-sidebar" class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden lg:flex flex-col transition-all duration-300">
     <div class="h-24 flex items-center justify-center px-4 pt-4">
-        <div class="flex items-center gap-2">
-            <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Nuevas Energias" style="width: 150px; height: auto;">
+        <div class="flex items-center gap-2 transition-transform duration-200 hover:scale-105">
+            <img src="{% static 'images/logo-nuevas-energias-v2.png' %}" alt="Nuevas Energias" class="w-[150px] h-auto filter drop-shadow-md">
         </div>
     </div>
-    <nav class="flex-1 px-4 py-6 space-y-2 mt-4">
+    <nav class="flex-1 px-4 py-6 space-y-1.5 mt-4">
         {% if view_as_employee or not user|has_group:'Administrador' %}
-            <a href="{% url 'ver_perfil' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="my-profile">
-                <i data-lucide="user-circle"></i>
-                <span class="font-medium">Mi Perfil</span>
+            <a href="{% url 'ver_perfil' %}" 
+                class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" 
+                data-view="my-profile">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="user-circle" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Mi Perfil</span>
             </a>
-            <a href="{% url 'mis_recibos' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="payslips">
-                <i data-lucide="receipt"></i>
-                <span class="font-medium">Mis Recibos</span>
+            <a href="{% url 'mis_recibos' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="payslips">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="receipt" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Mis Recibos</span>
             </a>
-            <a href="{% url 'mis_horarios_empleado' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="schedules">
-                <i data-lucide="calendar-days"></i>
-                <span class="font-medium">Mis Horarios</span>
+            <a href="{% url 'mis_horarios_empleado' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="schedules">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="calendar-days" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Mis Horarios</span>
             </a>
-            <a href="{% url 'mis_sanciones' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="sanctions">
-                <i data-lucide="shield-alert"></i>
-                <span class="font-medium">Mis Sanciones</span>
+            <a href="{% url 'mis_sanciones' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="sanctions">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="shield-alert" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Mis Sanciones</span>
             </a>
-            <a href="{% url 'mis_incidentes' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="incidents">
-                <i data-lucide="alert-triangle"></i>
-                <span class="font-medium">Mis Incidentes</span>
+            <a href="{% url 'mis_incidentes' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="incidents">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="alert-triangle" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Mis Incidentes</span>
             </a>
-            <a href="{% url 'mis_asistencias' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="attendance">
-                <i data-lucide="camera"></i>
-                <span class="font-medium">Mis Asistencias</span>
+            <a href="{% url 'mis_asistencias' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="attendance">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="camera" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Mis Asistencias</span>
             </a>
         {% else %}
-            <a href="/" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="dashboard">
-                <i data-lucide="layout-dashboard"></i>
-                <span class="font-medium">Inicio</span>
+            <a href="/" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="dashboard">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="layout-dashboard" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Inicio</span>
             </a>
-            <a href="{% url 'empleados' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="employees">
-                <i data-lucide="users"></i>
-                <span class="font-medium">Empleados</span>
+            <a href="{% url 'empleados' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="employees">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="users" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Empleados</span>
             </a>
-            <a href="{% url 'recibos_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="payslips">
-                <i data-lucide="receipt"></i>
-                <span class="font-medium">Recibos</span>
+            <a href="{% url 'recibos_admin' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="payslips">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="receipt" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Recibos</span>
             </a>
-            <a href="{% url 'horarios_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="schedules">
-                <i data-lucide="calendar-days"></i>
-                <span class="font-medium">Horarios</span>
+            <a href="{% url 'horarios_admin' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="schedules">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="calendar-days" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Horarios</span>
             </a>
-            <a href="{% url 'ver_todas_sanciones' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="sanctions">
-                <i data-lucide="shield-alert"></i>
-                <span class="font-medium">Sanciones</span>
+            <a href="{% url 'ver_todas_sanciones' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="sanctions">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="shield-alert" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Sanciones</span>
             </a>
-            <a href="{% url 'ver_incidentes' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="incidents">
-                <i data-lucide="alert-triangle"></i>
-                <span class="font-medium">Incidentes</span>
+            <a href="{% url 'ver_incidentes' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="incidents">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="alert-triangle" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Incidentes</span>
             </a>
-            <a href="{% url 'asistencia_admin' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="attendance">
-                <i data-lucide="camera"></i>
-                <span class="font-medium">Asistencia</span>
+            <a href="{% url 'asistencia_admin' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="attendance">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="camera" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Asistencia</span>
             </a>
-            <a href="{% url 'reportes_home' %}" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700" data-view="reports">
-                <i data-lucide="clipboard-list"></i>
-                <span class="font-medium">Reportes</span>
+            <a href="{% url 'reportes_home' %}" class="nav-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200 relative overflow-hidden" data-view="reports">
+                <span class="absolute inset-0 bg-gradient-to-r from-red-600/10 to-red-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></span>
+                <i data-lucide="clipboard-list" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium relative z-10">Reportes</span>
             </a>
         {% endif %}
     </nav>
     <div class="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
-        <a href="#" onclick="event.preventDefault(); openLogoutModal()" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-600 hover:text-white dark:hover:bg-red-700">
-            <i data-lucide="log-out"></i>
+        <a href="#" onclick="event.preventDefault(); openLogoutModal()" 
+            class="group flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 hover:text-white dark:hover:from-red-700 dark:hover:to-red-600 transition-all duration-200">
+            <i data-lucide="log-out" class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"></i>
             <span class="font-medium">Cerrar sesión</span>
         </a>
     </div>
@@ -158,8 +174,8 @@
     </div>
 </aside>
 
-<!-- Modal: Confirmar Cierre de Sesión (incluido en aside.html) -->
-<div id="logout-modal-aside" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" onclick="closeLogoutModal()">
+<!-- Modal: Confirmar Cierre de Sesión -->
+<div id="logout-modal-aside" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="closeLogoutModal()">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 m-4 text-center" onclick="event.stopPropagation()">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
             <i data-lucide="log-out" class="h-6 w-6 text-red-600 dark:text-red-400"></i>
@@ -179,14 +195,78 @@
     </div>
 </div>
 
-<script>
-    function openLogoutModal() {
-        const modal = document.getElementById('logout-modal-aside');
-        if (modal) modal.classList.replace('hidden', 'flex');
+<style>
+    .nav-link.active {
+        @apply bg-gradient-to-r from-red-600 to-red-500 text-white;
+    }
+    
+    .modal-content.show {
+        @apply scale-100 opacity-100;
     }
 
-    function closeLogoutModal() {
-        const modal = document.getElementById('logout-modal-aside');
-        if (modal) modal.classList.replace('flex', 'hidden');
+    @keyframes slideIn {
+        from { transform: translateX(-100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
+
+    .sidebar-mobile-open {
+        animation: slideIn 0.3s ease-out forwards;
+    }
+
+    .modal-content {
+        transform: scale(0.95);
+        opacity: 0;
+        transition: all 0.2s ease-out;
+    }
+    
+    .modal-content.show {
+        transform: scale(1);
+        opacity: 1;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Referencias a elementos del DOM
+        const modal = document.getElementById('logout-modal-aside');
+        const modalContent = modal.querySelector('.modal-content');
+        const logoutLinks = document.querySelectorAll('a[onclick*="openLogoutModal"]');
+
+        // Función para abrir el modal
+        window.openLogoutModal = function(event) {
+            if (event) event.preventDefault();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modalContent?.classList.add('show');
+            }, 10);
+        };
+
+        // Función para cerrar el modal
+        window.closeLogoutModal = function(event) {
+            if (event) event.preventDefault();
+            modalContent?.classList.remove('show');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        };
+
+        // Cerrar con la tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeLogoutModal();
+            }
+        });
+
+        // Asegurar que los clicks dentro del modal no lo cierren
+        modal.querySelector('.modal-content')?.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+
+        // Agregar el manejador de eventos a todos los enlaces de logout
+        logoutLinks.forEach(link => {
+            link.addEventListener('click', openLogoutModal);
+        });
+    });
 </script>
