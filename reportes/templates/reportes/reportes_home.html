@@ -5,57 +5,75 @@
 {% block page_title %}Dashboard de Reportes Dinámico{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 sm:px-8 py-8">
+<div class="max-w-7xl mx-auto space-y-8">
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         <!-- Columna de Controles -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg lg:order-2">
-            <h2 class="text-xl font-semibold mb-4 text-gray-200">Seleccionar Reporte</h2>
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:order-1">
+            <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-3">Seleccionar Reporte</h2>
             <div id="report-cards" class="space-y-4 max-h-[60vh] overflow-y-auto lg:max-h-none">
                 
                 <!-- Card: Reporte de Estado de Empleados -->
-                <div class="report-card cursor-pointer flex items-center p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-300" 
+                <div class="report-card cursor-pointer p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 border border-transparent" 
                      data-url="{% url 'reporte_estado_empleados_data' %}" 
                      data-title="Distribución de Empleados por Estado">
-                    <div class="mr-4">
-                        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-gray-300">Estado de Empleados</p>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                            <i data-lucide="users" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800 dark:text-gray-200">Estado de Empleados</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Activos, Inactivos, etc.</p>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Card: Reporte de Sanciones -->
-                <div class="report-card cursor-pointer flex items-center p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-300"
+                <div class="report-card cursor-pointer p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 border border-transparent"
                      data-url="{% url 'reporte_sanciones_data' %}"
                      data-title="Distribución de Sanciones por Tipo">
-                    <div class="mr-4">
-                        <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-gray-300">Sanciones por Tipo</p>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center">
+                            <i data-lucide="shield-alert" class="w-5 h-5 text-yellow-600 dark:text-yellow-400"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800 dark:text-gray-200">Sanciones por Tipo</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Leves, Moderadas, Graves.</p>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Card: Reporte de Incidentes -->
-                <div class="report-card cursor-pointer flex items-center p-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors duration-300"
+                <div class="report-card cursor-pointer p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 border border-transparent"
                      data-url="{% url 'reporte_incidentes_data' %}"
                      data-title="Distribución de Incidentes por Tipo">
-                    <div class="mr-4">
-                        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-gray-300">Incidentes por Tipo</p>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800 dark:text-gray-200">Incidentes por Tipo</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Conducta, Seguridad, etc.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Columna del Gráfico -->
-        <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg lg:order-1">
-            <h2 id="chartTitle" class="text-xl font-semibold mb-4 text-gray-200 text-center"></h2>
-            <div class="h-96 w-full flex items-center justify-center">
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:order-2">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+                <h2 id="chartTitle" class="text-lg font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent mb-2 sm:mb-0"></h2>
+                <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                    <button id="chart-type-doughnut" class="chart-type-btn p-2 rounded-md" title="Gráfico de Dona"><i data-lucide="pie-chart" class="w-5 h-5"></i></button>
+                    <button id="chart-type-bar" class="chart-type-btn p-2 rounded-md" title="Gráfico de Barras"><i data-lucide="bar-chart-2" class="w-5 h-5"></i></button>
+                </div>
+            </div>
+            <div id="chart-container" class="h-96 w-full flex items-center justify-center relative">
+                <div id="chart-loader" class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center z-10 hidden">
+                    <i data-lucide="loader-2" class="w-8 h-8 text-red-500 animate-spin"></i>
+                </div>
                 <canvas id="dynamicChart"></canvas>
             </div>
         </div>
@@ -66,11 +84,13 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('dynamicChart').getContext('2d');
+    const loader = document.getElementById('chart-loader');
     const chartTitleEl = document.getElementById('chartTitle');
     let dynamicChart;
 
+    // Paleta de colores mejorada
     const chartColors = [
-        'rgba(59, 130, 246, 0.7)', 'rgba(251, 191, 36, 0.7)', 'rgba(239, 68, 68, 0.7)', 
+        'rgba(217, 35, 45, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(251, 191, 36, 0.7)', 
         'rgba(16, 185, 129, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(249, 115, 22, 0.7)'
     ];
     const chartBorderColors = [
@@ -78,9 +98,21 @@ document.addEventListener('DOMContentLoaded', function() {
         'rgba(16, 185, 129, 1)', 'rgba(139, 92, 246, 1)', 'rgba(249, 115, 22, 1)'
     ];
 
-    function initializeChart() {
+    function getThemeColors() {
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        return {
+            gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+            textColor: isDarkMode ? '#E5E7EB' : '#374151'
+        };
+    }
+
+    function createOrUpdateChart(type = 'doughnut') {
+        const theme = getThemeColors();
+        if (dynamicChart) {
+            dynamicChart.destroy();
+        }
         dynamicChart = new Chart(ctx, {
-            type: 'doughnut',
+            type: type,
             data: {
                 labels: [],
                 datasets: [{
@@ -88,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     data: [],
                     backgroundColor: chartColors,
                     borderColor: chartBorderColors,
-                    borderWidth: 1
+                    borderWidth: type === 'doughnut' ? 2 : 1
                 }]
             },
             options: {
@@ -97,23 +129,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: { 
                         position: 'top',
-                        labels: {
-                            color: '#D1D5DB' // Color del texto de la leyenda (gris claro)
-                        }
+                        labels: { color: theme.textColor }
                     },
-                }
+                },
+                scales: type === 'bar' ? {
+                    y: { beginAtZero: true, grid: { color: theme.gridColor }, ticks: { color: theme.textColor, stepSize: 1 } },
+                    x: { grid: { display: false }, ticks: { color: theme.textColor } }
+                } : {}
             }
         });
     }
 
     async function updateChart(url, title) {
+        loader.classList.remove('hidden');
         try {
             const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const chartData = await response.json();
             
+            // Simular una pequeña demora para que el loader sea visible
+            await new Promise(resolve => setTimeout(resolve, 300));
+
             chartTitleEl.textContent = title;
             dynamicChart.data.labels = chartData.labels;
             dynamicChart.data.datasets[0].data = chartData.data;
@@ -122,22 +158,56 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error("Failed to fetch or update chart:", error);
             chartTitleEl.textContent = "Error al cargar los datos";
+        } finally {
+            loader.classList.add('hidden');
         }
     }
 
     const reportCards = document.querySelectorAll('.report-card');
     reportCards.forEach(card => {
         card.addEventListener('click', () => {
+            // Remove active state from all cards
+            reportCards.forEach(c => {
+                c.classList.remove('bg-red-100', 'dark:bg-red-900/30', 'border-red-300', 'dark:border-red-700');
+                c.classList.add('bg-gray-50', 'dark:bg-gray-700/50', 'border-transparent');
+            });
+            // Add active state to clicked card
+            card.classList.add('bg-red-100', 'dark:bg-red-900/30', 'border-red-300', 'dark:border-red-700');
+            card.classList.remove('bg-gray-50', 'dark:bg-gray-700/50', 'border-transparent');
+
             const url = card.dataset.url;
             const title = card.dataset.title;
             updateChart(url, title);
         });
     });
 
-    initializeChart();
+    // Chart type switcher
+    const chartTypeButtons = document.querySelectorAll('.chart-type-btn');
+    chartTypeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            chartTypeButtons.forEach(btn => btn.classList.remove('bg-red-600', 'text-white'));
+            button.classList.add('bg-red-600', 'text-white');
+            
+            const newType = button.id.includes('doughnut') ? 'doughnut' : 'bar';
+            if (dynamicChart.config.type !== newType) {
+                const currentUrl = document.querySelector('.report-card.border-red-300')?.dataset.url;
+                const currentTitle = document.querySelector('.report-card.border-red-300')?.dataset.title;
+                if (currentUrl) {
+                    createOrUpdateChart(newType);
+                    updateChart(currentUrl, currentTitle);
+                }
+            }
+        });
+    });
+
+    // Initial load
+    createOrUpdateChart('doughnut');
+    document.getElementById('chart-type-doughnut').classList.add('bg-red-600', 'text-white');
+
     if (reportCards.length > 0) {
         reportCards[0].click();
     }
+    lucide.createIcons();
 });
 </script>
 {% endblock %}

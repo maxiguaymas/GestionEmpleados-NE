@@ -1,66 +1,157 @@
-<div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-    <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">Filtros del Historial</h3>
-    <form id="historial-filters-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div>
-            <label for="filtro-dni" class="block text-sm font-medium text-gray-700 dark:text-gray-300">DNI</label>
-            <input type="text" id="filtro-dni" name="dni" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" oninput="this.value = this.value.replace(/[^0-9]/g, '')" inputmode="numeric" pattern="[0-9]*">
-        </div>
-        <div>
-            <label for="filtro-nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre o Apellido</label>
-            <input type="text" id="filtro-nombre" name="nombre" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
-        </div>
-        <div>
-            <label for="filtro-estado" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-            <select id="filtro-estado" name="estado" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                <option value="">Todos</option>
-                <option value="activo">Activo</option>
-                <option value="inactivo">Inactivo</option>
-            </select>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-            <div>
-                <label for="filtro-mes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mes</label>
-                <select id="filtro-mes" name="mes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <option value="">Todos</option>
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
-            </div>
-            <div>
-                <label for="filtro-anio" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
-                <select id="filtro-anio" name="anio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <option value="">Todos</option>
-                    {% for year in years %}
-                        <option value="{{ year }}">{{ year }}</option>
-                    {% endfor %}
-                </select>
+<div class="space-y-6">
+    <!-- Panel de Filtros -->
+    <div class="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50">
+            <div class="flex items-center gap-3">
+                <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
+                    <i data-lucide="filter" class="h-5 w-5 text-red-600 dark:text-red-400"></i>
+                </span>
+                <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">Filtros del Historial</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Utiliza los filtros para encontrar registros específicos</p>
+                </div>
             </div>
         </div>
-    </form>
-</div>
+        
+        <form id="historial-filters-form" class="p-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Filtro DNI -->
+                <div class="group">
+                    <label for="filtro-dni" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">DNI</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </span>
+                        <input type="text" id="filtro-dni" name="dni" 
+                            class="pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                                   focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+                </div>
 
-<div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead class="bg-gray-50 dark:bg-gray-700">
-            <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Empleado</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Horario</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Fecha de Asignación</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Estado</th>
-            </tr>
-        </thead>
-        <tbody id="historial-tbody" class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-            <!-- Las filas se insertarán aquí dinámicamente -->
-        </tbody>
-    </table>
+                <!-- Filtro Nombre -->
+                <div class="group">
+                    <label for="filtro-nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nombre o Apellido</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
+                            <i data-lucide="search" class="w-5 h-5"></i>
+                        </span>
+                        <input type="text" id="filtro-nombre" name="nombre" 
+                            class="pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                                   focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200"
+                            pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+"
+                            title="Solo se permiten letras y espacios"
+                            onkeypress="return /[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/.test(event.key)"
+                            oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/g, '')">
+                    </div>
+                </div>
+
+                <!-- Filtro Estado -->
+                <div class="group">
+                    <label for="filtro-estado" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Estado</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
+                            <i data-lucide="toggle-left" class="w-5 h-5"></i>
+                        </span>
+                        <select id="filtro-estado" name="estado" 
+                            class="pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                                   focus:ring-2 focus:ring-red-500/20 focus:border-red-500 cursor-pointer transition-all duration-200">
+                            <option value="">Todos</option>
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filtros Fecha -->
+                <div class="flex flex-col">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Período</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="relative group">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                            </span>
+                            <select id="filtro-mes" name="mes" 
+                                class="pl-9 w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                                       focus:ring-2 focus:ring-red-500/20 focus:border-red-500 cursor-pointer text-sm transition-all duration-200">
+                                <option value="">Mes</option>
+                                <option value="1">Enero</option>
+                                <option value="2">Febrero</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Mayo</option>
+                                <option value="6">Junio</option>
+                                <option value="7">Julio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="relative group">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-red-500 transition-colors">
+                                <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                            </span>
+                            <select id="filtro-anio" name="anio" 
+                                class="pl-9 w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                                       focus:ring-2 focus:ring-red-500/20 focus:border-red-500 cursor-pointer text-sm transition-all duration-200">
+                                <option value="">Año</option>
+                                {% for year in years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 flex justify-end">
+                <button type="reset" 
+                    class="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    <span>Limpiar Filtros</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de Resultados -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                                <span>Empleado</span>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                <span>Horario</span>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                <span>Fecha de Asignación</span>
+                            </div>
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="activity" class="w-4 h-4"></i>
+                                <span>Estado</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="historial-tbody" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <!-- Las filas se insertarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

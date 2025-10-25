@@ -10,9 +10,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.http import HttpResponse
 from django.template.loader import get_template, render_to_string
+from django.db.models import Q
 from django.core.mail import send_mail
 from xhtml2pdf import pisa
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required
 def sanciones_empleado(request, empleado_id):
@@ -43,7 +44,7 @@ def sanciones_empleado(request, empleado_id):
     years = sanciones_query.dates('fecha_inicio', 'year').reverse()
 
     # Paginación
-    registros_por_pagina = request.GET.get('por_pagina', 9)
+    registros_por_pagina = request.GET.get('por_pagina', '9')
     paginator = Paginator(sanciones_query, registros_por_pagina)
     page_number = request.GET.get('page')
     sanciones_paginadas = paginator.get_page(page_number)
@@ -316,48 +317,53 @@ def detalle_sancion(request, sancion_id):
 def mis_sanciones(request):
     try:
         empleado = request.user.empleado
-        sanciones_query = SancionEmpleado.objects.filter(id_empl=empleado).select_related('id_sancion').order_by('-fecha_inicio')
-    except Empleado.DoesNotExist:
-        sanciones_query = SancionEmpleado.objects.none()
+        sanciones = SancionEmpleado.objects.filter(id_empl=empleado).order_by('-fecha_inicio')
+        
+        # Aplicar filtros si existen
+        month = request.GET.get('month')
+        year = request.GET.get('year')
+        tipo = request.GET.get('tipo')
 
-    # Get filter parameters
-    month = request.GET.get('month')
-    year = request.GET.get('year')
-    tipo_sancion = request.GET.get('tipo')
-
-    # Apply filters
-    try:
         if month:
-            sanciones_query = sanciones_query.filter(fecha_inicio__month=int(month))
+            sanciones = sanciones.filter(fecha_inicio__month=int(month))
         if year:
-            sanciones_query = sanciones_query.filter(fecha_inicio__year=int(year))
-    except (ValueError, TypeError):
-        pass
+            sanciones = sanciones.filter(fecha_inicio__year=int(year))
+        if tipo:
+            sanciones = sanciones.filter(id_sancion__tipo=tipo)
 
-    if tipo_sancion:
-        sanciones_query = sanciones_query.filter(id_sancion__tipo__iexact=tipo_sancion)
+        # Configuración de la paginación
+        por_pagina = request.GET.get('por_pagina', '9')
+        paginator = Paginator(sanciones, por_pagina)
+        page_number = request.GET.get('page')
+        sanciones_paginadas = paginator.get_page(page_number)
+        
+        # Obtener años disponibles y tipos de sanción
+        # Se usa el queryset original sin filtros para obtener todos los años posibles
+        years_dates = SancionEmpleado.objects.filter(id_empl=empleado).dates('fecha_inicio', 'year', order='DESC')
+        years = [d.year for d in years_dates]
+        tipos_sancion = Sancion.objects.values_list('tipo', flat=True).distinct()
 
-    # Get distinct sanction types for the filter dropdown
-    tipos_sancion = Sancion.objects.values_list('tipo', flat=True).distinct()
+        context = {
+            'sanciones_paginadas': sanciones_paginadas,
+            'filter_values': {
+                'month': month or '',
+                'year': year or '',
+                'tipo': tipo or '',
+            },
+            'tipos_sancion': tipos_sancion,
+            'year_options': years,
+            'por_pagina': por_pagina,
+            'page_title': 'Mis Sanciones'
+        }
 
-    # Get the range of years present in the data for the current employee
-    years = SancionEmpleado.objects.filter(id_empl=request.user.empleado).dates('fecha_inicio', 'year').reverse() if hasattr(request.user, 'empleado') else []
-
-    # Paginación
-    registros_por_pagina = request.GET.get('por_pagina', 9)
-    paginator = Paginator(sanciones_query, registros_por_pagina)
-    page_number = request.GET.get('page')
-    sanciones_paginadas = paginator.get_page(page_number)
-
-    context = {
-        'sanciones_paginadas': sanciones_paginadas,
-        'page_title': 'Mis Sanciones',
-        'filter_values': request.GET,
-        'tipos_sancion': tipos_sancion,
-        'year_options': [d.year for d in years],
-        'por_pagina': registros_por_pagina,
-    }
-    return render(request, 'mis_sanciones.html', context)
+        return render(request, 'mis_sanciones.html', context)
+        
+    except Empleado.DoesNotExist:
+        context = {
+            'error_message': 'No se encontró tu perfil de empleado.',
+            'page_title': 'Mis Sanciones'
+        }
+        return render(request, 'mis_sanciones.html', context)
 
 # Copia esta función de ayuda para generar PDFs
 def render_to_pdf(template_src, context_dict={}):

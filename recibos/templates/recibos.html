@@ -6,28 +6,47 @@
 {% block page_title %}Recibos{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div class="relative w-full sm:max-w-xs">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-            <input id="payslip-dni-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Buscar por DNI..." class="w-full pl-10 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-            <button id="payslip-search-btn" class="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><i data-lucide="search" class="w-5 h-5"></i></button>
+<div class="space-y-6">
+    <!-- Barra de búsqueda y botón -->
+    <div class="flex flex-col sm:flex-row gap-4 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="relative flex-1 max-w-sm">
+            <div class="relative">
+                <input id="payslip-dni-input" type="text" inputmode="numeric" pattern="[0-9]*" 
+                    placeholder="Buscar por DNI..." maxlength="8"
+                    class="block w-full pl-10 pr-12 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 
+                           bg-white dark:bg-gray-700 focus:ring-2 focus:ring-red-500/20 focus:border-red-500
+                           transition-all duration-200">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                </div>
+                <button id="payslip-search-btn" type="button"
+                    class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-red-500
+                           transition-colors duration-200">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="dni-input-help" class="mt-1.5 ml-1 text-xs text-gray-500"></div>
         </div>
-        <button id="upload-payslip-btn" class="w-full sm:w-auto flex-shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700">
-            <i data-lucide="upload"></i>
+        <button id="upload-payslip-btn" 
+            class="flex-shrink-0 inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-red-600 text-white 
+                   rounded-lg hover:bg-red-700 transition-all duration-200 hover:shadow-lg hover:scale-105">
+            <i data-lucide="upload" class="w-5 h-5"></i>
             <span>Cargar Recibo</span>
         </button>
     </div>
-    
-    <div id="payslip-results-container" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div class="p-6">
+
+    <!-- Contenedor de resultados -->
+    <div id="payslip-results-container" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-xl font-bold">Resultados para <span id="payslip-employee-name"></span></h2>
         </div>
-        <div id="payslip-filter-form" class="p-4 bg-gray-50 dark:bg-gray-900 border-t border-b dark:border-gray-700">
-            <form id="filter-form" class="flex items-end space-x-4">
-                <div>
-                    <label for="mes" class="text-sm font-medium text-gray-700 dark:text-gray-300">Mes</label>
-                    <select name="mes" id="mes" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+        <div id="payslip-filter-form" class="p-4 bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700">
+            <form id="filter-form" class="flex flex-wrap items-end gap-4">
+                <div class="w-32">
+                    <label for="mes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mes</label>
+                    <select name="mes" id="mes" 
+                        class="mt-1 block w-full pl-3 pr-8 py-2 text-sm border-gray-300 dark:border-gray-600 
+                               bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
                         <option value="">Todos</option>
                         <option value="1">Enero</option>
                         <option value="2">Febrero</option>
@@ -43,22 +62,34 @@
                         <option value="12">Diciembre</option>
                     </select>
                 </div>
-                <div>
-                    <label for="anio" class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
-                    <select name="anio" id="anio" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                <div class="w-28">
+                    <label for="anio" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
+                    <select name="anio" id="anio" 
+                        class="mt-1 block w-full pl-3 pr-8 py-2 text-sm border-gray-300 dark:border-gray-600 
+                               bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
                         <!-- Options will be populated by JS -->
                     </select>
                 </div>
-                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Filtrar</button>
+                <button type="submit" 
+                    class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 
+                           transition-all duration-200 flex items-center gap-2">
+                    <i data-lucide="filter" class="w-4 h-4"></i>
+                    <span>Filtrar</span>
+                </button>
             </form>
         </div>
         <div id="payslip-list" class="overflow-hidden"></div>
     </div>
 
-    <div id="payslip-no-search-message" class="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <i data-lucide="receipt" class="mx-auto h-12 w-12 text-gray-400"></i>
-        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Buscar recibos de sueldo</h3>
-        <p class="mt-1 text-sm text-gray-500">Ingresa un DNI para ver los recibos de un empleado.</p>
+    <!-- Mensaje sin búsqueda -->
+    <div id="payslip-no-search-message" class="py-12 px-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="max-w-sm mx-auto text-center">
+            <div class="inline-flex p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
+                <i data-lucide="search" class="w-6 h-6 text-gray-500 dark:text-gray-400"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Buscar recibos de sueldo</h3>
+            <p class="text-sm text-gray-500">Ingresa un DNI para ver los recibos de un empleado.</p>
+        </div>
     </div>
 </div>
 
@@ -134,17 +165,207 @@
         </form>
     </div>
 </div>
-{% endblock %}
+
+<!-- Modal: Alertas -->
+<div id="alert-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden">
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 m-4">
+            <div id="alert-icon" class="mx-auto flex h-12 w-12 items-center justify-center rounded-full mb-4">
+                <!-- Icon will be injected here -->
+            </div>
+            <h3 id="alert-title" class="text-lg font-semibold text-center mb-2"></h3>
+            <p id="alert-message" class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6"></p>
+            <div class="flex justify-center gap-3" id="alert-buttons">
+                <button type="button" id="alert-cancel" class="min-w-[100px] px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">
+                    Cancelar
+                </button>
+                <button type="button" id="alert-confirm" class="min-w-[100px] px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
 
 {% block page_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const modal = document.getElementById('upload-payslip-modal');
-        const formFields = modal.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="date"], input[type="tel"], select, textarea');
-        formFields.forEach(field => {
-            field.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'dark:border-gray-600', 'dark:bg-gray-700', 'shadow-sm');
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('upload-payslip-modal');
+    const formFields = modal.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="date"], input[type="tel"], select, textarea');
+    formFields.forEach(field => {
+        field.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'dark:border-gray-600', 'dark:bg-gray-700', 'shadow-sm');
     });
+
+    // Variables para el seguimiento de cambios
+    let originalFormData = {};
+    
+    // Función para guardar los datos originales del formulario
+    function saveOriginalData(form) {
+        originalFormData = {
+            fecha_emision: form.fecha_emision.value,
+            periodo: form.periodo.value
+        };
+        console.log('Datos originales guardados:', originalFormData);
+    }
+
+    // Función para verificar si hay cambios
+    function hasFormChanges(form) {
+        const currentData = {
+            fecha_emision: form.fecha_emision.value,
+            periodo: form.periodo.value
+        };
+
+        const hasFileChanges = form.ruta_pdf.files.length > 0 || form.ruta_imagen.files.length > 0;
+        const hasFieldChanges = JSON.stringify(originalFormData) !== JSON.stringify(currentData);
+
+        console.log('Cambios en archivos:', hasFileChanges);
+        console.log('Cambios en campos:', hasFieldChanges);
+        
+        return hasFileChanges || hasFieldChanges;
+    }
+
+    // Función para mostrar modales
+    function showModal(options) {
+        const modal = document.getElementById('alert-modal');
+        const icon = document.getElementById('alert-icon');
+        const title = document.getElementById('alert-title');
+        const message = document.getElementById('alert-message');
+        const cancelBtn = document.getElementById('alert-cancel');
+        const confirmBtn = document.getElementById('alert-confirm');
+
+        // Configuración de iconos y colores según el tipo
+        const styles = {
+            error: {
+                icon: 'alert-triangle',
+                class: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+            },
+            warning: {
+                icon: 'alert-circle',
+                class: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400'
+            },
+            info: {
+                icon: 'info',
+                class: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+            }
+        };
+
+        const style = styles[options.type] || styles.info;
+        
+        // Configurar icono
+        icon.className = `mx-auto flex h-12 w-12 items-center justify-center rounded-full mb-4 ${style.class}`;
+        icon.innerHTML = `<i data-lucide="${style.icon}" class="w-6 h-6"></i>`;
+        
+        // Configurar contenido
+        title.textContent = options.title;
+        message.textContent = options.message;
+
+        // Configurar botones
+        cancelBtn.style.display = options.showCancel ? 'block' : 'none';
+        confirmBtn.textContent = options.confirmText || 'Confirmar';
+
+        // Configurar eventos
+        const cleanup = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            cancelBtn.onclick = null;
+            confirmBtn.onclick = null;
+        };
+
+        cancelBtn.onclick = () => {
+            cleanup();
+            if (options.onCancel) options.onCancel();
+        };
+
+        confirmBtn.onclick = () => {
+            cleanup();
+            if (options.onConfirm) options.onConfirm();
+        };
+
+        // Mostrar modal
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        lucide.createIcons();
+    }
+
+    // Función para validar el formulario
+    function validateEditForm(event) {
+        event.preventDefault();
+        const form = event.target;
+        
+        // Validar campos requeridos
+        const fecha = form.fecha_emision.value;
+        const periodo = form.periodo.value;
+
+        if (!fecha || !periodo) {
+            showModal({
+                type: 'error',
+                title: 'Campos incompletos',
+                message: 'La fecha de emisión y el período son obligatorios.',
+                showCancel: false,
+                confirmText: 'Entendido'
+            });
+            return false;
+        }
+
+        // Verificar si hay cambios
+        if (!hasFormChanges(form)) {
+            showModal({
+                type: 'info',
+                title: 'Sin cambios',
+                message: 'No se detectaron cambios en el formulario.',
+                showCancel: false,
+                confirmText: 'Entendido'
+            });
+            return false;
+        }
+
+        // Confirmar cambios
+        showModal({
+            type: 'warning',
+            title: 'Confirmar cambios',
+            message: '¿Estás seguro de que deseas guardar los cambios?',
+            showCancel: true,
+            confirmText: 'Guardar',
+            cancelText: 'Cancelar',
+            onConfirm: () => {
+                form.submit();
+            }
+        });
+
+        return false;
+    }
+
+    // Función para mostrar notificaciones
+    function showNotification(type, title, message) {
+        const bgColor = type === 'error' ? 'bg-red-100 border-red-500 text-red-700' :
+                       type === 'info' ? 'bg-blue-100 border-blue-500 text-blue-700' :
+                       'bg-gray-100 border-gray-500 text-gray-700';
+
+        const notification = `
+            <div class="fixed top-4 right-4 z-50 max-w-md p-4 ${bgColor} border-l-4 rounded shadow-lg notification-toast">
+                <div class="flex items-start">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">${title}</p>
+                        <p class="mt-1 text-sm">${message}</p>
+                    </div>
+                    <button class="ml-4 text-gray-400 hover:text-gray-500" onclick="this.parentElement.parentElement.remove()">
+                        <i data-lucide="x" class="h-5 w-5"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', notification);
+        lucide.createIcons();
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            const notifications = document.querySelectorAll('.notification-toast');
+            notifications[notifications.length - 1]?.remove();
+        }, 5000);
+    }
+
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -179,21 +400,75 @@
             return;
         }
 
-        let p_list = '<table class="w-full text-left"><thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300"><tr><th class="p-4">Fecha de Emisión</th><th class="p-4">Período</th><th class="p-4">Archivos</th><th class="p-4">Acciones</th></tr></thead><tbody>';
+        let p_list = `
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
+                        <tr class="text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <th scope="col" class="px-6 py-3 whitespace-nowrap">Fecha de Emisión</th>
+                            <th scope="col" class="px-6 py-3 whitespace-nowrap">Período</th>
+                            <th scope="col" class="px-6 py-3 whitespace-nowrap">Archivos</th>
+                            <th scope="col" class="px-6 py-3 whitespace-nowrap">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+        `;
+        
         recibos.forEach(recibo => {
             const fecha = new Date(recibo.fecha_emision);
-            p_list += `<tr class="border-t dark:border-gray-700"><td class="p-4">${fecha.toLocaleDateString('es-AR', { timeZone: 'UTC' })}</td><td class="p-4">${recibo.periodo}</td><td class="p-4"><div class="flex items-center gap-2">`;
+            p_list += `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${fecha.toLocaleDateString('es-AR', { timeZone: 'UTC' })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${recibo.periodo}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-2">
+            `;
+            
             if (recibo.ruta_pdf) {
-                p_list += `<a href="/media/${recibo.ruta_pdf}" target="_blank" class="flex items-center gap-1 text-sm text-red-600 hover:underline"><i data-lucide="file-text" class="w-4 h-4"></i>PDF</a>`;
+                p_list += `
+                    <a href="/media/${recibo.ruta_pdf}" target="_blank" 
+                       class="flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 
+                              bg-red-50 dark:bg-red-900/20 rounded-lg transition-colors duration-200
+                              hover:bg-red-100 dark:hover:bg-red-900/30">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <span>PDF</span>
+                </a>
+                `;
             }
+            
             if (recibo.ruta_imagen) {
-                p_list += `<a href="/media/${recibo.ruta_imagen}" target="_blank" class="flex items-center gap-1 text-sm text-blue-600 hover:underline"><i data-lucide="image" class="w-4 h-4"></i>Imagen</a>`;
+                p_list += `
+                    <a href="/media/${recibo.ruta_imagen}" target="_blank" 
+                       class="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700
+                              bg-blue-50 dark:bg-blue-900/20 rounded-lg transition-colors duration-200
+                              hover:bg-blue-100 dark:hover:bg-blue-900/30">
+                    <i data-lucide="image" class="w-4 h-4"></i>
+                    <span>Imagen</span>
+                </a>
+                `;
             }
-            p_list += `</div></td><td class="p-4">
-                <button data-recibo-id="${recibo.id}" class="edit-payslip-btn text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 flex items-center gap-1"><i data-lucide="edit" class="w-4 h-4"></i>Editar</button>
-            </td></tr>`;
+            
+            p_list += `
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button data-recibo-id="${recibo.id}" 
+                                class="edit-payslip-btn flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 
+                                       hover:text-red-600 dark:hover:text-red-500 transition-colors duration-200">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                            <span>Editar</span>
+                        </button>
+                    </td>
+                </tr>
+            `;
         });
-        p_list += '</tbody></table>';
+        
+        p_list += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
         listContainer.innerHTML = p_list;
         
         if (window.lucide) {
@@ -233,9 +508,15 @@
                                 imageContainer.innerHTML = 'No hay imagen cargada.';
                             }
 
+                            // Guardar los datos originales después de llenar el formulario
+                            saveOriginalData(form);
+                            
+                            // Asignar el validador al formulario
+                            form.onsubmit = validateEditForm;
+                            
                             openModal('edit-payslip-modal');
                         } else {
-                            alert('Error al obtener los detalles del recibo.');
+                            showNotification('error', 'Error', 'Error al obtener los detalles del recibo.');
                         }
                     });
             });
@@ -290,13 +571,34 @@
 
     function handleSearch() {
         const dni = dniInput.value;
-        if (!dni) return;
+        if (!validateDNI(dni)) return;
         fetchRecibos(dni, null, null);
     }
+
+    // Función para validar DNI
+    function validateDNI(dni) {
+        return /^\d{7,8}$/.test(dni);
+    }
+
+    dniInput.addEventListener('input', function(e) {
+        const dni = e.target.value;
+        if (dni.length === 0) {
+            dniHelp.textContent = '';
+            searchBtn.classList.remove('text-red-500');
+        } else if (dni.length < 7) {
+            dniHelp.textContent = 'El DNI debe tener entre 7 y 8 dígitos';
+            searchBtn.classList.remove('text-red-500');
+        } else if (validateDNI(dni)) {
+            dniHelp.textContent = 'Presiona Enter o el ícono de búsqueda';
+            searchBtn.classList.add('text-red-500');
+            handleSearch();
+        }
+    });
 
     searchBtn.addEventListener('click', handleSearch);
     dniInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
+            e.preventDefault();
             handleSearch();
         }
     });
@@ -310,5 +612,6 @@
         const anio = e.target.elements.anio.value;
         fetchRecibos(dni, mes, anio);
     });
+});
 </script>
 {% endblock %}

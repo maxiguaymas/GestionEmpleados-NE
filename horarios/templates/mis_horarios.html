@@ -2,26 +2,110 @@
 {% load static %}
 
 {% block title %}Mis Horarios{% endblock %}
-
 {% block page_title %}Mis Horarios{% endblock %}
 
 {% block content %}
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-    {% if asignaciones %}
-    <h3 class="text-lg font-semibold mb-4">Tus Horarios Asignados</h3>
-    {% for asignacion in asignaciones %}
-    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4">
-        <h4 class="font-bold text-xl">{{ asignacion.id_horario.nombre }}</h4>
-        <p class="text-gray-600 dark:text-gray-400">{{ asignacion.id_horario.hora_entrada|time:"H:i" }} - {{ asignacion.id_horario.hora_salida|time:"H:i" }}</p>
-        <p class="text-sm text-gray-500">{{ asignacion.id_horario.get_dia_display }}</p>
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
+                <i data-lucide="calendar-clock" class="h-5 w-5 text-red-600 dark:text-red-400"></i>
+            </span>
+            <div>
+                <h3 class="font-semibold text-gray-900 dark:text-white">Tus Horarios de Trabajo</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Aquí puedes ver todos tus horarios asignados.</p>
+            </div>
+        </div>
     </div>
-    {% endfor %}
+
+    {% if asignaciones %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for asignacion in asignaciones %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-all duration-200">
+            <!-- Header con estado -->
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="font-bold text-lg text-gray-900 dark:text-white">{{ asignacion.id_horario.nombre }}</h3>
+                <span class="px-3 py-1 text-xs font-semibold rounded-full 
+                    {% if asignacion.estado %}
+                        bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400
+                    {% else %}
+                        bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400
+                    {% endif %}">
+                    {{ asignacion.estado|yesno:"Activo,Inactivo" }}
+                </span>
+            </div>
+
+            <!-- Fecha de asignación -->
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Asignado el: {{ asignacion.fecha_asignacion|date:"d/m/Y" }}
+            </p>
+
+            <!-- Horario -->
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 mb-4 text-center">
+                <div class="flex items-center justify-center gap-2">
+                    <i data-lucide="clock" class="w-5 h-5 text-gray-400"></i>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ asignacion.id_horario.hora_entrada|time:"H:i" }} - {{ asignacion.id_horario.hora_salida|time:"H:i" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Días de la semana -->
+            <div class="flex flex-wrap justify-center gap-2 text-xs">
+                <span class="px-2 py-1 rounded-full font-medium transition-colors duration-200
+                    {% if asignacion.id_horario.lunes %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400
+                    {% else %}bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                    Lun
+                </span>
+                <span class="px-2 py-1 rounded-full font-medium transition-colors duration-200
+                    {% if asignacion.id_horario.martes %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400
+                    {% else %}bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                    Mar
+                </span>
+                <span class="px-2 py-1 rounded-full font-medium transition-colors duration-200
+                    {% if asignacion.id_horario.miercoles %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400
+                    {% else %}bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                    Mié
+                </span>
+                <span class="px-2 py-1 rounded-full font-medium transition-colors duration-200
+                    {% if asignacion.id_horario.jueves %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400
+                    {% else %}bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                    Jue
+                </span>
+                <span class="px-2 py-1 rounded-full font-medium transition-colors duration-200
+                    {% if asignacion.id_horario.viernes %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400
+                    {% else %}bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                    Vie
+                </span>
+                <span class="px-2 py-1 rounded-full font-medium transition-colors duration-200
+                    {% if asignacion.id_horario.sabado %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400
+                    {% else %}bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                    Sáb
+                </span>
+                <span class="px-2 py-1 rounded-full font-medium transition-colors duration-200
+                    {% if asignacion.id_horario.domingo %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400
+                    {% else %}bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                    Dom
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
     {% else %}
-    <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
-        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tienes horarios asignados</h3>
-        <p class="mt-1 text-sm text-gray-500">Aun no tienes un horario asignado.</p>
+    <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="mx-auto h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+            <i data-lucide="calendar-x" class="h-6 w-6 text-gray-400"></i>
+        </div>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">No tienes horarios asignados</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Aún no se te ha asignado ningún horario de trabajo.</p>
     </div>
     {% endif %}
 </div>
-{% endblock content %}
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

@@ -6,82 +6,101 @@
 {% block page_title %}Mis Recibos{% endblock %}
 
 {% block content %}
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm ">
-    <div class="p-4">
-        <form method="get" action="">
-            <div class="flex items-center space-x-4">
-                <div>
-                    <label for="mes" class="text-sm font-medium text-gray-700 dark:text-gray-300">Mes</label>
-                    <select name="mes" id="mes" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-                        <option value="">Todos</option>
-                        <option value="1" {% if selected_month == 1 %}selected{% endif %}>Enero</option>
-                        <option value="2" {% if selected_month == 2 %}selected{% endif %}>Febrero</option>
-                        <option value="3" {% if selected_month == 3 %}selected{% endif %}>Marzo</option>
-                        <option value="4" {% if selected_month == 4 %}selected{% endif %}>Abril</option>
-                        <option value="5" {% if selected_month == 5 %}selected{% endif %}>Mayo</option>
-                        <option value="6" {% if selected_month == 6 %}selected{% endif %}>Junio</option>
-                        <option value="7" {% if selected_month == 7 %}selected{% endif %}>Julio</option>
-                        <option value="8" {% if selected_month == 8 %}selected{% endif %}>Agosto</option>
-                        <option value="9" {% if selected_month == 9 %}selected{% endif %}>Septiembre</option>
-                        <option value="10" {% if selected_month == 10 %}selected{% endif %}>Octubre</option>
-                        <option value="11" {% if selected_month == 11 %}selected{% endif %}>Noviembre</option>
-                        <option value="12" {% if selected_month == 12 %}selected{% endif %}>Diciembre</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="anio" class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
-                    <select name="anio" id="anio" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-                        {% for year in years %}
-                            <option value="{{ year.year }}" {% if selected_year == year.year %}selected{% endif %}>{{ year.year }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <button type="submit" class="mt-5 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Filtrar</button>
-                </div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="p-6 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800/50">
+        <form method="get" action="" class="flex flex-wrap items-end gap-4">
+            <div class="w-32">
+                <label for="mes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Mes</label>
+                <select name="mes" id="mes" 
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                           focus:ring-2 focus:ring-red-500/20 focus:border-red-500 cursor-pointer
+                           transition-all duration-200 hover:border-red-500/50 text-sm py-2">
+                    <option value="">Todos</option>
+                    <option value="1" {% if selected_month == 1 %}selected{% endif %}>Enero</option>
+                    <option value="2" {% if selected_month == 2 %}selected{% endif %}>Febrero</option>
+                    <option value="3" {% if selected_month == 3 %}selected{% endif %}>Marzo</option>
+                    <option value="4" {% if selected_month == 4 %}selected{% endif %}>Abril</option>
+                    <option value="5" {% if selected_month == 5 %}selected{% endif %}>Mayo</option>
+                    <option value="6" {% if selected_month == 6 %}selected{% endif %}>Junio</option>
+                    <option value="7" {% if selected_month == 7 %}selected{% endif %}>Julio</option>
+                    <option value="8" {% if selected_month == 8 %}selected{% endif %}>Agosto</option>
+                    <option value="9" {% if selected_month == 9 %}selected{% endif %}>Septiembre</option>
+                    <option value="10" {% if selected_month == 10 %}selected{% endif %}>Octubre</option>
+                    <option value="11" {% if selected_month == 11 %}selected{% endif %}>Noviembre</option>
+                    <option value="12" {% if selected_month == 12 %}selected{% endif %}>Diciembre</option>
+                </select>
             </div>
+            <div class="w-28">
+                <label for="anio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Año</label>
+                <select name="anio" id="anio" 
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                           focus:ring-2 focus:ring-red-500/20 focus:border-red-500 cursor-pointer
+                           transition-all duration-200 hover:border-red-500/50 text-sm py-2">
+                    {% for year in years %}
+                        <option value="{{ year.year }}" {% if selected_year == year.year %}selected{% endif %}>{{ year.year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" 
+                class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 
+                       transition-all duration-200 flex items-center gap-2">
+                <i data-lucide="filter" class="w-4 h-4"></i>
+                <span>Filtrar</span>
+            </button>
         </form>
     </div>
 
-    <table class="w-full text-left">
-        <thead class="bg-gray-50 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300">
-            <tr>
-                <th class="p-4">Fecha de Emisión</th>
-                <th class="p-4 hidden sm:table-cell">Período</th>
-                <th class="p-4">Archivos</th>
-            </tr>
-        </thead>
-        {% for recibo in recibos %}
-        <tbody>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700/50">
+                <tr class="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                    <th class="px-6 py-4 text-left">Fecha de Emisión</th>
+                    <th class="px-6 py-4 text-left hidden sm:table-cell">Período</th>
+                    <th class="px-6 py-4 text-left">Archivos</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for recibo in recibos %}
+                <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                    <td class="px-6 py-4 font-medium">{{ recibo.fecha_emision|date:"d/m/Y" }}</td>
+                    <td class="px-6 py-4 hidden sm:table-cell text-gray-600 dark:text-gray-400">{{ recibo.periodo }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            {% if recibo.ruta_pdf %}
+                            <a href="{{ recibo.ruta_pdf.url }}" target="_blank"
+                                class="flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 
+                                       bg-red-50 dark:bg-red-900/20 rounded-lg transition-colors duration-200
+                                       hover:bg-red-100 dark:hover:bg-red-900/30">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                <span>PDF</span>
+                            </a>
+                            {% endif %}
+                            {% if recibo.ruta_imagen %}
+                            <a href="{{ recibo.ruta_imagen.url }}" target="_blank"
+                                class="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700
+                                       bg-blue-50 dark:bg-blue-900/20 rounded-lg transition-colors duration-200
+                                       hover:bg-blue-100 dark:hover:bg-blue-900/30">
+                                <i data-lucide="image" class="w-4 h-4"></i>
+                                <span>Imagen</span>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-            <tr class="border-t dark:border-gray-700">
-                <td class="p-4 font-medium">{{ recibo.fecha_emision|date:"d/m/Y" }}</td>
-                <td class="p-4 hidden sm:table-cell text-gray-600 dark:text-gray-400">{{ recibo.periodo }}</td>
-                <td class="p-4">
-                    <div class="flex items-center gap-2">
-                        {% if recibo.ruta_pdf %}
-                        <a href="{{ recibo.ruta_pdf.url }}" target="_blank"
-                            class="flex items-center gap-1 text-sm text-red-600 hover:underline">
-                            <i data-lucide="file-text" class="w-4 h-4"></i>PDF
-                        </a>
-                        {% endif %}
-                        {% if recibo.ruta_imagen %}
-                        <a href="{{ recibo.ruta_imagen.url }}" target="_blank"
-                            class="flex items-center gap-1 text-sm text-blue-600 hover:underline">
-                            <i data-lucide="image" class="w-4 h-4"></i>Imagen
-                        </a>
-                        {% endif %}
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
     {% if not recibos %}
-    <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <i data-lucide="alert-triangle" class="mx-auto h-12 w-12 text-gray-400"></i>
-        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No se encontraron recibos con los filtros seleccionados.</h3>
-        <p class="mt-1 text-sm text-gray-500">Prueba con otros filtros o revisa si tienes recibos cargados.</p>
+    <div class="py-12 px-6">
+        <div class="max-w-sm mx-auto text-center">
+            <div class="inline-flex p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
+                <i data-lucide="receipt" class="w-6 h-6 text-gray-500 dark:text-gray-400"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">No se encontraron recibos</h3>
+            <p class="text-sm text-gray-500">Prueba con otros filtros o revisa si tienes recibos cargados.</p>
+        </div>
     </div>
     {% endif %}
 </div>

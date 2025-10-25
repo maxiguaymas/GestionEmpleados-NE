@@ -3,13 +3,19 @@
 <!-- Card View for Mobile -->
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
     {% for empleado in page_obj|default:empleados %}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 flex flex-col justify-between">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex flex-col justify-between
+                border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200
+                hover:border-red-500/20 group">
         <div>
             <div class="flex items-center gap-4 mb-4">
                 {% if empleado.ruta_foto %}
-                    <img src="{{ empleado.ruta_foto.url }}" class="h-16 w-16 rounded-full object-cover">
+                    <img src="{{ empleado.ruta_foto.url }}" 
+                         class="h-16 w-16 rounded-xl object-cover ring-2 ring-gray-100 dark:ring-gray-700
+                                group-hover:ring-red-500/20 transition-all duration-200">
                 {% else %}
-                    <span class="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500 text-xl">
+                    <span class="h-16 w-16 rounded-xl bg-gradient-to-br from-red-500 to-red-600
+                               flex items-center justify-center font-bold text-white text-xl
+                               shadow-sm group-hover:shadow-md transition-all duration-200">
                         {{ empleado.nombre|slice:":1" }}{{ empleado.apellido|slice:":1" }}
                     </span>
                 {% endif %}
@@ -40,14 +46,23 @@
             </div>
         </div>
 
-        <div class="flex justify-end items-center border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-            <div data-menu-container>
-                <button data-action="toggle-menu" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="more-horizontal" class="text-gray-500 dark:text-gray-400"></i></button>
-                <div data-menu class="hidden absolute top-0 left-0 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-50 border dark:border-gray-700 py-1">
-                    <a href="{% url 'ver_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="eye" class="w-4 h-4"></i>Ver Perfil</a>
-                    <a href="{% url 'editar_empleado' empleado.id %}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="edit-2" class="w-4 h-4"></i>Editar</a>
-                    <a href="{% url 'eliminar_empleado' empleado.id %}" data-action="delete-employee" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"><i data-lucide="trash-2" class="w-4 h-4"></i>Eliminar</a>
-                </div>
+        <div class="flex justify-end items-center border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <div class="flex gap-2">
+                <a href="{% url 'ver_empleado' empleado.id %}" 
+                   class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300
+                          transition-colors duration-200" title="Ver Perfil">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
+                </a>
+                <a href="{% url 'editar_empleado' empleado.id %}" 
+                   class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300
+                          transition-colors duration-200" title="Editar">
+                    <i data-lucide="edit-2" class="w-5 h-5"></i>
+                </a>
+                <a href="{% url 'eliminar_empleado' empleado.id %}" data-action="delete-employee"
+                   class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-500
+                          transition-colors duration-200" title="Eliminar">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </a>
             </div>
         </div>
     </div>
@@ -93,23 +108,23 @@
 </div>
 
 <!-- Table View for Desktop -->
-<div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-x-auto">
+<div class="hidden md:block overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
     <table class="w-full">
-        <thead class="bg-gray-50 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-            <tr>
-                <th class="p-4">Foto</th>
-                <th class="p-4">Nombre</th>
-                <th class="p-4">DNI</th>
-                <th class="p-4">Email</th>
-                <th class="p-4">Cargo</th>
-                <th class="p-4">Estado</th>
-                <th class="p-4">Acciones</th>
+        <thead class="bg-gray-50 dark:bg-gray-700/50">
+            <tr class="text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                <th class="px-6 py-4">Foto</th>
+                <th class="px-6 py-4">Nombre</th>
+                <th class="px-6 py-4">DNI</th>
+                <th class="px-6 py-4">Email</th>
+                <th class="px-6 py-4">Cargo</th>
+                <th class="px-6 py-4">Estado</th>
+                <th class="px-6 py-4">Acciones</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             {% for empleado in page_obj|default:empleados %}
-            <tr>
-                <td class="p-4">
+            <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                <td class="px-6 py-4">
                     {% if empleado.ruta_foto %}
                         <img src="{{ empleado.ruta_foto.url }}" class="h-10 w-10 rounded-full object-cover">
                     {% else %}
@@ -118,22 +133,22 @@
                         </span>
                     {% endif %}
                 </td>
-                <td class="p-4 font-medium text-gray-800 dark:text-gray-100">{{ empleado.nombre }} {{ empleado.apellido }}</td>
-                <td class="p-4 text-gray-600 dark:text-gray-300">{{ empleado.dni }}</td>
-                <td class="p-4 text-gray-600 dark:text-gray-300">{{ empleado.email }}</td>
-                <td class="p-4 text-gray-600 dark:text-gray-300">
+                <td class="px-6 py-4 font-medium text-gray-800 dark:text-gray-100">{{ empleado.nombre }} {{ empleado.apellido }}</td>
+                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ empleado.dni }}</td>
+                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ empleado.email }}</td>
+                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
                     {% if empleado.user.groups.first %}
                         {% get_group_color_classes empleado.user.groups.first.name as color_classes %}
                         <span class="px-2 py-1 text-xs font-semibold rounded-full {{ color_classes }}">{{ empleado.user.groups.first.name }}</span>
                     {% else %}-{% endif %}
                 </td>
-                <td class="p-4">
+                <td class="px-6 py-4">
                     <span class="px-2 py-1 text-xs font-semibold rounded-full 
                         {% if empleado.estado == 'Activo' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">
                         {{ empleado.estado }}
                     </span>
                 </td>
-                <td class="p-4">
+                <td class="px-6 py-4">
                     <div data-menu-container>
                         <button data-action="toggle-menu" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="more-horizontal" class="text-gray-500 dark:text-gray-400"></i></button>
                         <div data-menu class="hidden absolute top-0 left-0 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-50 border dark:border-gray-700 py-1">
@@ -146,8 +161,11 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" class="p-8 text-center text-gray-500">
-                    No hay empleados registrados.
+                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                    <div class="flex flex-col items-center justify-center gap-2">
+                        <i data-lucide="users" class="w-8 h-8 text-gray-400"></i>
+                        <p>No hay empleados registrados.</p>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
