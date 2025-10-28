@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.urls import reverse
 
 
 # Create your models here.
@@ -40,6 +41,9 @@ class Empleado(models.Model):
         elif self.nombre:
             return f"{self.nombre[0]}".upper()
         return ""
+
+    def get_absolute_url(self):
+        return reverse('ver_empleado', kwargs={'id': self.id})
     
 
 class RequisitoDocumento(models.Model):
