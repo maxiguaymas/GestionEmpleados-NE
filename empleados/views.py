@@ -129,6 +129,7 @@ def editar_empleado(request, id):
     documentos = Documento.objects.filter(id_leg=legajo) if legajo else []
     requisitos = RequisitoDocumento.objects.all()
     error = None
+    next_url = request.GET.get('next')
 
     if request.method == 'POST':
         # Convertir la fecha del formato dd/mm/yyyy a yyyy-mm-dd
@@ -152,7 +153,7 @@ def editar_empleado(request, id):
                         doc.ruta_archivo = archivo
                         doc.estado_doc = True
                         doc.save()
-            return redirect('empleados')
+            return redirect(next_url or 'empleados')
         else:
             return render(request, 'editar_empleado.html', {
                 'form': form,
@@ -160,13 +161,14 @@ def editar_empleado(request, id):
                 'documentos': documentos,
                 'requisitos': requisitos,
                 'legajo': legajo,
+                'next': next_url
             })
 
     else:
         form = EmpleadoForm(instance=empleado)
-        # Formatear la fecha de nacimiento al formato dd/mm/yyyy
+        # Formatear la fecha de nacimiento al formato yyyy-mm-dd
         if empleado.fecha_nacimiento:
-            form.initial['fecha_nacimiento'] = empleado.fecha_nacimiento.strftime('%d/%m/%Y')
+            form.initial['fecha_nacimiento'] = empleado.fecha_nacimiento.strftime('%Y-%m-%d')
 
     return render(request, 'editar_empleado.html', {
         'form': form,
@@ -174,6 +176,7 @@ def editar_empleado(request, id):
         'requisitos': requisitos,
         'legajo': legajo,
         'page_title': 'Editar Empleado',
+        'next': next_url
     })
 
 @login_required
