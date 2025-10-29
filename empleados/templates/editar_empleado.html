@@ -115,22 +115,57 @@
             <div>
                 <a href="{{ next|default_if_none:request.META.HTTP_REFERER|default:form.instance.get_absolute_url }}" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">Cancelar</a>
                 <button type="button" id="form-next-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
-                <button type="submit" id="form-submit-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 hidden">Guardar Cambios</button>
+                <button type="button" id="form-submit-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 hidden">Guardar Cambios</button>
             </div>
         </div>
     </div>
 </form>
+
+<!-- Modal de Confirmación -->
+<div id="confirm-submit-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 m-4 text-center">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/50">
+            <i data-lucide="alert-triangle" class="h-6 w-6 text-yellow-600 dark:text-yellow-400"></i>
+        </div>
+        <h2 id="confirm-title" class="text-xl font-semibold mt-4">Confirmar Cambios</h2>
+        <p id="confirm-message" class="text-sm text-gray-500 dark:text-gray-400 mt-2">¿Estás seguro de guardar los cambios?</p>
+        <div class="mt-6 flex justify-center gap-3">
+            <button type="button" id="cancel-action-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 w-full">
+                Cancelar
+            </button>
+            <button id="confirm-action-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full">
+                Guardar
+            </button>
+        </div>
+    </div>
+</div>
+
 </div>
 {% endblock content %}
 
 {% block page_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const confirmModal = document.getElementById('confirm-submit-modal');
+    const confirmBtn = document.getElementById('confirm-action-btn');
+    const cancelBtn = document.getElementById('cancel-action-btn');
+
     let currentFormStep = 1;
     const nextBtn = document.getElementById('form-next-btn');
     const prevBtn = document.getElementById('form-prev-btn');
     const submitBtn = document.getElementById('form-submit-btn');
     const form = document.querySelector('form');
+    
+    // Deshabilitar botones de navegación/envío inicialmente
+    nextBtn.disabled = true;
+    submitBtn.disabled = true;
+
+    function addValidationListeners() {
+        const currentStepDiv = document.getElementById(`form-step-${currentFormStep}`);
+        const inputs = currentStepDiv.querySelectorAll('input, select');
+        inputs.forEach(input => input.addEventListener('input', validateStep));
+        inputs.forEach(input => input.addEventListener('change', validateStep)); // Para selects y file inputs
+    }
 
     // Manejo especial para el campo de fecha
     const fechaNacimientoInput = document.getElementById('id_fecha_nacimiento');
@@ -165,43 +200,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     e.target.value = `${valor.slice(0,2)}/${valor.slice(2,4)}/${valor.slice(4,8)}`;
                 }
             }
-            validarPasoActual();
+            validateStep(); // Validar al cambiar la fecha
         });
     }
 
-    function validarPasoActual() {
-        let pasoValido = true;
-        const camposRequeridosPorPaso = {
-            1: ['nombre', 'apellido', 'dni', 'fecha_nacimiento', 'genero', 'estado_civil', 'grupo'],
-            2: ['email']
-        };
+    function validateStep() {
+        const currentStepDiv = document.getElementById(`form-step-${currentFormStep}`);
+        // Django añade el atributo 'required' a los campos obligatorios del formulario.
+        const inputs = currentStepDiv.querySelectorAll('input[required], select[required]');
+        let allValid = true;
 
-        const camposRequeridos = camposRequeridosPorPaso[currentFormStep];
-        if (camposRequeridos) {
-            pasoValido = camposRequeridos.every(nombreCampo => {
-                const campo = document.getElementById(`id_${nombreCampo}`);
-                if (!campo) return true;
-                
-                const valor = campo.value.trim();
-                
-                if (nombreCampo === 'fecha_nacimiento') {
-                    if (!valor) return false;
-                    const partes = valor.split('/');
-                    if (partes.length !== 3) return false;
-                    const [dia, mes, año] = partes;
-                    if (año.length !== 4) return false;
-                    return true;
-                }
-                
-                return valor !== '';
-            });
-        }
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                allValid = false;
+            }
+        });
 
+        // En la edición, los pasos 3 (foto) y 4 (documentos) no tienen campos obligatorios
+        // ya que los archivos son opcionales para actualizar.
         if (currentFormStep === 3 || currentFormStep === 4) {
-            pasoValido = true;
+            allValid = true;
         }
 
-        nextBtn.disabled = !pasoValido;
+        nextBtn.disabled = !allValid;
+        // El botón de guardar cambios se activa si el paso 4 es válido (siempre lo es en este caso).
+        submitBtn.disabled = !(currentFormStep === 4 && allValid);
     }
 
     function updateFormStepUI() {
@@ -226,7 +249,8 @@ document.addEventListener('DOMContentLoaded', function() {
             nextBtn.classList.remove('hidden');
             submitBtn.classList.add('hidden');
         }
-        validarPasoActual();
+        addValidationListeners();
+        validateStep(); // Validar el estado inicial del paso
     }
 
     nextBtn.addEventListener('click', () => {
@@ -276,7 +300,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    form.addEventListener('input', validarPasoActual);
+    // --- Lógica del Modal de Confirmación ---
+    submitBtn.addEventListener('click', function() {
+        // Al hacer clic en el botón "Guardar Cambios", mostramos el modal.
+        // Como el botón ya no es de tipo "submit", no necesitamos preventDefault().
+        confirmModal.classList.remove('hidden');
+        confirmModal.classList.add('flex');
+    });
+
+
+    cancelBtn.addEventListener('click', function() {
+        confirmModal.classList.add('hidden');
+        confirmModal.classList.remove('flex');
+    });
+
+    confirmBtn.addEventListener('click', function() {
+        // Si el usuario confirma, se envía el formulario
+        form.submit();
+    });
+
     updateFormStepUI();
 });
 

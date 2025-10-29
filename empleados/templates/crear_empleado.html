@@ -107,6 +107,45 @@
 {% block page_scripts %}
 <script>
 let currentFormStep = 1;
+const nextBtn = document.getElementById('form-next-btn');
+const prevBtn = document.getElementById('form-prev-btn');
+const submitBtn = document.getElementById('form-submit-btn');
+
+function validateStep() {
+    const currentStepDiv = document.getElementById(`form-step-${currentFormStep}`);
+    const inputs = currentStepDiv.querySelectorAll('input[required], select[required]');
+    let allValid = true;
+
+    inputs.forEach(input => {
+        // Para los campos de archivo, verificamos si se ha seleccionado uno.
+        if (input.type === 'file') {
+            if (input.files.length === 0) {
+                allValid = false;
+            }
+        } 
+        // Para otros campos, verificamos que no estén vacíos.
+        else if (!input.value.trim()) {
+            allValid = false;
+        }
+    });
+
+    // El botón "Siguiente" se activa solo si todos los campos requeridos del paso actual son válidos.
+    if (currentFormStep < 4) {
+        nextBtn.disabled = !allValid;
+    }
+
+    // El botón "Finalizar" se activa solo si todos los campos requeridos del último paso son válidos.
+    if (currentFormStep === 4) {
+        submitBtn.disabled = !allValid;
+    }
+}
+
+function addValidationListeners() {
+    const currentStepDiv = document.getElementById(`form-step-${currentFormStep}`);
+    const inputs = currentStepDiv.querySelectorAll('input, select');
+    inputs.forEach(input => input.addEventListener('input', validateStep));
+    inputs.forEach(input => input.addEventListener('change', validateStep)); // Para selects y file inputs
+}
 
 function updateFormStepUI() {
     document.querySelectorAll('.form-step').forEach(step => step.classList.add('hidden'));
@@ -114,7 +153,6 @@ function updateFormStepUI() {
 
     const nextBtn = document.getElementById('form-next-btn');
     const prevBtn = document.getElementById('form-prev-btn');
-    const submitBtn = document.getElementById('form-submit-btn');
 
     for (let i = 1; i <= 4; i++) {
         const indicator = document.getElementById(`step-indicator-${i}`);
@@ -134,13 +172,14 @@ function updateFormStepUI() {
         nextBtn.classList.remove('hidden');
         submitBtn.classList.add('hidden');
     }
+    addValidationListeners();
+    validateStep(); // Validar el estado inicial del paso
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     // --- Stepper Navigation ---
-    const nextBtn = document.getElementById('form-next-btn');
-    const prevBtn = document.getElementById('form-prev-btn');
-
+    submitBtn.disabled = true; // Deshabilitar el botón de envío inicialmente
+    
     nextBtn.addEventListener('click', () => {
         if (currentFormStep < 4) {
             currentFormStep++;
