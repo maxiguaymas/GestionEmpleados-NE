@@ -143,7 +143,16 @@ def editar_empleado(request, id):
         form = EmpleadoForm(data, request.FILES, instance=empleado)
         archivos = request.FILES
         if form.is_valid():
-            form.save()
+            empleado_actualizado = form.save(commit=False)
+            
+            # --- Lógica para actualizar el grupo del usuario ---
+            grupo_seleccionado = form.cleaned_data.get('grupo')
+            if grupo_seleccionado and empleado_actualizado.user:
+                # Limpiamos los grupos anteriores y añadimos el nuevo
+                empleado_actualizado.user.groups.clear()
+                empleado_actualizado.user.groups.add(grupo_seleccionado)
+            
+            empleado_actualizado.save()
             # Actualizar documentos si se suben nuevos archivos
             for req in requisitos:
                 archivo = archivos.get(f'doc_{req.id}')

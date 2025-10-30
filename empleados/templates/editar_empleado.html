@@ -113,7 +113,7 @@
         <div class="mt-8 pt-4 border-t dark:border-gray-700 flex justify-between items-center">
             <button type="button" id="form-prev-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50" disabled>Anterior</button>
             <div>
-                <a href="{{ next|default_if_none:request.META.HTTP_REFERER|default:form.instance.get_absolute_url }}" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">Cancelar</a>
+                <a href="{{ next|default_if_none:'empleados' }}" class="px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">Cancelar</a>
                 <button type="button" id="form-next-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
                 <button type="button" id="form-submit-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 hidden">Guardar Cambios</button>
             </div>
@@ -245,6 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentFormStep === 4) {
             nextBtn.classList.add('hidden');
             submitBtn.classList.remove('hidden');
+            submitBtn.disabled = !pasoValido;
         } else {
             nextBtn.classList.remove('hidden');
             submitBtn.classList.add('hidden');
