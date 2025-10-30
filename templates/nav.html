@@ -1,7 +1,7 @@
 {% load static %}
 {% load auth_extras %}
 
-<header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 transition-colors duration-200">
+<header class="relative h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 transition-colors duration-200">
     <div class="flex items-center gap-4">
         <button id="open-mobile-menu" class="lg:hidden text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors duration-150">
             <i data-lucide="menu" class="w-5 h-5"></i>
@@ -18,7 +18,7 @@
             <span id="theme-toggle-light-icon" class="hidden"><i data-lucide="sun"></i></span>
         </button>
 
-        <div class="relative">
+        <div>
             <button id="notification-toggle" 
                 class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all duration-150 hover:scale-105">
                 <i data-lucide="bell" class="w-5 h-5"></i>
@@ -32,7 +32,7 @@
                 {% endif %}
             </button>
             <div id="notification-panel"
-                class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border dark:border-gray-700 z-20">
+                class="hidden absolute mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border dark:border-gray-700 z-20 w-full max-w-sm right-4 left-4 sm:left-auto sm:right-0 sm:w-96 sm:max-w-none">
                 <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
                     <h3 class="font-semibold">Notificaciones ({{ notificaciones_count }})</h3>
                     <form action="{% url 'notificaciones:marcar_todas_leidas' %}" method="POST" class="inline">
