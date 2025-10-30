@@ -15,6 +15,7 @@ def centro_notificaciones(request):
     return render(request, 'centro_notificaciones.html', {
         'notificaciones_list': notificaciones_list,
         'just_read_ids': no_leidas_ids, # Pasamos los IDs a la plantilla
+        'page_title': 'Notificaciones'
     })
 
 @login_required

@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import HorarioForm, HorarioPresetForm, AsignarHorarioForm
-from empleados.models import Horarios, Empleado, AsignacionHorario
+from .forms import HorarioForm, HorarioPresetForm
+from empleados.models import Horarios, Empleado, AsignacionHorario, Notificacion
 from django.contrib import messages
 from empleados.views import es_admin
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -8,6 +8,9 @@ from django.http import JsonResponse
 from django.db.models import Count, Q
 import datetime
 from django.conf import settings
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.urls import reverse
 
 @user_passes_test(es_admin)
 def historial_api_view(request):
@@ -122,17 +125,8 @@ def crear_horario(request):
 
     return redirect('horarios_admin')
 
-from django.shortcuts import get_object_or_404, render, redirect
-from .forms import HorarioForm, HorarioPresetForm, AsignarHorarioForm
-from empleados.models import Horarios, Empleado, AsignacionHorario, Notificacion
-from django.contrib import messages
-from empleados.views import es_admin
-from django.contrib.auth.decorators import user_passes_test, login_required
-from django.http import JsonResponse
-from django.db.models import Count
-from django.template.loader import render_to_string
-from django.core.mail import send_mail
-from django.urls import reverse
+
+
 
 @user_passes_test(es_admin)
 def asignar_horario(request):
