@@ -83,9 +83,9 @@
             <h3 class="text-lg font-semibold mb-4">4. Documentación Requerida</h3>
             <div class="space-y-3">
                 {% for req in requisitos %}
-                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <p class="text-sm font-medium">{{ req.nombre_doc }} {% if req.obligatorio %}<span class="text-red-500">*</span>{% endif %}</p>
-                    <input type="file" name="doc_{{ req.id }}" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 dark:file:bg-red-900/50 dark:file:text-red-300 dark:hover:file:bg-red-900" {% if req.obligatorio %}required{% endif %}>
+                    <input type="file" name="doc_{{ req.id }}" class="w-full md:w-auto text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 dark:file:bg-red-900/50 dark:file:text-red-300 dark:hover:file:bg-red-900" {% if req.obligatorio %}required{% endif %}>
                 </div>
                 {% endfor %}
             </div>
