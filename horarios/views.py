@@ -126,6 +126,8 @@ def crear_horario(request):
     return redirect('horarios_admin')
 
 
+
+
 @user_passes_test(es_admin)
 def asignar_horario(request):
     """
