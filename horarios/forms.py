@@ -53,9 +53,8 @@ class HorarioPresetForm(forms.Form):
                 }
             )
             if not created:
-                horario.cantidad_personal_requerida = data['cantidad_personal_requerida']
-                horario.save()
-            return horario
+                pass
+            return horario, created
         elif data['turno'] == 'tarde':
             horario, created = Horarios.objects.get_or_create(
                 nombre="Turno Tarde",
@@ -68,9 +67,8 @@ class HorarioPresetForm(forms.Form):
                 }
             )
             if not created:
-                horario.cantidad_personal_requerida = data['cantidad_personal_requerida']
-                horario.save()
-            return horario
+                pass
+            return horario, created
         return None
 
 
