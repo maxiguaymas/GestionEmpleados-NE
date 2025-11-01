@@ -43,3 +43,17 @@ class EmpleadoForm(forms.ModelForm):
                 field.widget.attrs['class'] = 'form-select'  # Bootstrap 5 recomienda 'form-select' para select
             else:
                 field.widget.attrs['class'] = 'form-control'
+
+    def clean_dni(self):
+        dni = self.cleaned_data.get('dni')
+        # self.instance es el objeto que se está editando.
+        # Si estamos en modo de edición (self.instance.pk existe),
+        # excluimos al propio empleado de la búsqueda de DNI duplicados.
+        if self.instance and self.instance.pk:
+            if Empleado.objects.filter(dni=dni).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Este DNI ya está registrado para otro empleado.")
+        # Si estamos en modo de creación (no hay self.instance.pk),
+        # simplemente comprobamos si el DNI ya existe.
+        elif Empleado.objects.filter(dni=dni).exists():
+            raise forms.ValidationError("Este DNI ya está registrado.")
+        return dni

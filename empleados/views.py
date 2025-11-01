@@ -17,7 +17,7 @@ from empleados.models import Legajo, Documento, RequisitoDocumento
 import pandas as pd
 from django.template.loader import get_template
 from xhtml2pdf import pisa
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 import json
 from django.template.loader import render_to_string
@@ -145,25 +145,36 @@ def editar_empleado(request, id):
         if form.is_valid():
             empleado_actualizado = form.save(commit=False)
             
-            # --- Lógica para actualizar el grupo del usuario ---
-            grupo_seleccionado = form.cleaned_data.get('grupo')
-            if grupo_seleccionado and empleado_actualizado.user:
-                # Limpiamos los grupos anteriores y añadimos el nuevo
+            # Actualizar grupo de usuario
+            grupo = form.cleaned_data.get('grupo')
+            if grupo:
                 empleado_actualizado.user.groups.clear()
-                empleado_actualizado.user.groups.add(grupo_seleccionado)
-            
+                empleado_actualizado.user.groups.add(grupo)
+
+            # Actualizar email del usuario
+            email = form.cleaned_data.get('email')
+            if email and empleado_actualizado.user.email != email:
+                empleado_actualizado.user.email = email
+                empleado_actualizado.user.save()
+
             empleado_actualizado.save()
-            # Actualizar documentos si se suben nuevos archivos
-            for req in requisitos:
-                archivo = archivos.get(f'doc_{req.id}')
-                if archivo and legajo:
-                    doc = Documento.objects.filter(id_leg=legajo, id_requisito=req).first()
-                    if doc:
-                        doc.ruta_archivo = archivo
-                        doc.estado_doc = True
-                        doc.save()
+
+            # Actualizar documentos
+            if legajo:
+                for req in requisitos:
+                    archivo = archivos.get(f'doc_{req.id}')
+                    if archivo:
+                        # Si se sube un nuevo archivo, se actualiza o crea el documento.
+                        Documento.objects.update_or_create(
+                            id_leg=legajo,
+                            id_requisito=req,
+                            defaults={'ruta_archivo': archivo, 'estado_doc': True}
+                        )
+
             return redirect(next_url or 'empleados')
         else:
+            # DEBUG: Imprimir errores si el formulario no es válido
+            print("Formulario no válido. Errores:", form.errors.as_json())
             return render(request, 'editar_empleado.html', {
                 'form': form,
                 'error': 'Por favor corrige los errores.',
