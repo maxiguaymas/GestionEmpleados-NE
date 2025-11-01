@@ -7,6 +7,8 @@ urlpatterns = [
     
     # Procesamiento de los formularios de creación
     path('crear/', views.crear_horario, name='crear_horario'),
+    path('editar/<int:horario_id>/', views.editar_horario, name='editar_horario'),
+    path('eliminar/<int:horario_id>/', views.eliminar_horario, name='eliminar_horario'),
     
     # Procesamiento del formulario de asignación
     path('asignar/', views.asignar_horario, name='asignar_horario'),

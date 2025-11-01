@@ -105,21 +105,24 @@ def crear_horario(request):
         if 'submit_preset' in request.POST:
             form = HorarioPresetForm(request.POST)
             if form.is_valid():
-                horario = form.save()
-                messages.success(request, f'Horario "{horario.nombre}" creado/actualizado con éxito.')
+                horario, created = form.save()
+                if created:
+                    messages.success(request, f'Horario "{horario.nombre}" creado con éxito.')
+                else:
+                    messages.error(request, f'El horario predefinido ya existe.', extra_tags='horario_existe')
             else:
-                # Si hay errores, es mejor mostrarlos en el formulario.
-                # Esta implementación simple solo muestra un error genérico.
                 messages.error(request, 'Error al crear el horario predefinido. Por favor, verifique los datos.')
         
         elif 'submit_custom' in request.POST:
             form = HorarioForm(request.POST)
             if form.is_valid():
-                horario = form.save()
-                messages.success(request, f'Horario personalizado "{horario.nombre}" creado con éxito.')
+                nombre_horario = form.cleaned_data['nombre']
+                if Horarios.objects.filter(nombre=nombre_horario).exists():
+                    messages.error(request, f'Ya existe un horario con el nombre "{nombre_horario}".', extra_tags='horario_existe')
+                else:
+                    horario = form.save()
+                    messages.success(request, f'Horario personalizado "{horario.nombre}" creado con éxito.')
             else:
-                # Idealmente, renderizaríamos el form con errores.
-                # Por simplicidad, redirigimos con un mensaje de error.
                 error_msg = 'Error al crear el horario personalizado. ' + ' '.join([f'{k}: {v[0]}' for k, v in form.errors.items()])
                 messages.error(request, error_msg)
 
@@ -221,7 +224,42 @@ def asignar_horario(request):
 @user_passes_test(es_admin)
 def ver_horarios_asig(request):
     # Esta vista ya no es necesaria si todo se maneja en horarios_admin,
-    # pero la mantenemos por si hay alguna URL que apunte aquí.
+    return redirect('horarios_admin')
+
+@user_passes_test(es_admin)
+def editar_horario(request, horario_id):
+    horario = get_object_or_404(Horarios, id=horario_id)
+    personal_asignado = horario.asignaciones.count()
+
+    if request.method == 'POST':
+        form = HorarioForm(request.POST, instance=horario)
+        if form.is_valid():
+            cantidad_personal_requerida = form.cleaned_data.get('cantidad_personal_requerida')
+            if cantidad_personal_requerida < personal_asignado:
+                messages.error(request, f'La cantidad de personal requerido no puede ser menor que el personal ya asignado ({personal_asignado}).')
+            else:
+                form.save()
+                messages.success(request, f'Horario "{horario.nombre}" actualizado con éxito.')
+                return redirect('horarios_admin')
+    else:
+        form = HorarioForm(instance=horario)
+    
+    context = {
+        'form': form,
+        'horario': horario,
+        'personal_asignado': personal_asignado,
+        'page_title': 'Editar Horario'
+    }
+    return render(request, 'editar_horario.html', context)
+
+@user_passes_test(es_admin)
+def eliminar_horario(request, horario_id):
+    horario = get_object_or_404(Horarios, id=horario_id)
+    # Eliminar asignaciones de este horario
+    AsignacionHorario.objects.filter(id_horario=horario).delete()
+    # Eliminar el horario
+    horario.delete()
+    messages.success(request, f'Horario "{horario.nombre}" y todas sus asignaciones han sido eliminados.')
     return redirect('horarios_admin')
 
 @login_required

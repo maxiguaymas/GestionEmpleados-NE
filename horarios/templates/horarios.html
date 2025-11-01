@@ -3,7 +3,12 @@
 
 {% block title %}Gestión de Horarios{% endblock %}
 
-{% block page_title %}Horarios{% endblock %}
+{% block page_title %}
+<a href="javascript:history.back()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-2">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left w-5 h-5 inline-block align-middle">
+        <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+    </svg>
+</a>Horarios{% endblock %}
 
 {% block content %}
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
@@ -44,10 +49,57 @@
         </div>
     </div>
 </div>
+
+<div id="delete-horario-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="closeDeleteModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm" onclick="event.stopPropagation()">
+        <div class="p-8 text-center">
+            <div class="w-20 h-20 mx-auto flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
+                <i data-lucide="trash-2" class="w-10 h-10 text-red-600 dark:text-red-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">¿Eliminar Horario?</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">¿Estás seguro de que quieres eliminar este horario? Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 px-8 pb-8">
+            <button type="button" onclick="closeDeleteModal()"
+                class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold text-lg">
+                Cancelar
+            </button>
+            <a id="confirm-delete-btn" href="#"
+                class="block text-center px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 font-semibold text-lg">
+                Sí, Eliminar
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block page_scripts %}
 <script>
+    // Script para mostrar notificaciones de Django
+    {% if messages %}
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                let duration = 5000;
+                let type = '{{ message.tags }}';
+                let title = 'Notificación';
+
+                if (type.includes('success')) {
+                    title = 'Éxito';
+                } else if (type.includes('error')) {
+                    title = 'Error';
+                } else if (type.includes('warning')) {
+                    title = 'Advertencia';
+                }
+
+                if (type.includes('horario_existe')) {
+                    duration = 5000;
+                }
+
+                showNotification(type, title, "{{ message }}", duration);
+            {% endfor %}
+        });
+    {% endif %}
+
     // --- Lógica para las pestañas principales ---
     function setupTabs(prefix) {
         document.querySelectorAll(`.${prefix}-tab`).forEach(button => {
@@ -209,7 +261,7 @@
             if (window.refreshHistorial) {
                 window.refreshHistorial();
             }
-        }
+        } 
 
         function addHiddenInput(employeeId) {
             const input = document.createElement('input');
@@ -298,20 +350,48 @@
         window.refreshHistorial = fetchAndRenderHistorial;
     }
 
+    // --- Lógica para el modal de eliminación ---
+    const deleteModal = document.getElementById('delete-horario-modal');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+    window.openDeleteModal = function(horarioId) {
+        const url = `/horarios/eliminar/${horarioId}/`;
+        confirmDeleteBtn.href = url;
+        deleteModal.classList.remove('hidden');
+        deleteModal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    window.closeDeleteModal = function() {
+        deleteModal.classList.add('hidden');
+        deleteModal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
     // --- INICIALIZACIÓN ---
     document.addEventListener('DOMContentLoaded', function() {
-        setupTabs('schedule');
-        const hash = window.location.hash.substring(1);
-        const validTabs = ['view-assignments', 'assign-schedules', 'create-schedule', 'history'];
-        if (hash && validTabs.includes(hash)) {
-            switchTab('schedule', hash);
-        } else {
-            switchTab('schedule', 'view-assignments');
-        }
+        console.log('DOM fully loaded and parsed');
+        try {
+            setupTabs('schedule');
+            console.log('setupTabs OK');
+            setupCreateScheduleTabs();
+            console.log('setupCreateScheduleTabs OK');
+            setupAssignmentUI();
+            console.log('setupAssignmentUI OK');
+            setupHistorialTab();
+            console.log('setupHistorialTab OK');
 
-        setupCreateScheduleTabs();
-        setupAssignmentUI();
-        setupHistorialTab();
+            document.querySelectorAll('.delete-horario-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const horarioId = this.dataset.horarioId;
+                    openDeleteModal(horarioId);
+                });
+            });
+            console.log('Delete buttons OK');
+        } catch (error) {
+            console.error('Error during initialization:', error);
+        }
     });
 </script>
 {% endblock %}
