@@ -53,7 +53,7 @@
                           transition-colors duration-200" title="Ver Perfil">
                     <i data-lucide="eye" class="w-5 h-5"></i>
                 </a>
-                <a href="{% url 'editar_empleado' empleado.id %}" 
+                <a href="{% url 'editar_empleado' empleado.id %}?next={% url 'empleados' %}" 
                    class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300
                           transition-colors duration-200" title="Editar">
                     <i data-lucide="edit-2" class="w-5 h-5"></i>
