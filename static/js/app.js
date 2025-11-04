@@ -14,6 +14,7 @@ function initializeApp() {
     
     setupMobileMenu();
     setupNotificationPanel();
+    setupProfileDropdown();
     updateUserUI();
     setupNavigation();
     // setupGlobalEventListeners(); // Se necesitará adaptar a Django
@@ -46,6 +47,23 @@ function toggleMobileMenu() {
 function setupNotificationPanel() {
     const toggleBtn = document.getElementById('notification-toggle');
     const panel = document.getElementById('notification-panel');
+    if (!toggleBtn || !panel) return;
+
+    toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!panel.contains(e.target) && !toggleBtn.contains(e.target)) {
+            panel.classList.add('hidden');
+        }
+    });
+}
+
+function setupProfileDropdown() {
+    const toggleBtn = document.getElementById('user-menu-button');
+    const panel = document.getElementById('user-menu');
     if (!toggleBtn || !panel) return;
 
     toggleBtn.addEventListener('click', (e) => {
