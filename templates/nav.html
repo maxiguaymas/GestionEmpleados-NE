@@ -76,19 +76,25 @@
             {% endif %}
         {% endif %}
 
-        <div class="relative group">
-            {% if user.empleado %}
-                {% with iniciales=user.empleado.get_iniciales %}
-                <div class="h-10 w-10 rounded-lg overflow-hidden transform transition-transform duration-200 hover:scale-105 hover:shadow-lg">
-                    <img id="user-avatar" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        src="https://placehold.co/100x100/D9232D/FFFFFF?text={{iniciales}}" alt="Avatar">
+        <div class="relative">
+            <button id="user-menu-button" class="h-10 w-10 rounded-lg overflow-hidden transform transition-transform duration-200 hover:scale-105 hover:shadow-lg focus:outline-none">
+                {% if user.empleado and user.empleado.ruta_foto %}
+                    <img id="user-avatar" class="h-full w-full object-cover" src="{{ user.empleado.ruta_foto.url }}" alt="Avatar">
+                {% else %}
+                    {% with iniciales=user.empleado.get_iniciales|default:user|get_user_initials %}
+                    <img id="user-avatar" class="h-full w-full object-cover" src="https://placehold.co/100x100/D9232D/FFFFFF?text={{iniciales}}" alt="Avatar">
+                    {% endwith %}
+                {% endif %}
+                <span class="absolute -right-1 -bottom-1 block h-3.5 w-3.5 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-800"></span>
+            </button>
+
+            <div id="user-menu"
+                 class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-20 border dark:border-gray-700">
+                <div class="py-1">
+                    <a href="{% url 'ver_perfil' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mi Perfil</a>
+                    <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Cerrar Sesión</a>
                 </div>
-                {% endwith %}
-            {% else %}
-                <img id="user-avatar" class="h-10 w-10 rounded-full object-cover"
-                    src="https://placehold.co/100x100/D9232D/FFFFFF?text={{ user|get_user_initials }}" alt="Avatar">
-            {% endif %}
-            <span class="absolute -right-1 -bottom-1 block h-3.5 w-3.5 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-800 transition-all duration-200"></span>
+            </div>
         </div>
     </div>
 </header>
