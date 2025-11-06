@@ -100,7 +100,7 @@
             <h2 class="text-xl font-semibold">Cargar Nuevo Recibo</h2>
             <button onclick="closeModal('upload-payslip-modal')" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="x"></i></button>
         </div>
-        <form action="{% url 'cargar_recibo' %}" method="post" enctype="multipart/form-data" class="mt-6 space-y-4">
+        <form id="upload-payslip-form" action="{% url 'cargar_recibo' %}" method="post" enctype="multipart/form-data" class="mt-6 space-y-4">
             {% csrf_token %}
             <div>
                 <label for="{{ form.id_empl.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.id_empl.label }}</label>
@@ -124,7 +124,7 @@
             </div>
             <div class="pt-4 flex justify-end gap-3">
                 <button type="button" onclick="closeModal('upload-payslip-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar Recibo</button>
+                <button id="upload-payslip-submit-btn" type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar Recibo</button>
             </div>
         </form>
     </div>
@@ -611,6 +611,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const mes = e.target.elements.mes.value;
         const anio = e.target.elements.anio.value;
         fetchRecibos(dni, mes, anio);
+    });
+
+    const uploadPayslipForm = document.getElementById('upload-payslip-form');
+    const uploadPayslipSubmitBtn = document.getElementById('upload-payslip-submit-btn');
+
+    uploadPayslipForm.addEventListener('submit', function() {
+        uploadPayslipSubmitBtn.disabled = true;
+        uploadPayslipSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
     });
 });
 </script>
