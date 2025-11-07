@@ -11,7 +11,7 @@
 {% block actual_page_title %}Editar Horario{% endblock %}
 
 {% block content %}
-<a href="{% url 'horarios_admin' %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
+<a href="{% url 'horarios_admin' %}" id="volver-btn" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 mb-6">
     <i data-lucide="arrow-left"></i> Volver
 </a>
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 max-w-2xl mx-auto">
@@ -73,6 +73,27 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Confirmación para Volver -->
+<div id="confirm-back-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 m-4 text-center" onclick="event.stopPropagation()">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/50">
+            <i data-lucide="alert-circle" class="h-6 w-6 text-yellow-600 dark:text-yellow-400"></i>
+        </div>
+        <h2 class="text-xl font-semibold mt-4">Cambios sin Guardar</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Hay cambios sin guardar. ¿Estás seguro de que quieres volver?</p>
+        <div class="mt-6 flex justify-center gap-3">
+            <button type="button" id="cancel-back-btn"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 w-full">
+                Cancelar
+            </button>
+            <button type="button" id="confirm-back-btn"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full">
+                Aceptar
+            </button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block page_scripts %}
@@ -81,18 +102,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('editar-horario-form');
     const cantidadInput = document.getElementById('id_cantidad_personal_requerida');
     const personalAsignado = {{ personal_asignado|default:0 }};
-    const modal = document.getElementById('validation-error-modal');
-    const modalMessage = document.getElementById('validation-error-message');
+    const validationModal = document.getElementById('validation-error-modal');
+    const validationModalMessage = document.getElementById('validation-error-message');
+    const confirmBackModal = document.getElementById('confirm-back-modal');
+    const volverBtn = document.getElementById('volver-btn');
+    const confirmBackBtn = document.getElementById('confirm-back-btn');
+    const cancelBackBtn = document.getElementById('cancel-back-btn');
+
+    // Store initial form state
+    const initialFormData = new FormData(form);
+    const initialSerializedData = new URLSearchParams(initialFormData).toString();
+    let formChanged = false;
+
+    // Function to check for form changes
+    const checkForChanges = () => {
+        const currentFormData = new FormData(form);
+        const currentSerializedData = new URLSearchParams(currentFormData).toString();
+        formChanged = initialSerializedData !== currentSerializedData;
+    };
+
+    // Listen for any input changes in the form
+    form.addEventListener('input', checkForChanges);
+    form.addEventListener('change', checkForChanges); // For checkboxes and selects
+
+    // Handle back button click
+    volverBtn.addEventListener('click', function(event) {
+        if (formChanged) {
+            event.preventDefault();
+            confirmBackModal.classList.remove('hidden');
+            confirmBackModal.classList.add('flex');
+        }
+    });
+
+    // Handle confirm back button
+    confirmBackBtn.addEventListener('click', function() {
+        window.location.href = volverBtn.href;
+    });
+
+    // Handle cancel back button
+    cancelBackBtn.addEventListener('click', function() {
+        confirmBackModal.classList.add('hidden');
+        confirmBackModal.classList.remove('flex');
+    });
 
     window.openValidationErrorModal = function(message) {
-        modalMessage.textContent = message;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        validationModalMessage.textContent = message;
+        validationModal.classList.remove('hidden');
+        validationModal.classList.add('flex');
     }
 
     window.closeValidationErrorModal = function() {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        validationModal.classList.add('hidden');
+        validationModal.classList.remove('flex');
     }
 
     form.addEventListener('submit', function(event) {
@@ -105,15 +166,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Cerrar modal haciendo clic fuera o con la tecla Escape
-    modal.addEventListener('click', function(event) {
-        if (event.target === modal) {
+    validationModal.addEventListener('click', function(event) {
+        if (event.target === validationModal) {
             closeValidationErrorModal();
         }
     });
 
     document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+        if (event.key === 'Escape' && !validationModal.classList.contains('hidden')) {
             closeValidationErrorModal();
+        }
+        if (event.key === 'Escape' && !confirmBackModal.classList.contains('hidden')) {
+            confirmBackModal.classList.add('hidden');
+            confirmBackModal.classList.remove('flex');
         }
     });
 });

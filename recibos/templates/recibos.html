@@ -159,7 +159,7 @@
                 <div id="current-image-file" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></div>
             </div>
             <div class="pt-4 flex justify-end gap-3">
-                <button type="button" onclick="closeModal('edit-payslip-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
+                <button type="button" id="cancel-edit-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
                 <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar Cambios</button>
             </div>
         </form>
@@ -382,7 +382,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function cancelEdit() {
+        const form = document.getElementById('edit-payslip-form');
+        if (hasFormChanges(form)) {
+            showModal({
+                type: 'warning',
+                title: 'Cambios sin guardar',
+                message: '¿Estás seguro de que quieres cancelar? Perderás los cambios no guardados.',
+                showCancel: true,
+                confirmText: 'Aceptar',
+                onConfirm: () => {
+                    closeModal('edit-payslip-modal');
+                }
+            });
+        } else {
+            closeModal('edit-payslip-modal');
+        }
+    }
+
     document.getElementById('upload-payslip-btn').addEventListener('click', () => openModal('upload-payslip-modal'));
+    document.getElementById('cancel-edit-btn').addEventListener('click', cancelEdit);
+
 
     // Script for payslip search
     const searchBtn = document.getElementById('payslip-search-btn');
