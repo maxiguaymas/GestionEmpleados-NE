@@ -245,15 +245,18 @@ def buscar_empleados(request):
     estado = request.GET.get('estado')
     cargo_id = request.GET.get('cargo')
 
-    filters = Q(fecha_egreso__isnull=True)
+    filters = Q()
     
     if query:
         filters &= (Q(nombre__icontains=query) |
                     Q(apellido__icontains=query) |
                     Q(dni__icontains=query))
     
-    if estado:
+    if estado and estado != 'Todos':
         filters &= Q(estado=estado)
+    else:
+        # Por defecto, si no se especifica un estado o se eligen "Todos", no se filtra por fecha de egreso.
+        pass
 
     if cargo_id:
         filters &= Q(user__groups__id=cargo_id)

@@ -60,6 +60,29 @@
 </div>
 <!-- Contenedor donde colocaremos la paginación al final de la página -->
 <div id="page-bottom-pagination" class="mt-6 px-4 sm:px-6"></div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div id="delete-employee-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 m-4 text-center" onclick="event.stopPropagation()">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
+            <i data-lucide="trash-2" class="h-6 w-6 text-red-600 dark:text-red-400"></i>
+        </div>
+        <h2 class="text-xl font-semibold mt-4">Eliminar Empleado</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            ¿Estás seguro de que deseas eliminar a <strong id="employee-name-modal"></strong>? Esta acción no se puede deshacer.
+        </p>
+        <div class="mt-6 flex justify-center gap-3">
+            <button type="button" id="cancel-delete-button"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 w-full">
+                Cancelar
+            </button>
+            <a href="#" id="confirm-delete-button"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full inline-flex items-center justify-center">
+                Confirmar
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock content %}
 
 {% block page_scripts %}
@@ -112,11 +135,34 @@
         cargoFilter.addEventListener('change', performSearch);
 
         // --- Lógica de Menús y Notificaciones (Event Delegation) ---
+        const deleteModal = document.getElementById('delete-employee-modal');
+        const employeeNameModal = document.getElementById('employee-name-modal');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
+        const cancelDeleteButton = document.getElementById('cancel-delete-button');
+
+        function openDeleteModal(url, employeeName) {
+            employeeNameModal.textContent = employeeName;
+            confirmDeleteButton.href = url;
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+        }
+
+        cancelDeleteButton.addEventListener('click', closeDeleteModal);
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                closeDeleteModal();
+            }
+        });
+
         document.body.addEventListener('click', function(e) {
             const toggleButton = e.target.closest('[data-action="toggle-menu"]');
             const deleteButton = e.target.closest('[data-action="delete-employee"]');
 
-            // --- Manejo de Menús Desplegables ---
             if (toggleButton) {
                 e.preventDefault();
                 const menu = toggleButton.nextElementSibling;
@@ -158,10 +204,9 @@
             } else if (deleteButton) {
                 e.preventDefault();
                 const url = deleteButton.href;
-                showNotification('warning', '¿Estás seguro?',
-                    `Esta acción no se puede deshacer. <br><br> <a href="${url}" class="font-bold text-red-600 hover:underline">Sí, eliminar</a>`,
-                    10000
-                );
+                const employeeName = deleteButton.dataset.employeeName;
+                openDeleteModal(url, employeeName);
+
             } else if (!e.target.closest('[data-menu]')) {
                 if (activeCleanup) {
                     activeCleanup();
