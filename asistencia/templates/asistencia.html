@@ -136,6 +136,8 @@
                     statusDivMark.innerHTML = `<span class="badge bg-success">Asistencia registrada para ${data.nombre}!</span>`;
                 } else if (data.status === 'already_marked') {
                     statusDivMark.innerHTML = `<span class="badge bg-warning"> ${data.nombre}, ya has marcado asistencia hoy.</span>`;
+                } else if (data.status === 'outside_shift') {
+                    statusDivMark.innerHTML = `<span class="badge bg-danger">${data.nombre}, ${data.message}</span>`;
                 }
                 processingMark = false;
             })
@@ -304,16 +306,15 @@
                 return;
             }
 
-            let url = `/asistencia/api/ver-asistencias/${dni}/`;
-            const urlParams = new URLSearchParams(params);
-            
-            // Asegurarse de que los parámetros del formulario de filtro se incluyan
-            urlParams.set('por_pagina', porPaginaSelect.value);
-            
-            const queryString = params.toString();
-            if (queryString) {
-                url += `?${queryString}`;
-            }
+            // Construir los parámetros de la URL
+            const urlParams = new URLSearchParams();
+            const formData = new FormData(periodFilterForm);
+
+            // Añadir todos los parámetros del formulario y los pasados a la función
+            for (const [key, value] of formData.entries()) { if (value) urlParams.set(key, value); }
+            for (const [key, value] of Object.entries(params)) { if (value) urlParams.set(key, value); }
+
+            let url = `/asistencia/api/ver-asistencias/${dni}/?${urlParams.toString()}`;
 
             fetch(url)
                 .then(response => response.json())
@@ -353,7 +354,7 @@
                         noSearchMessage.classList.add('hidden');
                         lucide.createIcons();
 
-                        renderPagination(data.pagination, urlParams);
+                        renderPagination(data.pagination);
                     } else {
                         showNotification('error', 'Error', data.message);
                         resultsContainer.classList.add('hidden');
@@ -362,7 +363,7 @@
                 });
         };
 
-        const renderPagination = (pagination, currentParams) => {
+        const renderPagination = (pagination) => {
             if (pagination.num_pages <= 1) {
                 paginationContainer.innerHTML = '';
                 return;
@@ -380,15 +381,13 @@
                             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">`;
 
             if (pagination.has_previous) {
-                currentParams.set('page', pagination.previous_page_number);
-                paginationHtml += `<a href="#" data-params='${JSON.stringify(Object.fromEntries(currentParams))}' class="pagination-link relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Anterior</span> <i data-lucide="chevron-left" class="h-5 w-5"></i> </a>`;
+                paginationHtml += `<a href="#" data-page="${pagination.previous_page_number}" class="pagination-link relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Anterior</span> <i data-lucide="chevron-left" class="h-5 w-5"></i> </a>`;
             }
 
             paginationHtml += `<span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300"> Página ${pagination.number} de ${pagination.num_pages} </span>`;
 
             if (pagination.has_next) {
-                currentParams.set('page', pagination.next_page_number);
-                paginationHtml += `<a href="#" data-params='${JSON.stringify(Object.fromEntries(currentParams))}' class="pagination-link relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Siguiente</span> <i data-lucide="chevron-right" class="h-5 w-5"></i> </a>`;
+                paginationHtml += `<a href="#" data-page="${pagination.next_page_number}" class="pagination-link relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"> <span class="sr-only">Siguiente</span> <i data-lucide="chevron-right" class="h-5 w-5"></i> </a>`;
             }
 
             paginationHtml += `</nav></div></div></div>`;
@@ -420,13 +419,18 @@
             fetchAndRenderAsistencias(dniInput.value);
         });
 
+        porPaginaSelect.addEventListener('change', () => {
+            const dni = dniInput.value;
+            if (dni) fetchAndRenderAsistencias(dni);
+        });
+
         // Event listener para los links de paginación
         resultsContainer.addEventListener('click', function(e) {
             const link = e.target.closest('.pagination-link');
             if (link) {
                 e.preventDefault();
-                const params = JSON.parse(link.dataset.params);
-                fetchAndRenderAsistencias(dniInput.value, params);
+                const page = link.dataset.page;
+                fetchAndRenderAsistencias(dniInput.value, { page: page });
             }
         });
     }
