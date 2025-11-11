@@ -2,7 +2,6 @@ import base64
 import numpy as np
 import cv2
 import face_recognition
-from datetime import date
 from django.utils import translation
 
 from django.shortcuts import render, get_object_or_404
@@ -10,7 +9,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from empleados.models import Empleado
+from django.utils import timezone
+from empleados.models import Empleado, AsignacionHorario
 from .models import Rostro, Asistencia
 from .forms import AsistenciaFilterForm
 
@@ -112,10 +112,40 @@ def api_reconocer_rostro(request):
                 first_match_index = matches.index(True)
                 empleado_id = empleados_ids[first_match_index]
                 empleado = Empleado.objects.get(id=empleado_id)
+
+                # --- INICIO: Verificación de horario laboral ---
+                ahora = timezone.localtime(timezone.now())
+                asignacion = AsignacionHorario.objects.filter(id_empl=empleado, estado=True).order_by('-fecha_asignacion').first()
+
+                if not asignacion:
+                    return JsonResponse({'status': 'outside_shift', 'nombre': f'{empleado.nombre} {empleado.apellido}', 'message': 'No tienes un horario asignado.'})
+
+                horario = asignacion.id_horario
+                dias_semana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+                dia_actual_str = dias_semana[ahora.weekday()]
+
+                if not getattr(horario, dia_actual_str):
+                    return JsonResponse({'status': 'outside_shift', 'nombre': f'{empleado.nombre} {empleado.apellido}', 'message': 'Hoy no es un día laborable para ti.'})
+
+                # Margen de tolerancia para marcar asistencia (1 hora antes de la entrada, 0 después de la salida)
+                margen_inicio = timezone.timedelta(hours=1)
+
+                hora_entrada_dt = timezone.make_aware(timezone.datetime.combine(ahora.date(), horario.hora_entrada))
+                hora_salida_dt = timezone.make_aware(timezone.datetime.combine(ahora.date(), horario.hora_salida))
+
+                inicio_permitido = hora_entrada_dt - margen_inicio
+                fin_permitido = hora_salida_dt
+
+                if not (inicio_permitido <= ahora <= fin_permitido):
+                    return JsonResponse({'status': 'outside_shift', 'nombre': f'{empleado.nombre} {empleado.apellido}', 'message': 'Estás fuera de tu horario de trabajo.'})
+                # --- FIN: Verificación de horario laboral ---
                 
+                hoy = timezone.localdate()
                 # Registrar asistencia (solo una vez por dÃ­a)
-                if not Asistencia.objects.filter(id_empl=empleado, fecha_hora__date=date.today()).exists():
-                    Asistencia.objects.create(id_empl=empleado)                
+                if not Asistencia.objects.filter(id_empl=empleado, fecha_hora__date=hoy).exists():
+                    # Solución final: Restamos 3 horas directamente a la hora actual (UTC)
+                    hora_corregida = timezone.now() - timezone.timedelta(hours=3) # Mantenemos la corrección que ya funcionaba
+                    Asistencia.objects.create(id_empl=empleado, fecha_hora=hora_corregida)
                     return JsonResponse({'status': 'success', 'nombre': f'{empleado.nombre} {empleado.apellido}'})                
                 else:
                     return JsonResponse({'status': 'already_marked', 'nombre': f'{empleado.nombre} {empleado.apellido}'})

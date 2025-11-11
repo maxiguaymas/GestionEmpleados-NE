@@ -17,7 +17,7 @@
             <!-- Search by Name/DNI -->
             <div>
                 <label for="q" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Buscar por Empleado</label>
-                <input type="text" name="q" id="q" value="{{ filter_values.q|default:'' }}" placeholder="Nombre o DNI..." class="mt-1 w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
+                <input type="text" name="q" id="q" value="{{ filter_values.q|default:'' }}" placeholder="Nombre o DNI..." class="mt-1 w-full pl-4 pr-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\sáéíóúÁÉÍÓÚüÜñÑ]/g, '');">
             </div>
 
             <!-- Filter by Period -->
@@ -182,5 +182,11 @@
 {% block page_scripts %}
 <script>
     lucide.createIcons();
+
+    // Script para el campo de búsqueda de sanciones
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('q');
+        // La validación se maneja directamente en el atributo 'oninput' del HTML.
+    });
 </script>
 {% endblock %}
