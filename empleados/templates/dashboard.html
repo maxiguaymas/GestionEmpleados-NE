@@ -159,57 +159,90 @@
 {% block page_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-    const textColor = isDarkMode ? '#E5E7EB' : '#374151';
+    let hiresChart, statusChart;
 
-    // 1. Gráfico de Contrataciones (Líneas)
-    const hiresCtx = document.getElementById('hiresChart').getContext('2d');
-    new Chart(hiresCtx, {
-        type: 'line',
-        data: {
-            labels: {{ hires_labels|safe }},
-            datasets: [{
-                label: 'Nuevos Empleados',
-                data: {{ hires_data|safe }},
-                borderColor: '#D9232D',
-                backgroundColor: 'rgba(217, 35, 45, 0.1)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 } },
-                x: { grid: { display: false }, ticks: { color: '#FFFFFF' } }
+    function getChartColors() {
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        return {
+            gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+            textColor: isDarkMode ? '#E5E7EB' : '#374151',
+            borderColor: isDarkMode ? '#1f2937' : '#ffffff'
+        };
+    }
+
+    function createCharts() {
+        const colors = getChartColors();
+
+        // 1. Gráfico de Contrataciones (Líneas)
+        const hiresCtx = document.getElementById('hiresChart').getContext('2d');
+        hiresChart = new Chart(hiresCtx, {
+            type: 'line',
+            data: {
+                labels: {{ hires_labels|safe }},
+                datasets: [{
+                    label: 'Nuevos Empleados',
+                    data: {{ hires_data|safe }},
+                    borderColor: '#D9232D',
+                    backgroundColor: 'rgba(217, 35, 45, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
             },
-            plugins: { legend: { display: false } }
-        }
-    });
-
-    // 2. Gráfico de Estado de Empleados (Dona)
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: {{ status_labels|safe }},
-            datasets: [{
-                label: 'Estado de Empleados',
-                data: {{ status_data|safe }},
-                backgroundColor: ['#10B981', '#F59E0B', '#6B7280', '#EF4444', '#3B82F6'],
-                borderColor: isDarkMode ? '#1f2937' : '#ffffff',
-                borderWidth: 4,
-            }]
-        },
-        options: {
-            responsive: true,
-            cutout: '70%',
-            plugins: {
-                legend: { position: 'bottom', labels: { color: '#FFFFFF', boxWidth: 12, padding: 20 } }
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor, stepSize: 1 } },
+                    x: { grid: { display: false }, ticks: { color: colors.textColor } }
+                },
+                plugins: { legend: { display: false } }
             }
+        });
+
+        // 2. Gráfico de Estado de Empleados (Dona)
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ status_labels|safe }},
+                datasets: [{
+                    label: 'Estado de Empleados',
+                    data: {{ status_data|safe }},
+                    backgroundColor: ['#10B981', '#F59E0B', '#6B7280', '#EF4444', '#3B82F6'],
+                    borderColor: colors.borderColor,
+                    borderWidth: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: colors.textColor, boxWidth: 12, padding: 20 } }
+                }
+            }
+        });
+    }
+
+    function updateChartColors() {
+        const colors = getChartColors();
+
+        if (hiresChart) {
+            hiresChart.options.scales.y.grid.color = colors.gridColor;
+            hiresChart.options.scales.y.ticks.color = colors.textColor;
+            hiresChart.options.scales.x.ticks.color = colors.textColor;
+            hiresChart.update();
         }
-    });
+
+        if (statusChart) {
+            statusChart.data.datasets[0].borderColor = colors.borderColor;
+            statusChart.options.plugins.legend.labels.color = colors.textColor;
+            statusChart.update();
+        }
+    }
+
+    createCharts();
+
+    // Listen for theme changes
+    document.addEventListener('themeChanged', updateChartColors);
 });
 </script>
 {% endblock page_scripts %}
