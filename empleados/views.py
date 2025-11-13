@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.shortcuts import render
 from asistencia.models import Asistencia
 from .models import SancionEmpleado
@@ -114,6 +115,7 @@ def crear_empleado(request):
                     ruta_archivo=archivo if archivo else None,
                     estado_doc=bool(archivo)
                 )
+            messages.success(request, '¡Empleado creado con éxito!')
             return redirect('empleados')
         else:
             return render(request, 'crear_empleado.html', {'form': form, 'error': error or 'Por favor corrige los errores.', 'requisitos': requisitos})
